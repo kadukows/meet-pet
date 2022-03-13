@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import DarkThemeToggler from '../darkThemeProvider/DarkThemeToggler';
 import { Location, useLocation } from 'react-router';
 import MyDrawer from './MyDrawer';
+import LoginButton from '../auth/LoginButton';
 
 type Props = {};
 
@@ -26,7 +27,7 @@ const MyAppBar = (props: Props) => {
                         {translateLocationPathname(location)}
                     </Typography>
                     <DarkThemeToggler />
-                    <Button color="inherit">Login</Button>
+                    <LoginButton />
                 </Toolbar>
             </AppBar>
         </Box>

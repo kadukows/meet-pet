@@ -10,30 +10,18 @@ import CssBaseline from '@mui/material/CssBaseline';
 import MyAppBar from './features/appBar/MyAppBar';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
+import GetUserAtInit from './features/auth/User';
 
 function App() {
     return (
         <ReduxProvider store={store}>
+            <GetUserAtInit />
             <DarkThemeProvider>
                 <CssBaseline enableColorScheme />
                 <SnackbarProvider>
                     <NotifierComponent />
 
                     <Router>
-                        {/*
-                            <ul>
-                                <li>
-                                    <Link to="/">Home</Link>
-                                </li>
-                                <li>
-                                    <Link to="/counter">Counter</Link>
-                                </li>
-                                <li>
-                                    <DarkThemeToggler />
-                                </li>
-                            </ul>
-                            <hr />
-                            */}
                         <Box
                             sx={{
                                 display: 'inline-flex',
