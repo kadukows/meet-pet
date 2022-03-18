@@ -1,37 +1,23 @@
 import React from 'react';
-import * as yup from 'yup';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
 import { RootState } from '../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFormik } from 'formik';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { resetAuth, setUserTokenAuth } from './userSlice';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { addAlert } from '../alerts/alertsSlice';
+import LoginDialog from './LoginDialog';
 
 type Props = {};
 
-async function sleep(time: number) {
-    return new Promise((res, rej) => setTimeout(() => res(null), time));
-}
-
 const LoginButton = (props: Props) => {
-    const [error, setError] = React.useState(null);
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = React.useCallback(() => setOpen(true), []);
-    const handleClose = React.useCallback(() => setOpen(false), []);
-
     const authed = useSelector(
         (state: RootState) =>
             state.authReducer.token != null && !state.authReducer.loading
     );
+
+    const [open, setOpen] = React.useState(false);
 
     const dispatch = useDispatch();
     const onSubmitCallback = React.useCallback(
@@ -63,101 +49,36 @@ const LoginButton = (props: Props) => {
                 );
                 setOpen(false);
             } catch (e: any) {
-                alert('Error');
+                dispatch(
+                    addAlert({
+                        message: 'Invalid username or password!',
+                        type: 'warning',
+                    })
+                );
             }
         },
         [dispatch]
     );
-
-    const formik = useFormik({
-        initialValues: {
-            username: '',
-            password: '',
-        },
-        validationSchema: validationSchema,
-        onSubmit: onSubmitCallback,
-    });
 
     return (
         <React.Fragment>
             {authed ? (
                 <MenuButton />
             ) : (
-                <Button color="inherit" onClick={handleOpen}>
+                <Button color="inherit" onClick={() => setOpen(true)}>
                     Login
                 </Button>
             )}
-
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Login</DialogTitle>
-                <DialogContent>
-                    <form id="loginForm" onSubmit={formik.handleSubmit}>
-                        <TextField
-                            sx={{ mt: 2 }}
-                            fullWidth
-                            id="username"
-                            name="username"
-                            label="Username"
-                            value={formik.values.username}
-                            onChange={formik.handleChange}
-                            error={
-                                formik.touched.username &&
-                                Boolean(formik.errors.username)
-                            }
-                            helperText={
-                                formik.touched.username &&
-                                formik.errors.username
-                            }
-                            disabled={formik.isSubmitting}
-                        />
-                        <TextField
-                            sx={{ mt: 2 }}
-                            fullWidth
-                            id="password"
-                            name="password"
-                            label="Password"
-                            type="password"
-                            value={formik.values.password}
-                            onChange={formik.handleChange}
-                            error={
-                                formik.touched.password &&
-                                Boolean(formik.errors.password)
-                            }
-                            helperText={
-                                formik.touched.password &&
-                                formik.errors.password
-                            }
-                            disabled={formik.isSubmitting}
-                        />
-                    </form>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button type="submit" form="loginForm">
-                        Login
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <LoginDialog
+                isOpen={open}
+                setOpen={setOpen}
+                onSubmitCallback={onSubmitCallback}
+            />
         </React.Fragment>
     );
 };
 
 export default LoginButton;
-
-//////////////////////
-
-const validationSchema = yup.object({
-    username: yup
-        .string
-        //'Enter your username'
-        ()
-        .required('Username is required'),
-    password: yup
-        .string //'Enter your password'
-        ()
-        //.min(8, 'Password should be of minimum 8 characters length')
-        .required('Password is required'),
-});
 
 const MenuButton = () => {
     const fullName = useSelector(
