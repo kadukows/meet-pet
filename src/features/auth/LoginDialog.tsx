@@ -25,13 +25,8 @@ const LoginDialog = (props: Props) => {
         validationSchema: validationSchema,
         onSubmit: (values) => {
             formik.isSubmitting = true;
-            try {
-                props.onSubmitCallback(values);
-            } catch (e: any) {
-                alert('UPS!');
-            } finally {
-                formik.resetForm();
-            }
+            props.onSubmitCallback(values);
+            formik.resetForm();
         },
     });
 
