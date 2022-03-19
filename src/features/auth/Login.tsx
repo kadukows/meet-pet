@@ -8,7 +8,7 @@ import LoginDialog from './LoginDialog';
 
 type Props = {};
 
-const LoginButton = (props: Props) => {
+const Login = (props: Props) => {
     const [open, setOpen] = React.useState(false);
 
     const dispatch = useDispatch();
@@ -66,4 +66,4 @@ const LoginButton = (props: Props) => {
     );
 };
 
-export default LoginButton;
+export default Login;

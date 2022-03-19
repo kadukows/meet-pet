@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import DarkThemeToggler from '../darkThemeProvider/DarkThemeToggler';
 import { Location, useLocation } from 'react-router';
 import MyDrawer from './MyDrawer';
-import LoginButton from '../auth/LoginButton';
+import Login from '../auth/Login';
 import MenuBar from '../menuBar/MenuBar';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -34,7 +34,7 @@ const MyAppBar = (props: Props) => {
                         {translateLocationPathname(location)}
                     </Typography>
                     <DarkThemeToggler />
-                    {authed ? <MenuBar /> : <LoginButton />}
+                    {authed ? <MenuBar /> : <Login />}
                 </Toolbar>
             </AppBar>
         </Box>

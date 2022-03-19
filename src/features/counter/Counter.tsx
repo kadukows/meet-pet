@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 import { css } from '@emotion/react';
 import { addAlert } from '../alerts/alertsSlice';
-import LoginButton from '../auth/LoginButton';
+import Login from '../auth/Login';
 
 type Props = {
     text?: string;
