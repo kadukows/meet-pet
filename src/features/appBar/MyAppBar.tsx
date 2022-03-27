@@ -7,12 +7,19 @@ import Button from '@mui/material/Button';
 import DarkThemeToggler from '../darkThemeProvider/DarkThemeToggler';
 import { Location, useLocation } from 'react-router';
 import MyDrawer from './MyDrawer';
-import LoginButton from '../auth/LoginButton';
+import Login from '../auth/Login';
+import MenuBar from '../menuBar/MenuBar';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 type Props = {};
 
 const MyAppBar = (props: Props) => {
     const location = useLocation();
+    const authed = useSelector(
+        (state: RootState) =>
+            state.authReducer.token != null && !state.authReducer.loading
+    );
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -27,7 +34,7 @@ const MyAppBar = (props: Props) => {
                         {translateLocationPathname(location)}
                     </Typography>
                     <DarkThemeToggler />
-                    <LoginButton />
+                    {authed ? <MenuBar /> : <Login />}
                 </Toolbar>
             </AppBar>
         </Box>
