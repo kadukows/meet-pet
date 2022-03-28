@@ -6,5 +6,9 @@
     "[typescriptreact]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "[python]": {
+        "editor.formatOnSave": true
+    },
+    "python.formatting.provider": "black"
 }
