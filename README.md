@@ -1,6 +1,18 @@
 # meet-pet
 
-Readme for this project
+- [meet-pet](#meet-pet)
+	- [Django cheat sheet](#django-cheat-sheet)
+		- [./manage.py makemigrations](#managepy-makemigrations)
+		- [./manage.py migrate](#managepy-migrate)
+		- [./manage.py createsuperuser](#managepy-createsuperuser)
+		- [./manage.py runserver](#managepy-runserver)
+		- [Api documentation](#api-documentation)
+	- [Available Scripts for frontend](#available-scripts-for-frontend)
+		- [npm start](#npm-start)
+		- [npm test](#npm-test)
+		- [npm run build](#npm-run-build)
+		- [npm run eject](#npm-run-eject)
+	- [Learn More](#learn-more)
 
 ## Django cheat sheet
 
