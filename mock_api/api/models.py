@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 
 # we need one-to-one link to exsiting User model
-class UserProfile(models.Model):
+class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_prefs = models.OneToOneField("UserPrefs", null=True, on_delete=models.CASCADE)
     shelter_prefs = models.OneToOneField(
