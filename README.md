@@ -1,8 +1,38 @@
-# Getting Started with Create React App
+# meet-pet
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Readme for this project
 
-## Available Scripts
+## Django cheat sheet
+
+As with every python project/lib, you need to create venv and install dependencied located in requirements.txt file.
+After that django requires you to create database, simply run `./manage.py migrate`. Then you are good to go, run
+`./manage.py runserver` to start Django server!.
+
+### `./manage.py makemigrations`
+This creates migrations needed to be applied to the database. They are located in mock_api/api/migrations folder.
+This is required to do after changing/adding models to mock_api/api/models.py file.
+
+### `./manage.py migrate`
+Applies migrations which are not yet in database.
+
+### `./manage.py createsuperuser`
+Creates super user credentials for accessing admin page, located at http://localhost:8000 .
+
+### `./manage.py runserver`
+Runs the development server.
+
+### Api documentation
+Documentation for existing api calls is be located at http://localhost:8000/api . This is the same path to which
+api calls will be directed (Django differentiates between web browser and javascript calls, and serves according representations).
+This documentation can be accessed with credentials normally used in app (same db), and interactive portion of it
+should yield same results as if called from JS.
+
+**Note: Because documentation uses cookie based auth and frontend uses token you will encountr strange behaviour when logged in
+both ways at the same time (calls from frontend will yield errors). Logout from admin/documentation page before trying out frontend
+actions, or simply use admin/documentation in private/incognito mode, as this will keep cookie in separate instance of web browser.**
+
+
+## Available Scripts for frontend
 
 In the project directory, you can run:
 
