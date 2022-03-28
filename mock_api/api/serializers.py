@@ -29,13 +29,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "password", "profile"]
+        fields = ["username", "password", "profile", "first_name", "last_name", "email"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         user: User = User.objects.create(username=validated_data["username"])
         user.set_password(validated_data["password"])
-        # user.profile = validated_data["profile"]
         profile = Profile.objects.create(
             user=user,
             user_prefs=UserPrefs.objects.create(

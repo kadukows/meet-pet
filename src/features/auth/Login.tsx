@@ -1,10 +1,10 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import { useDispatch } from 'react-redux';
-import axios from 'axios';
 import { setUserTokenAuth } from './userSlice';
 import { addAlert } from '../alerts/alertsSlice';
 import LoginDialog from './LoginDialog';
+import { getRequestMaker } from '../apiConnection';
 
 type Props = {};
 
@@ -15,22 +15,23 @@ const Login = (props: Props) => {
     const onSubmitCallback = React.useCallback(
         async (values) => {
             try {
-                const formData = new FormData();
-                formData.append('username', values.username);
-                formData.append('password', values.password);
+                const token = await getRequestMaker().getToken(
+                    values.username,
+                    values.password
+                );
+                if (token === null) {
+                    throw new Error('');
+                }
 
-                const res = await axios.post<any>('/token', formData);
-
-                const user = await axios.get('/users/me', {
-                    headers: {
-                        Authorization: `Bearer ${res.data.access_token}`,
-                    },
-                });
+                const user = await getRequestMaker().getUser(token);
+                if (user === null) {
+                    throw new Error('');
+                }
 
                 dispatch(
                     setUserTokenAuth({
-                        token: res.data.access_token,
-                        user: user.data,
+                        token: token,
+                        user: user,
                     })
                 );
                 dispatch(

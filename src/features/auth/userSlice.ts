@@ -1,10 +1,4 @@
-import {
-    createSlice,
-    PayloadAction,
-    ThunkAction,
-    AnyAction,
-} from '@reduxjs/toolkit';
-import { RootState } from '../../store';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface User {
     username: string;
@@ -57,60 +51,3 @@ interface UserTokenAuthPayload {
 
 export const { setUserTokenAuth, resetAuth } = authSlice.actions;
 export const authReducer = authSlice.reducer;
-
-/*
-function canAuthProcessBeInstantiated(state: AuthState): boolean {
-    return !state.authenticated && state.token !== null && !state.loading;
-}
-
-export const tryAuthWithCurrentToken =
-    (): ThunkAction<void, RootState, unknown, AnyAction> =>
-    async (dispatch, getState) => {
-        if (!canAuthProcessBeInstantiated(getState().authReducer)) {
-            return;
-        }
-
-        dispatch(setLoading(true));
-
-        try {
-            const token = getState().authReducer.token;
-
-            const res = await axios.get<User>(
-                GENERAL_API_ROUTES.user,
-                getTokenRequestConfig(token)
-            );
-
-            const { username } = res.data;
-            dispatch(setUserTokenAuth({ user: { username }, token }));
-        } catch (err) {
-            dispatch(resetAuth());
-        } finally {
-            dispatch(setLoading(false));
-        }
-    };
-
-export const tryAuthWithToken =
-    (token: string): ThunkAction<void, RootState, unknown, AnyAction> =>
-    async (dispatch, getState) => {
-        if (getState().authReducer.loading) {
-            return;
-        }
-
-        dispatch(setLoading(true));
-
-        try {
-            const res = await axios.get(
-                GENERAL_API_ROUTES.user,
-                getTokenRequestConfig(token)
-            );
-
-            const { username } = res.data;
-            dispatch(setUserTokenAuth({ user: { username }, token }));
-        } catch (err) {
-            dispatch(resetAuth());
-        } finally {
-            dispatch(setLoading(false));
-        }
-    };
-
-*/

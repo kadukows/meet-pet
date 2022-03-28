@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { getRequestMaker } from '../apiConnection';
 import { resetAuth, setUserTokenAuth } from './userSlice';
 
 type Props = {
@@ -25,20 +26,13 @@ const getToken = async (
     dispatch: Dispatch
 ) => {
     if (loading && token != null) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/fetch#examples
-        const authHeader = new Headers();
-        authHeader.append('Authorization', `Bearer ${token}`);
+        const user = await getRequestMaker().getUser(token);
 
-        const res = await fetch('/users/me', {
-            method: 'GET',
-            headers: authHeader,
-        });
-
-        if (res.ok) {
+        if (user !== null) {
             dispatch(
                 setUserTokenAuth({
                     token,
-                    user: await res.json(),
+                    user,
                 })
             );
         } else {
