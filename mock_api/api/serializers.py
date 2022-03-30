@@ -13,10 +13,47 @@ from api.models import (
 )
 
 
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = ["id", "value"]
+        read_only = ["id"]
+
+
+class SizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size
+        fields = ["id", "value"]
+        read_only = ["id"]
+
+
+class CharacterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Character
+        fields = ["id", "value"]
+        read_only = ["id"]
+
+
+class AnimalKindSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnimalKind
+        fields = ["id", "value"]
+        read_only = ["id"]
+
+
 class UserPrefsSerializer(serializers.ModelSerializer):
+    # liked_colors = ColorSerializer(many=True)
+    # liked_charactes = CharacterSerializer(many=True)
+
     class Meta:
         model = UserPrefs
-        fields = ["has_garden", "location"]
+        fields = [
+            "has_garden",
+            "location",
+            "liked_colors",
+            "liked_charactes",
+            "liked_kinds",
+        ]
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):
@@ -56,34 +93,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class ColorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Color
-        fields = ["id", "value"]
-        read_only = ["id"]
-
-
-class SizeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Size
-        fields = ["id", "value"]
-        read_only = ["id"]
-
-
-class CharacterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Character
-        fields = ["id", "value"]
-        read_only = ["id"]
-
-
-class AnimalKindSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AnimalKind
-        fields = ["id", "value"]
-        read_only = ["id"]
-
-
 class SpecificAnimalKindSerializer(serializers.ModelSerializer):
     animal_kind = AnimalKindSerializer(read_only=True)
 
@@ -95,8 +104,8 @@ class SpecificAnimalKindSerializer(serializers.ModelSerializer):
 
 class AnimalSerializer(serializers.ModelSerializer):
     specific_animal_kind = SpecificAnimalKindSerializer(read_only=True)
-    character = CharacterSerializer(read_only=True, many=True)
-    color = ColorSerializer(read_only=True, many=True)
+    characters = CharacterSerializer(read_only=True, many=True)
+    colors = ColorSerializer(read_only=True, many=True)
     size = SizeSerializer(read_only=True)
 
     class Meta:
@@ -105,8 +114,8 @@ class AnimalSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "specific_animal_kind",
-            "character",
-            "color",
+            "characters",
+            "colors",
             "size",
             "male",
             "likes_child",

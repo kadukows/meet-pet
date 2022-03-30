@@ -32,6 +32,9 @@ def add_user_to_normal_group(sender, instance: User, created, **kwargs):
 class UserPrefs(models.Model):
     has_garden = models.BooleanField(null=False)
     location = models.TextField(null=False)
+    liked_colors = models.ManyToManyField("Color")
+    liked_charactes = models.ManyToManyField("Character")
+    liked_kinds = models.ManyToManyField("AnimalKind")
 
 
 class ShelterPrefs(models.Model):
@@ -79,9 +82,12 @@ class Animal(models.Model):
     specific_animal_kind = models.ForeignKey(
         "SpecificAnimalKind", on_delete=models.CASCADE
     )
-    character = models.ManyToManyField(Character)
-    color = models.ManyToManyField(Color)
+    characters = models.ManyToManyField(Character)
+    colors = models.ManyToManyField(Color)
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     male = models.BooleanField(null=False)
     likes_child = models.BooleanField(null=False)
     likes_other_animals = models.BooleanField(null=False)
+
+    def __str__(self):
+        return self.name

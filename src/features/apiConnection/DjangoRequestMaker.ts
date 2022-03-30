@@ -52,6 +52,16 @@ const DjangoRequestMaker: IRequestMaker = {
 
         return null;
     },
+
+    getColors: async (token) => {
+        // sleep
+        return [
+            {
+                id: 99,
+                value: 'Kupa',
+            },
+        ];
+    },
 };
 
 const makeAuthHeader = (token: string) => ({

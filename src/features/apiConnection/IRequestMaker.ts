@@ -1,4 +1,5 @@
 import { User } from '../auth/userSlice';
+import { Color } from '../colors/colorSlice';
 
 // TODO: maybe handle errors from server? (so returns will look something like "Promise<string | ErrorType>")
 // It could also throw some error
@@ -10,6 +11,7 @@ import { User } from '../auth/userSlice';
 interface IRequestMaker {
     getToken: (username: string, password: string) => Promise<string | null>;
     getUser: (token: string) => Promise<User | null>;
+    getColors: (token: string) => Promise<Color[] | null>;
 }
 
 export type { IRequestMaker };

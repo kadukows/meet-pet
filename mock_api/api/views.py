@@ -17,6 +17,7 @@ from api.serializers import (
     AnimalSerializer,
     CharacterSerializer,
     ColorSerializer,
+    SpecificAnimalKindSerializer,
     UserSerializer,
     SizeSerializer,
 )
@@ -71,7 +72,7 @@ class AnimalKindViewSet(viewsets.ModelViewSet, BaseAuthPerm):
 
 
 class SpecificAnimalKindViewSet(viewsets.ModelViewSet, BaseAuthPerm):
-    serializer_class = SpecificAnimalKind
+    serializer_class = SpecificAnimalKindSerializer
     queryset = SpecificAnimalKind.objects.all()
 
 
