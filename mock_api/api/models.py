@@ -26,12 +26,15 @@ class Profile(models.Model):
 @receiver(post_save, sender=User)
 def add_user_to_normal_group(sender, instance: User, created, **kwargs):
     if created:
-        instance.groups.add(Group.objects.get(name="Normal"))
+        user_prefs = UserPrefs()
+        user_prefs.save()
+        profile = Profile(user=instance, user_prefs=user_prefs)
+        profile.save()
 
 
 class UserPrefs(models.Model):
-    has_garden = models.BooleanField(null=False)
-    location = models.TextField(null=False)
+    has_garden = models.BooleanField(null=False, default=False)
+    location = models.TextField(null=False, default="Some location")
     liked_colors = models.ManyToManyField("Color")
     liked_charactes = models.ManyToManyField("Character")
     liked_kinds = models.ManyToManyField("AnimalKind")
