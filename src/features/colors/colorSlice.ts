@@ -58,24 +58,21 @@ export const colorObserver = observer(
     (state: RootState) => state.authReducer.authorized,
     (dispatch: any, current, previous) => {
         if (previous === false && current === true) {
-            dispatch(
-                (): ThunkAction<void, RootState, unknown, AnyAction> =>
-                    async (dispatch, getState) => {
-                        dispatch(setLoading(true));
+            dispatch(async (dispatch: any, getState: any) => {
+                dispatch(setLoading(true));
 
-                        const colors = await getRequestMaker().getColors(
-                            getState().authReducer.token as string
-                        );
+                const colors = await getRequestMaker().getColors(
+                    getState().authReducer.token as string
+                );
 
-                        if (colors !== null) {
-                            dispatch(setColors(colors));
-                        } else {
-                            // some notif
-                        }
+                if (colors !== null) {
+                    dispatch(setColors(colors));
+                } else {
+                    // some notif
+                }
 
-                        dispatch(setLoading(false));
-                    }
-            );
+                dispatch(setLoading(false));
+            });
         } else if (previous === true && current === false) {
             dispatch(removeColors());
         }

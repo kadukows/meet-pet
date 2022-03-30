@@ -1,9 +1,8 @@
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.forms import BooleanField
 
 
 # we need one-to-one link to exsiting User model
