@@ -6,6 +6,7 @@ import { resetAuth } from '../auth/userSlice';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { addAlert } from '../alerts/alertsSlice';
+
 type Props = {
     text?: string;
 };

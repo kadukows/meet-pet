@@ -46,6 +46,7 @@ export default MyAppBar;
 const REGEX_MAPPING = {
     Counter: /^\/counter$/,
     Home: /^\/$/,
+    'Meet the pet!': /^\/meet$/,
 };
 
 const translateLocationPathname = (location: Location) => {

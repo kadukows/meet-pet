@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Color } from '../colors/colorSlice';
 import { IRequestMaker } from './IRequestMaker';
 
 const DjangoRequestMaker: IRequestMaker = {
@@ -54,13 +55,15 @@ const DjangoRequestMaker: IRequestMaker = {
     },
 
     getColors: async (token) => {
-        // sleep
-        return [
-            {
-                id: 99,
-                value: 'Kupa',
-            },
-        ];
+        try {
+            const res = await axios.get<Color[]>(
+                '/api/colors/',
+                makeAuthHeader(token)
+            );
+            return res.data;
+        } catch (e) {}
+
+        return null;
     },
 };
 
