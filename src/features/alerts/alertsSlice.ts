@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, nanoid, Update } from '@reduxjs/toolkit';
 
 export interface BaseAlert {
-    type: 'warning' | 'info' | 'success' | null;
+    type: 'warning' | 'info' | 'success' | 'error' | null;
     message: string;
 }
 

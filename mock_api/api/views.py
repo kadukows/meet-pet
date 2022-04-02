@@ -48,34 +48,34 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
 
 class BaseAuthPerm:
     authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
-    permissions_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
 
-class ColorViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class ColorViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = ColorSerializer
     queryset = Color.objects.all()
 
 
-class SizeViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class SizeViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = SizeSerializer
     queryset = Size.objects.all()
 
 
-class CharacterViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class CharacterViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = CharacterSerializer
     queryset = Character.objects.all()
 
 
-class AnimalKindViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class AnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalKindSerializer
     queryset = AnimalKind.objects.all()
 
 
-class SpecificAnimalKindViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = SpecificAnimalKindSerializer
     queryset = SpecificAnimalKind.objects.all()
 
 
-class AnimalViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalSerializer
     queryset = Animal.objects.all()

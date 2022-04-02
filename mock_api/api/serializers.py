@@ -68,7 +68,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["user_prefs", "shelter_prefs"]
+        fields = ["user_prefs", "shelter_prefs", "user_type"]
 
 
 class UserSerializer(serializers.ModelSerializer):

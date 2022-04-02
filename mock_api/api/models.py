@@ -12,6 +12,13 @@ class Profile(models.Model):
     shelter_prefs = models.OneToOneField(
         "ShelterPrefs", null=True, on_delete=models.CASCADE
     )
+    NORMAL = "NO"
+    SHELTER = "SH"
+    ADMIN = "AD"
+    USER_TYPE_CHOICES = [(NORMAL, "Normal"), (SHELTER, "Shelter"), (ADMIN, "Admin")]
+    user_type = models.CharField(
+        max_length=2, choices=USER_TYPE_CHOICES, default=NORMAL
+    )
 
     class Meta:
         constraints = [

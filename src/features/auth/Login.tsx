@@ -28,18 +28,22 @@ const Login = (props: Props) => {
                     throw new Error('');
                 }
 
-                dispatch(
-                    setUserTokenAuth({
-                        token: token,
-                        user: user,
-                    })
-                );
-                dispatch(
-                    addAlert({
-                        message: 'Logged in!',
-                        type: null,
-                    })
-                );
+                // This prevents "leak" message in js debug console
+                setTimeout(() => {
+                    dispatch(
+                        setUserTokenAuth({
+                            token: token,
+                            user: user,
+                        })
+                    );
+                    dispatch(
+                        addAlert({
+                            message: 'Logged in!',
+                            type: null,
+                        })
+                    );
+                }, 250);
+
                 setOpen(false);
             } catch (e: any) {
                 dispatch(

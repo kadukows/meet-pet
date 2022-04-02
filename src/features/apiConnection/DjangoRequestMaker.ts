@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { AnimalKind } from '../animalKind/animaKindSlice';
 import { Color } from '../colors/colorSlice';
 import { IRequestMaker } from './IRequestMaker';
 
@@ -61,6 +62,43 @@ const DjangoRequestMaker: IRequestMaker = {
                 makeAuthHeader(token)
             );
             return res.data;
+        } catch (e) {}
+
+        return null;
+    },
+
+    getAnimalKinds: async (token) => {
+        try {
+            const res = await axios.get<AnimalKind[]>(
+                '/api/animal_kinds/',
+                makeAuthHeader(token)
+            );
+            return res.data;
+        } catch (e) {}
+
+        return null;
+    },
+
+    getSpecificAnimalKinds: async (token) => {
+        try {
+            interface ApiObject {
+                id: number;
+                value: string;
+                animal_kind: {
+                    id: number;
+                };
+            }
+
+            const res = await axios.get<ApiObject[]>(
+                '/api/specific_animal_kinds/',
+                makeAuthHeader(token)
+            );
+
+            return res.data.map((apiObj) => ({
+                id: apiObj.id,
+                value: apiObj.value,
+                animal_kind_id: apiObj.animal_kind.id,
+            }));
         } catch (e) {}
 
         return null;
