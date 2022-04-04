@@ -1,5 +1,7 @@
 import axios from 'axios';
+import { Animal } from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
+import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { IRequestMaker } from './IRequestMaker';
 
@@ -103,6 +105,38 @@ const DjangoRequestMaker: IRequestMaker = {
 
         return null;
     },
+
+    getCharacters: async (token) => {
+        try {
+            const res = await axios.get<Character[]>(
+                '/api/characters/',
+                makeAuthHeader(token)
+            );
+            return res.data;
+        } catch (e) {}
+
+        return null;
+    },
+
+    getNextAnimalForTinderLikeChoose: async (token) => {
+        const animal: Animal = {
+            id: 4,
+            name: 'Dog the dog',
+            description: 'Dog the dog is really really special',
+            specific_animal_kind: 'Sheperd',
+            characters: ['Energetic', 'Nice'],
+            colors: ['brown'],
+            is_male: true,
+            likes_child: false,
+            likes_other_animals: false,
+            photo_ids: [1, 2, 99],
+        };
+
+        //return null;
+        await sleep(2000);
+
+        return animal;
+    },
 };
 
 const makeAuthHeader = (token: string) => ({
@@ -110,5 +144,11 @@ const makeAuthHeader = (token: string) => ({
         Authorization: `Bearer ${token}`,
     },
 });
+
+const sleep = (ms: number) => {
+    return new Promise<null>((accept, reject) =>
+        setTimeout(() => accept(null), ms)
+    );
+};
 
 export { DjangoRequestMaker };

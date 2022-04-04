@@ -13,6 +13,10 @@ import {
     specificAnimalKindReducer,
     specificAnimalKindObserver,
 } from './features/specificAnimalKind/specificAnimalKindSlice';
+import {
+    characterReducer,
+    characterObserver,
+} from './features/characters/charcterSlice';
 
 const store = configureStore({
     reducer: {
@@ -23,6 +27,7 @@ const store = configureStore({
         colorReducer,
         animalKindReducer,
         specificAnimalKindReducer,
+        characterReducer,
     },
 });
 
@@ -30,4 +35,9 @@ export type RootState = ReturnType<typeof store.getState>;
 
 export { store };
 
-observe(store, [colorObserver, animalKindObserver, specificAnimalKindObserver]);
+observe(store, [
+    colorObserver,
+    animalKindObserver,
+    specificAnimalKindObserver,
+    characterObserver,
+]);

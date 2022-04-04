@@ -1,3 +1,3 @@
-import TinderChooseMain from './TinderChooseMain';
+import TinderChooseIndexPage from './TinderChooseIndexPage';
 
-export default TinderChooseMain;
+export default TinderChooseIndexPage;

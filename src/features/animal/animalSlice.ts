@@ -1,9 +1,12 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
 export interface Animal {
     id: number;
     name: string;
-    characters: number[];
-    colors: number[];
-    specific_animal_kind: number;
+    description: string;
+    specific_animal_kind: string;
+    characters: string[];
+    colors: string[];
+    is_male: boolean;
+    likes_child: boolean;
+    likes_other_animals: boolean;
+    photo_ids: number[];
 }
