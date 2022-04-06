@@ -1,6 +1,17 @@
+import os
 from django.core.management.base import BaseCommand, CommandError
+from django.core.files import File
 from django.contrib.auth.models import Group, Permission
-from api.models import Animal, AnimalKind, Color, Size, Character, SpecificAnimalKind
+from PIL import Image
+from api.models import (
+    Animal,
+    AnimalKind,
+    Color,
+    Photo,
+    Size,
+    Character,
+    SpecificAnimalKind,
+)
 
 
 COLORS = ["Brown", "Gold", "White"]
@@ -53,16 +64,7 @@ class Command(BaseCommand):
                     )
                     s_obj.save()
 
-        shepherd1 = Animal.objects.filter(
-            name="Alex",
-            specific_animal_kind=SpecificAnimalKind.objects.get(
-                value="german shepherd"
-            ),
-            size=Size.objects.get(value="Big"),
-            male=True,
-            likes_child=True,
-            likes_other_animals=False,
-        ).first()
+        shepherd1 = Animal.objects.filter(name="Alex").first()
 
         if shepherd1 is None:
             self.stdout.write(f"Created animal: Alex :)")
@@ -83,4 +85,14 @@ class Command(BaseCommand):
                 ]
             )
             shepherd1.colors.set([Color.objects.get(value="Brown")])
+
+            photo_folder = "api/management/commands/resources/alex"
+            photo_names = os.listdir(photo_folder)
+            for photo_name in photo_names:
+                img = File(open(f"{photo_folder}/{photo_name}", "rb"))
+                photo = Photo(animal=shepherd1)
+                photo.file.save(photo_name, img)
+                # photo.save()
+                shepherd1.photos.add(photo)
+
             shepherd1.save()

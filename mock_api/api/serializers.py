@@ -103,11 +103,24 @@ class SpecificAnimalKindSerializer(serializers.ModelSerializer):
         read_only = ["id"]
 
 
+class PhotoSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField("get_image_url")
+
+    class Meta:
+        model = Photo
+        fields = ["id", "file", "image_url"]
+        read_only = ["id", "file", "image_url"]
+
+    def get_image_url(self, obj):
+        return obj.file.url
+
+
 class AnimalSerializer(serializers.ModelSerializer):
     specific_animal_kind = SpecificAnimalKindSerializer(read_only=True)
     characters = CharacterSerializer(read_only=True, many=True)
     colors = ColorSerializer(read_only=True, many=True)
     size = SizeSerializer(read_only=True)
+    photos = PhotoSerializer(read_only=True, many=True)
 
     class Meta:
         model = Animal
@@ -124,15 +137,3 @@ class AnimalSerializer(serializers.ModelSerializer):
             "photos",
         ]
         read_only = ["id"]
-
-
-class PhotoSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField("get_image_url")
-
-    class Meta:
-        model = Photo
-        fields = ["id", "file", "image_url"]
-        read_only = ["id", "file", "image_url"]
-
-    def get_image_url(self, obj):
-        return obj.file.url

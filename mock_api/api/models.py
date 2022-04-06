@@ -103,5 +103,5 @@ class Animal(models.Model):
 
 
 class Photo(models.Model):
-    file = models.ImageField(upload_to="animal_images")
+    file = models.ImageField(upload_to="api/animal_images")
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name="photos")

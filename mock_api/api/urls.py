@@ -1,3 +1,4 @@
+import os
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -29,4 +30,4 @@ router.register(r"my_photos", PhotoViewset)
 urlpatterns = [
     path("", include(router.urls)),
     path("get_token/", obtain_auth_token),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=os.path.join(settings.MEDIA_ROOT, "api"))
