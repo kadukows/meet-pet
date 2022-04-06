@@ -26,3 +26,4 @@ yarn-error.log*
 __pycache__
 venv
 db.sqlite3
+mock_api/animal_images

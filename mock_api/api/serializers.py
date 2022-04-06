@@ -4,6 +4,7 @@ from api.models import (
     Animal,
     AnimalKind,
     Character,
+    Photo,
     Profile,
     Size,
     SpecificAnimalKind,
@@ -120,5 +121,18 @@ class AnimalSerializer(serializers.ModelSerializer):
             "male",
             "likes_child",
             "likes_other_animals",
+            "photos",
         ]
         read_only = ["id"]
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField("get_image_url")
+
+    class Meta:
+        model = Photo
+        fields = ["id", "file", "image_url"]
+        read_only = ["id", "file", "image_url"]
+
+    def get_image_url(self, obj):
+        return obj.file.url

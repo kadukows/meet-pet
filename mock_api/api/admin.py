@@ -5,6 +5,7 @@ from api.models import (
     AnimalKind,
     Character,
     Color,
+    Photo,
     Profile,
     Size,
     SpecificAnimalKind,
@@ -22,3 +23,4 @@ admin.site.register(Character)
 admin.site.register(SpecificAnimalKind)
 admin.site.register(AnimalKind)
 admin.site.register(Animal)
+admin.site.register(Photo)

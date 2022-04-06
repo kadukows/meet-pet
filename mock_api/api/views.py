@@ -1,5 +1,4 @@
-from lib2to3.pytree import Base
-from django import views
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
@@ -17,12 +16,21 @@ from api.serializers import (
     AnimalSerializer,
     CharacterSerializer,
     ColorSerializer,
+    PhotoSerializer,
     SpecificAnimalKindSerializer,
     UserSerializer,
     SizeSerializer,
 )
 from api.authentication import TokenBearerAuth
-from api.models import Animal, AnimalKind, Character, Color, Size, SpecificAnimalKind
+from api.models import (
+    Animal,
+    AnimalKind,
+    Character,
+    Color,
+    Photo,
+    Size,
+    SpecificAnimalKind,
+)
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -79,3 +87,10 @@ class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
+
+
+class PhotoViewset(viewsets.ModelViewSet):
+    serializer_class = PhotoSerializer
+    queryset = Photo.objects.all()
+    authentication_classes = []
+    permission_classes = []

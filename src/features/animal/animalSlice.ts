@@ -8,5 +8,5 @@ export interface Animal {
     is_male: boolean;
     likes_child: boolean;
     likes_other_animals: boolean;
-    photo_ids: number[];
+    photo_urls: string[];
 }

@@ -100,3 +100,8 @@ class Animal(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Photo(models.Model):
+    file = models.ImageField(upload_to="animal_images")
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name="photos")

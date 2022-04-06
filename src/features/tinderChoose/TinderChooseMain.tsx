@@ -1,114 +1,134 @@
 import React from 'react';
-import Box, { BoxProps } from '@mui/material/Box';
+import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
-import ImageList from '@mui/material/ImageList';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
-import Carousel from 'react-material-ui-carousel';
 import styled from '@mui/system/styled';
 import { Animal } from '../animal/animalSlice';
 import { characterSelectors } from '../characters/charcterSlice';
 import { useSelector } from 'react-redux';
 
+import AnimalTable from './AnimalTable';
+import AnimalCarousel from './AnimalCarousel';
+
 type Props = {
     animal: Animal | null;
+    nextAnimalCallback: () => void;
 };
 
-const TinderChooseMain = ({ animal }: Props) => {
-    return (
-        <GridFullHeight
-            container
-            sx={{ border: '1px solid blck', mt: 0 }}
-            spacing={2}
-        >
-            <Grid item sm={8} xs={12} sx={{ height: '100%' }}>
-                {/*<Skeleton variant="rectangular" width="100%" height="100%" />*/}
-                {animal === null ? (
-                    <Skeleton
-                        height="100%"
-                        width="100%"
-                        variant="rectangular"
-                    />
-                ) : (
-                    <Carousel autoPlay={false}>
-                        {animal.photo_ids.map((el) => (
-                            <Typography
+const FullViewportGrid = styled(Grid)(
+    ({ theme }) => `
+    ${theme.breakpoints.down('sm')} {
+        height: 80vh;
+    }
+
+    height: 100%;
+`
+);
+
+const TinderChooseMain = React.forwardRef(
+    ({ animal, nextAnimalCallback }: Props, ref: any) => {
+        return (
+            <GridFullHeight
+                container
+                sx={{ border: '1px solid blck', mt: 0, position: 'absolute' }}
+                spacing={2}
+                ref={ref}
+            >
+                <FullViewportGrid item sm={8} xs={12}>
+                    {animal === null ? (
+                        <Skeleton
+                            height="100%"
+                            width="100%"
+                            variant="rectangular"
+                        />
+                    ) : (
+                        <AnimalCarousel animal={animal} />
+                    )}
+                </FullViewportGrid>
+                <Grid item sm={4} xs={12} sx={{ height: '100%' }}>
+                    <Stack
+                        spacing={2}
+                        justifyContent="space-between"
+                        direction={{ xs: 'column-reverse', sm: 'column' }}
+                        sx={{ height: '100%' }}
+                    >
+                        <OverflowBox sx={{ flex: 4 }}>
+                            <MPaper
                                 sx={{
-                                    height: 300,
-                                    width: 300,
-                                    textAlign: 'center',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    height: '100%',
                                 }}
-                                variant="h1"
-                                key={el}
                             >
-                                {el}
-                            </Typography>
-                        ))}
-                    </Carousel>
-                )}
-            </Grid>
-            <Grid item sm={4} xs={12} sx={{ height: '100%' }}>
-                <Stack
-                    spacing={2}
-                    justifyContent="space-between"
-                    direction={{ xs: 'column-reverse', sm: 'column' }}
-                    sx={{ height: '100%' }}
-                >
-                    <OverflowBox sx={{ flex: 4 }}>
-                        <MPaper>
-                            <Typography variant="h4">
+                                <Typography variant="h4" sx={{ mb: 3 }}>
+                                    {animal === null ? (
+                                        <Skeleton variant="text" />
+                                    ) : (
+                                        animal.name
+                                    )}
+                                </Typography>
                                 {animal === null ? (
-                                    <Skeleton variant="text" />
+                                    <Skeleton
+                                        variant="rectangular"
+                                        sx={{ flex: 1 }}
+                                    />
                                 ) : (
-                                    animal.name
+                                    <AnimalTable animal={animal} />
                                 )}
-                            </Typography>
-                            {animal === null ? (
-                                <Skeleton
-                                    height="20vh"
-                                    width="100%"
-                                    variant="rectangular"
-                                ></Skeleton>
-                            ) : (
-                                <AnimalTable animal={animal} />
-                            )}
-                        </MPaper>
-                    </OverflowBox>
-                    <OverflowBox sx={{ flex: 4 }}>
-                        <BigPaper />
-                    </OverflowBox>
-                    <Box sx={{ flex: 2 }}>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'space-around',
-                                alignItems: 'center',
-                                height: '100%',
-                            }}
-                        >
-                            <Button size="large" variant="contained">
-                                Like
-                            </Button>
-                            <Button size="large" variant="contained">
-                                Next
-                            </Button>
+                            </MPaper>
+                        </OverflowBox>
+                        <OverflowBox sx={{ flex: 4 }}>
+                            <MPaper sx={{ minHeight: '100%' }}>
+                                {animal ? (
+                                    <Typography>
+                                        {animal.description}
+                                    </Typography>
+                                ) : (
+                                    <Skeleton
+                                        variant="rectangular"
+                                        height="100%"
+                                        width="100%"
+                                    />
+                                )}
+                            </MPaper>
+                        </OverflowBox>
+                        <Box sx={{ flex: 2 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-around',
+                                    alignItems: 'center',
+                                    height: '100%',
+                                }}
+                            >
+                                <Button
+                                    size="large"
+                                    variant="contained"
+                                    onClick={nextAnimalCallback}
+                                    disabled={animal === null}
+                                >
+                                    Like
+                                </Button>
+                                <Button
+                                    size="large"
+                                    variant="contained"
+                                    onClick={nextAnimalCallback}
+                                    disabled={animal === null}
+                                >
+                                    Next
+                                </Button>
+                            </Box>
                         </Box>
-                    </Box>
-                </Stack>
-            </Grid>
-        </GridFullHeight>
-    );
-};
+                    </Stack>
+                </Grid>
+            </GridFullHeight>
+        );
+    }
+);
 
 export default TinderChooseMain;
 
@@ -169,6 +189,7 @@ const BigPaper = ({
 const MPaper = styled(Paper)(
     ({ theme }) => `
     padding: ${theme.spacing(2)};
+    height: 100%;
 `
 );
 
@@ -188,56 +209,10 @@ const GridFullHeight = styled(Grid)(
 `
 );
 
-interface AnimalTableProps {
-    animal: Animal;
-}
-
-const AnimalTable = ({ animal }: AnimalTableProps) => {
-    const characters = useSelector((state) => chara);
-
-    return (
-        <TableContainer>
-            <Table>
-                <TableBody>
-                    <TableRow>
-                        <TableCell>
-                            <Typography variant="h6">Like children</Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Checkbox disabled checked={animal.likes_child} />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>
-                            <Typography variant="h6">
-                                Like other animals
-                            </Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Checkbox
-                                disabled
-                                checked={animal.likes_other_animals}
-                            />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>
-                            <Typography variant="h6">Male</Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Checkbox disabled checked={animal.is_male} />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>
-                            <Typography variant="h6">Characters</Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Typography>{characters}</Typography>
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-        </TableContainer>
-    );
-};
+const BoxFullHeight = styled(Box)(
+    ({ theme }) => `
+        ${theme.breakpoints.up('sm')} {
+            height: 90vh;
+        }
+    `
+);

@@ -3,6 +3,7 @@ import { User } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
+import { Character } from '../characters/charcterSlice';
 
 // TODO: maybe handle errors from server? (so returns will look something like "Promise<string | ErrorType>")
 // It could also throw some error

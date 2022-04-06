@@ -61,4 +61,4 @@ const translateLocationPathname = (location: Location) => {
     return 'translateNotFound ;<';
 };
 
-const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
+const Offset = styled('div')(({ theme }) => (theme.mixins as any).toolbar);

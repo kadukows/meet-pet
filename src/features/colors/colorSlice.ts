@@ -83,6 +83,6 @@ const fetchColors = createAsyncThunk(
 );
 
 export const colorObserver = makeObserverOnAuthed(
-    fetchColors(),
+    fetchColors(null),
     removeColors()
 );

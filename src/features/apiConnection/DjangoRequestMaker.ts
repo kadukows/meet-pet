@@ -129,7 +129,11 @@ const DjangoRequestMaker: IRequestMaker = {
             is_male: true,
             likes_child: false,
             likes_other_animals: false,
-            photo_ids: [1, 2, 99],
+            photo_urls: [
+                '/api/animal_images/owczarek-niemiecki.jpg',
+                '/api/animal_images/owczarek-niemiecki-768x511.jpg',
+                '/api/animal_images/1608716445.jpg',
+            ],
         };
 
         //return null;
