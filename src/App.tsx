@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import GetUserAtInit from './features/auth/User';
 import TinderChoose from './features/tinderChoose';
 import HomePage from './features/homePage';
+import RedirectIfNotLoggedIn from './features/auth/RedirectIfNotLoggedIn';
 
 function App() {
     return (
@@ -43,7 +44,11 @@ function App() {
                                     />
                                     <Route
                                         path="/meet"
-                                        element={<TinderChoose />}
+                                        element={
+                                            <RedirectIfNotLoggedIn>
+                                                <TinderChoose />
+                                            </RedirectIfNotLoggedIn>
+                                        }
                                     />
                                 </Routes>
                             </Container>
