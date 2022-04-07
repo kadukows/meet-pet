@@ -12,7 +12,7 @@ const AnimalCarousel = ({ animal }: Props) => {
         <Carousel
             autoPlay={false}
             sx={{ width: '100%', height: '100%' }}
-            height={'95%'}
+            height={'calc(100% - 30px)'}
         >
             {animal.photo_urls.map((el) => (
                 <Box

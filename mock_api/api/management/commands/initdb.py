@@ -1,4 +1,5 @@
 import os
+from urllib import request
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth.models import Group, Permission
@@ -14,40 +15,92 @@ from api.models import (
 )
 
 
-COLORS = ["Brown", "Gold", "White"]
+COLORS = ["Brown", "Gold", "White", "Ginger"]
 SIZES = ["Small", "Medium", "Big"]
-CHARACTERS = ["Easygoing", "Energetic", "Calm", "Attentive"]
+CHARACTERS = ["Easygoing", "Energetic", "Calm", "Attentive", "Inquisitive"]
 KINDS = {
     "dog": ["retriever", "bulldog", "german shepherd"],
-    "cats": ["british", "sphynx", "shorthair", "outdoor"],
+    "cat": ["british", "sphynx", "shorthair", "outdoor"],
 }
+
+
+class AnimalDef:
+    def __init__(
+        self,
+        name,
+        specific_animal_kind,
+        colors,
+        characters,
+        size,
+        male,
+        likes_child,
+        likes_other_animals,
+    ):
+        self.name = name
+        self.specific_animal_kind = specific_animal_kind
+        self.colors = colors
+        self.characters = characters
+        self.size = size
+        self.male = male
+        self.likes_child = likes_child
+        self.likes_other_animals = likes_other_animals
+
+
+ANIMALS = [
+    AnimalDef(
+        "Alex",
+        KINDS["dog"][2],
+        [COLORS[0]],
+        [CHARACTERS[1], CHARACTERS[3]],
+        SIZES[2],
+        True,
+        True,
+        True,
+    ),
+    AnimalDef(
+        "Sofi",
+        KINDS["cat"][3],
+        [COLORS[3]],
+        [CHARACTERS[2], CHARACTERS[4]],
+        SIZES[0],
+        False,
+        True,
+        False,
+    ),
+]
 
 
 class Command(BaseCommand):
     help = "Populates inital database with basic values"
 
     def handle(self, *args, **options):
-        for color in COLORS:
-            obj = Color.objects.filter(value=color).first()
-            if obj is None:
-                self.stdout.write(f"Creating color: {color}")
-                obj = Color.objects.create(value=color)
-                obj.save()
+        self.createColors()
+        self.createSizes()
+        self.createCharacters()
+        self.createKinds()
+        self.createAnimals()
 
-        for size in SIZES:
-            obj = Size.objects.filter(value=size).first()
-            if obj is None:
-                self.stdout.write(f"Creating size: {size}")
-                obj = Size.objects.create(value=size)
-                obj.save()
+    def createColors(self):
+        self.createObjects(Color, COLORS)
 
-        for char in CHARACTERS:
-            obj = Character.objects.filter(value=char).first()
-            if obj is None:
-                self.stdout.write(f"Creating character: {char}")
-                obj = Character.objects.create(value=char)
-                obj.save()
+    def createSizes(self):
+        self.createObjects(Size, SIZES)
 
+    def createCharacters(self):
+        self.createObjects(Character, CHARACTERS)
+
+    def createObjects(self, Class, names):
+        for name in names:
+            self.createObject(Class, name)
+
+    def createObject(self, Class, name):
+        obj = Class.objects.filter(value=name).first()
+        if obj is None:
+            self.stdout.write(f"Creating {Class.__name__}: {name}")
+            obj = Class.objects.create(value=name)
+            obj.save()
+
+    def createKinds(self):
         for kind, specifics in KINDS.items():
             kind_obj = AnimalKind.objects.filter(value=kind).first()
             if kind_obj is None:
@@ -64,35 +117,42 @@ class Command(BaseCommand):
                     )
                     s_obj.save()
 
-        shepherd1 = Animal.objects.filter(name="Alex").first()
+    def createAnimals(self):
+        for animalDef in ANIMALS:
+            self.createAnimal(animalDef)
 
-        if shepherd1 is None:
-            self.stdout.write(f"Created animal: Alex :)")
-            shepherd1 = Animal.objects.create(
-                name="Alex",
+    def createAnimal(self, aDef: AnimalDef):
+        animal: Animal = Animal.objects.filter(name=aDef.name).first()
+
+        if animal is None:
+            self.stdout.write(f"Creating animal: {aDef.name} :)")
+            animal = Animal.objects.create(
+                name=aDef.name,
                 specific_animal_kind=SpecificAnimalKind.objects.get(
-                    value="german shepherd"
+                    value=aDef.specific_animal_kind
                 ),
-                size=Size.objects.get(value="Big"),
-                male=True,
-                likes_child=True,
-                likes_other_animals=True,
+                size=Size.objects.get(value=aDef.size),
+                male=aDef.male,
+                likes_child=aDef.likes_child,
+                likes_other_animals=aDef.likes_other_animals,
             )
-            shepherd1.characters.set(
+            animal.characters.set(
                 [
-                    Character.objects.get(value="Energetic"),
-                    Character.objects.get(value="Attentive"),
+                    Character.objects.get(value=character)
+                    for character in aDef.characters
                 ]
             )
-            shepherd1.colors.set([Color.objects.get(value="Brown")])
+            animal.colors.set([Color.objects.get(value=color) for color in aDef.colors])
 
-            photo_folder = "api/management/commands/resources/alex"
+            with request.urlopen("http://loripsum.net/api/3/medium/plaintext") as res:
+                animal.description = res.read().decode("UTF-8")
+
+            photo_folder = f"api/management/commands/resources/{aDef.name}"
             photo_names = os.listdir(photo_folder)
             for photo_name in photo_names:
                 img = File(open(f"{photo_folder}/{photo_name}", "rb"))
-                photo = Photo(animal=shepherd1)
+                photo = Photo(animal=animal)
                 photo.file.save(photo_name, img)
-                # photo.save()
-                shepherd1.photos.add(photo)
+                animal.photos.add(photo)
 
-            shepherd1.save()
+            animal.save()

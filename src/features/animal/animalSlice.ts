@@ -5,6 +5,7 @@ export interface Animal {
     specific_animal_kind: string;
     characters: string[];
     colors: string[];
+    size: string;
     is_male: boolean;
     likes_child: boolean;
     likes_other_animals: boolean;

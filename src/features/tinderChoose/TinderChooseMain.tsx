@@ -1,6 +1,6 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
+import Paper, { PaperProps } from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -22,7 +22,7 @@ type Props = {
 const FullViewportGrid = styled(Grid)(
     ({ theme }) => `
     ${theme.breakpoints.down('sm')} {
-        height: 80vh;
+        height: 50vh;
     }
 
     height: 100%;
@@ -41,7 +41,7 @@ const TinderChooseMain = React.forwardRef(
                 <FullViewportGrid item sm={8} xs={12}>
                     {animal === null ? (
                         <Skeleton
-                            height="100%"
+                            height="calc(100% - 30px)"
                             width="100%"
                             variant="rectangular"
                         />
@@ -56,46 +56,53 @@ const TinderChooseMain = React.forwardRef(
                         direction={{ xs: 'column-reverse', sm: 'column' }}
                         sx={{ height: '100%' }}
                     >
-                        <OverflowBox sx={{ flex: 4 }}>
-                            <MPaper
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: '100%',
-                                }}
-                            >
-                                <Typography variant="h4" sx={{ mb: 3 }}>
-                                    {animal === null ? (
-                                        <Skeleton variant="text" />
-                                    ) : (
-                                        animal.name
-                                    )}
-                                </Typography>
+                        <MPaper
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: '40%',
+                                flex: 4,
+                            }}
+                        >
+                            <Typography variant="h4" sx={{ mb: 3 }}>
                                 {animal === null ? (
-                                    <Skeleton
-                                        variant="rectangular"
-                                        sx={{ flex: 1 }}
-                                    />
+                                    <Skeleton variant="text" />
                                 ) : (
-                                    <AnimalTable animal={animal} />
+                                    animal.name
                                 )}
-                            </MPaper>
-                        </OverflowBox>
-                        <OverflowBox sx={{ flex: 4 }}>
-                            <MPaper sx={{ minHeight: '100%' }}>
-                                {animal ? (
+                            </Typography>
+                            {animal === null ? (
+                                <Skeleton
+                                    variant="rectangular"
+                                    sx={{ flex: 1 }}
+                                />
+                            ) : (
+                                <AnimalTable animal={animal} />
+                            )}
+                        </MPaper>
+
+                        <MPaper
+                            sx={{
+                                flex: 4,
+                                height: '40%',
+                                display: 'flex',
+                            }}
+                        >
+                            {animal ? (
+                                <OverflowBox>
                                     <Typography>
                                         {animal.description}
                                     </Typography>
-                                ) : (
-                                    <Skeleton
-                                        variant="rectangular"
-                                        height="100%"
-                                        width="100%"
-                                    />
-                                )}
-                            </MPaper>
-                        </OverflowBox>
+                                </OverflowBox>
+                            ) : (
+                                <Skeleton
+                                    variant="rectangular"
+                                    height="100%"
+                                    width="100%"
+                                />
+                            )}
+                        </MPaper>
+
                         <Box sx={{ flex: 2 }}>
                             <Box
                                 sx={{
@@ -132,61 +139,7 @@ const TinderChooseMain = React.forwardRef(
 
 export default TinderChooseMain;
 
-const content = `What is Lorem Ipsum? Lorem Ipsum is simply dummy text of the
-    printing and typesetting industry. Lorem Ipsum has been the
-    industry's standard dummy text ever since the 1500s, when an
-    unknown printer took a galley of type and scrambled it to make a
-    type specimen book. It has survived not only five centuries, but
-    also the leap into electronic typesetting, remaining essentially
-    unchanged. It was popularised in the 1960s with the release of
-    Letraset sheets containing Lorem Ipsum passages, and more
-    recently with desktop publishing software like Aldus PageMaker
-    including versions of Lorem Ipsum. Why do we use it? It is a
-    long established fact that a reader will be distracted by the
-    readable content of a page when looking at its layout. The point
-    of using Lorem Ipsum is that it has a more-or-less normal
-    distribution of letters, as opposed to using 'Content here,
-    content here', making it look like readable English. Many
-    desktop publishing packages and web page editors now use Lorem
-    Ipsum as their default model text, and a search for 'lorem
-    ipsum' will uncover many web sites still in their infancy.
-    Various versions have evolved over the years, sometimes by
-    accident, sometimes on purpose (injected humour and the like).
-    Where does it come from? Contrary to popular belief, Lorem Ipsum
-    is not simply random text. It has roots in a piece of classical
-    Latin literature from 45 BC, making it over 2000 years old.
-    Richard McClintock, a Latin professor at Hampden-Sydney College
-    in Virginia, looked up one of the more obscure Latin words,
-    consectetur, from a Lorem Ipsum passage, and going through the
-    cites of the word in classical literature, discovered the
-    undoubtable source. Lorem Ipsum comes from sections 1.10.32 and
-    1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good
-    and Evil) by Cicero, written in 45 BC. This book is a treatise
-    on the theory of ethics, very popular during the Renaissance.
-    The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..",
-    comes from a line in section 1.10.32. The standard chunk of
-    Lorem Ipsum used since the 1500s is reproduced below for those
-    interested. Sections 1.10.32 and 1.10.33 from "de Finibus
-    Bonorum et Malorum" by Cicero are also reproduced in their exact
-    original form, accompanied by English versions from the 1914
-    translation by H. Rackham.;`;
-
-const BigPaper = ({
-    maxLength,
-    ...rest
-}: React.ComponentProps<typeof MPaper> & { maxLength?: number }) => {
-    return (
-        <MPaper {...rest}>
-            <Typography>
-                {maxLength !== undefined
-                    ? content.slice(0, maxLength)
-                    : content}
-            </Typography>
-        </MPaper>
-    );
-};
-
-const MPaper = styled(Paper)(
+const MPaper = styled((p: PaperProps) => <Paper elevation={3} {...p} />)(
     ({ theme }) => `
     padding: ${theme.spacing(2)};
     height: 100%;
@@ -207,12 +160,4 @@ const GridFullHeight = styled(Grid)(
         }
     }
 `
-);
-
-const BoxFullHeight = styled(Box)(
-    ({ theme }) => `
-        ${theme.breakpoints.up('sm')} {
-            height: 90vh;
-        }
-    `
 );

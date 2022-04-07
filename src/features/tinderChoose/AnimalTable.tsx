@@ -27,6 +27,16 @@ const AnimalTable = ({ animal }: Props) => {
                 <TableBody>
                     <DenseTableRow>
                         <TableCell>
+                            <Typography>Kind</Typography>
+                        </TableCell>
+                        <TableCell>
+                            <Typography>
+                                {animal.specific_animal_kind}
+                            </Typography>
+                        </TableCell>
+                    </DenseTableRow>
+                    <DenseTableRow>
+                        <TableCell>
                             <Typography>Like children</Typography>
                         </TableCell>
                         <TableCell>
@@ -68,6 +78,14 @@ const AnimalTable = ({ animal }: Props) => {
                         </TableCell>
                         <TableCell>
                             <Typography>{animal.colors.join(', ')}</Typography>
+                        </TableCell>
+                    </DenseTableRow>
+                    <DenseTableRow>
+                        <TableCell>
+                            <Typography>Size</Typography>
+                        </TableCell>
+                        <TableCell>
+                            <Typography>{animal.size}</Typography>
                         </TableCell>
                     </DenseTableRow>
                 </TableBody>

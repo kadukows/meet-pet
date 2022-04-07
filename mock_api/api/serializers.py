@@ -128,6 +128,7 @@ class AnimalSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "specific_animal_kind",
+            "description",
             "characters",
             "colors",
             "size",

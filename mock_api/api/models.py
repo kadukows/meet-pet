@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
@@ -44,6 +45,7 @@ class UserPrefs(models.Model):
     liked_colors = models.ManyToManyField("Color")
     liked_charactes = models.ManyToManyField("Character")
     liked_kinds = models.ManyToManyField("AnimalKind")
+    prev_animal = models.IntegerField(null=True)
 
 
 class ShelterPrefs(models.Model):
@@ -91,6 +93,7 @@ class Animal(models.Model):
     specific_animal_kind = models.ForeignKey(
         "SpecificAnimalKind", on_delete=models.CASCADE
     )
+    description = models.TextField(null=False, default="")
     characters = models.ManyToManyField(Character)
     colors = models.ManyToManyField(Color)
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
@@ -105,3 +108,10 @@ class Animal(models.Model):
 class Photo(models.Model):
     file = models.ImageField(upload_to="api/animal_images")
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name="photos")
+
+
+@receiver(models.signals.post_delete, sender=Photo)
+def auto_delete_photo_on_disk(sender, instance, **kwargs):
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)

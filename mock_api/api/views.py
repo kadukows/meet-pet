@@ -5,8 +5,8 @@ from rest_framework import (
     permissions,
     authentication,
     generics,
-    request,
-    response,
+    status,
+    serializers,
 )
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -30,6 +30,7 @@ from api.models import (
     Photo,
     Size,
     SpecificAnimalKind,
+    UserPrefs,
 )
 
 
@@ -87,6 +88,29 @@ class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
+
+    @action(methods=["post"], detail=False, serializer_class=serializers.Serializer)
+    def next(self, request):
+        if Animal.objects.count() == 0:
+            return Response(
+                data={"error": "No Animals in db"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_prefs: UserPrefs = self.request.user.profile.user_prefs
+
+        if user_prefs.prev_animal is None:
+            return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
+
+        animal = Animal.objects.filter(id__gt=user_prefs.prev_animal).first()
+        if animal is None:
+            return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
+
+        return self.returnAndSetAnimal(user_prefs, animal)
+
+    def returnAndSetAnimal(self, user_prefs: UserPrefs, animal: Animal):
+        user_prefs.prev_animal = animal.id
+        user_prefs.save()
+        return Response(data=AnimalSerializer(animal).data, status=status.HTTP_200_OK)
 
 
 class PhotoViewset(viewsets.ModelViewSet):

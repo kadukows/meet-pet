@@ -119,27 +119,22 @@ const DjangoRequestMaker: IRequestMaker = {
     },
 
     getNextAnimalForTinderLikeChoose: async (token) => {
-        const animal: Animal = {
-            id: 4,
-            name: 'Dog the dog',
-            description: 'Dog the dog is really really special',
-            specific_animal_kind: 'Sheperd',
-            characters: ['Energetic', 'Nice'],
-            colors: ['brown'],
-            is_male: true,
-            likes_child: false,
-            likes_other_animals: false,
-            photo_urls: [
-                '/api/animal_images/owczarek-niemiecki.jpg',
-                '/api/animal_images/owczarek-niemiecki-768x511.jpg',
-                '/api/animal_images/1608716445.jpg',
-            ],
-        };
+        try {
+            const resPromise = axios.post<AnimalResponse>(
+                '/api/animals/next/',
+                null,
+                makeAuthHeader(token)
+            );
 
-        //return null;
-        await sleep(2000);
+            // to showcase animation
+            const sleepPromise = sleep(2000);
 
-        return animal;
+            const [res] = await Promise.all([resPromise, sleepPromise]);
+
+            return transformAnimal(res.data);
+        } catch (e) {}
+
+        return null;
     },
 };
 
@@ -156,3 +151,50 @@ const sleep = (ms: number) => {
 };
 
 export { DjangoRequestMaker };
+
+interface AnimalResponse {
+    id: number;
+    name: string;
+    specific_animal_kind: {
+        id: number;
+        value: string;
+    };
+    description: string;
+    characters: Array<{ value: string }>;
+    colors: Array<{ value: string }>;
+    size: { value: string };
+    male: boolean;
+    likes_child: boolean;
+    likes_other_animals: boolean;
+    photos: Array<{ image_url: string }>;
+}
+
+function transformAnimal(res: AnimalResponse): Animal {
+    const {
+        id,
+        name,
+        specific_animal_kind,
+        description,
+        characters,
+        colors,
+        size,
+        male,
+        likes_child,
+        likes_other_animals,
+        photos,
+    } = res;
+
+    return {
+        id,
+        name,
+        description,
+        specific_animal_kind: specific_animal_kind.value,
+        characters: characters.map((el) => el.value),
+        colors: colors.map((el) => el.value),
+        size: size.value,
+        is_male: male,
+        likes_child,
+        likes_other_animals,
+        photo_urls: photos.map((el) => el.image_url),
+    };
+}
