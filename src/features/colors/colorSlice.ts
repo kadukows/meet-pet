@@ -1,13 +1,17 @@
 import {
     createSlice,
     createEntityAdapter,
-    ThunkAction,
     PayloadAction,
     AnyAction,
+    createAsyncThunk,
 } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { observer } from 'redux-observers';
 import { getRequestMaker } from '../apiConnection';
+import { addAlert } from '../alerts/alertsSlice';
+import {
+    addCommonBuilderCasesForAsyncThunk,
+    makeObserverOnAuthed,
+} from '../../helpers';
 
 export interface Color {
     id: number;
@@ -27,9 +31,6 @@ const initialState: ColorState = {
     ...colorAdapter.getInitialState(),
 };
 
-//const { setAll, removeAll } = colorAdapter;
-//const reducers = { setAll, removeAll };
-
 const colorSlice = createSlice({
     name: 'color',
     initialState,
@@ -44,6 +45,9 @@ const colorSlice = createSlice({
             state.loading = action.payload;
         },
     },
+    extraReducers: (builder) => {
+        addCommonBuilderCasesForAsyncThunk(fetchColors, colorAdapter, builder);
+    },
 });
 
 export const colorSelectors = colorAdapter.getSelectors(
@@ -54,27 +58,31 @@ export const { setColors, removeColors, setLoading } = colorSlice.actions;
 
 export const colorReducer = colorSlice.reducer;
 
-export const colorObserver = observer(
-    (state: RootState) => state.authReducer.authorized,
-    (dispatch: any, current, previous) => {
-        if (previous === false && current === true) {
-            dispatch(async (dispatch: any, getState: any) => {
-                dispatch(setLoading(true));
+////////////////////////////////////////
 
-                const colors = await getRequestMaker().getColors(
-                    getState().authReducer.token as string
-                );
+const fetchColors = createAsyncThunk(
+    'color/fetchColors',
+    async (arg: any, thunkApi) => {
+        const res = await getRequestMaker().getColors(
+            (thunkApi.getState() as RootState).authReducer.token as string
+        );
 
-                if (colors !== null) {
-                    dispatch(setColors(colors));
-                } else {
-                    // some notif
-                }
+        if (res === null) {
+            thunkApi.dispatch(
+                addAlert({
+                    type: 'error',
+                    message: 'Problem occured when fetching colors',
+                })
+            );
 
-                dispatch(setLoading(false));
-            });
-        } else if (previous === true && current === false) {
-            dispatch(removeColors());
+            return thunkApi.rejectWithValue(null);
         }
+
+        return res;
     }
+);
+
+export const colorObserver = makeObserverOnAuthed(
+    fetchColors(null),
+    removeColors()
 );

@@ -11,6 +11,8 @@ import MyAppBar from './features/appBar/MyAppBar';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import GetUserAtInit from './features/auth/User';
+import TinderChoose from './features/tinderChoose';
+import HomePage from './features/homePage';
 
 function App() {
     return (
@@ -32,12 +34,16 @@ function App() {
                             }}
                         >
                             <MyAppBar />
-                            <Container maxWidth="sm">
+                            <Container maxWidth="lg">
                                 <Routes>
-                                    <Route path="/" element={'Home page!'} />
+                                    <Route path="/" element={<HomePage />} />
                                     <Route
                                         path="/counter"
                                         element={<Counter />}
+                                    />
+                                    <Route
+                                        path="/meet"
+                                        element={<TinderChoose />}
                                     />
                                 </Routes>
                             </Container>

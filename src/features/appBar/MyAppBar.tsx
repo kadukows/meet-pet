@@ -11,6 +11,7 @@ import Login from '../auth/Login';
 import MenuBar from '../menuBar/MenuBar';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import styled from '@mui/system/styled';
 
 type Props = {};
 
@@ -22,8 +23,8 @@ const MyAppBar = (props: Props) => {
     );
 
     return (
-        <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="sticky">
+        <React.Fragment>
+            <AppBar>
                 <Toolbar>
                     <MyDrawer />
                     <Typography
@@ -37,7 +38,8 @@ const MyAppBar = (props: Props) => {
                     {authed ? <MenuBar /> : <Login />}
                 </Toolbar>
             </AppBar>
-        </Box>
+            <Offset />
+        </React.Fragment>
     );
 };
 
@@ -46,6 +48,7 @@ export default MyAppBar;
 const REGEX_MAPPING = {
     Counter: /^\/counter$/,
     Home: /^\/$/,
+    'Meet the pet!': /^\/meet$/,
 };
 
 const translateLocationPathname = (location: Location) => {
@@ -57,3 +60,5 @@ const translateLocationPathname = (location: Location) => {
 
     return 'translateNotFound ;<';
 };
+
+const Offset = styled('div')(({ theme }) => (theme.mixins as any).toolbar);

@@ -1,13 +1,12 @@
-from lib2to3.pytree import Base
-from django import views
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
     permissions,
     authentication,
     generics,
-    request,
-    response,
+    status,
+    serializers,
 )
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -17,12 +16,22 @@ from api.serializers import (
     AnimalSerializer,
     CharacterSerializer,
     ColorSerializer,
+    PhotoSerializer,
     SpecificAnimalKindSerializer,
     UserSerializer,
     SizeSerializer,
 )
 from api.authentication import TokenBearerAuth
-from api.models import Animal, AnimalKind, Character, Color, Size, SpecificAnimalKind
+from api.models import (
+    Animal,
+    AnimalKind,
+    Character,
+    Color,
+    Photo,
+    Size,
+    SpecificAnimalKind,
+    UserPrefs,
+)
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -48,34 +57,64 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
 
 class BaseAuthPerm:
     authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
-    permissions_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
 
-class ColorViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class ColorViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = ColorSerializer
     queryset = Color.objects.all()
 
 
-class SizeViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class SizeViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = SizeSerializer
     queryset = Size.objects.all()
 
 
-class CharacterViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class CharacterViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = CharacterSerializer
     queryset = Character.objects.all()
 
 
-class AnimalKindViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class AnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalKindSerializer
     queryset = AnimalKind.objects.all()
 
 
-class SpecificAnimalKindViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = SpecificAnimalKindSerializer
     queryset = SpecificAnimalKind.objects.all()
 
 
-class AnimalViewSet(viewsets.ModelViewSet, BaseAuthPerm):
+class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
+
+    @action(methods=["post"], detail=False, serializer_class=serializers.Serializer)
+    def next(self, request):
+        if Animal.objects.count() == 0:
+            return Response(
+                data={"error": "No Animals in db"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_prefs: UserPrefs = self.request.user.profile.user_prefs
+
+        if user_prefs.prev_animal is None:
+            return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
+
+        animal = Animal.objects.filter(id__gt=user_prefs.prev_animal).first()
+        if animal is None:
+            return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
+
+        return self.returnAndSetAnimal(user_prefs, animal)
+
+    def returnAndSetAnimal(self, user_prefs: UserPrefs, animal: Animal):
+        user_prefs.prev_animal = animal.id
+        user_prefs.save()
+        return Response(data=AnimalSerializer(animal).data, status=status.HTTP_200_OK)
+
+
+class PhotoViewset(viewsets.ModelViewSet):
+    serializer_class = PhotoSerializer
+    queryset = Photo.objects.all()
+    authentication_classes = []
+    permission_classes = []

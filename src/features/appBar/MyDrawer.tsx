@@ -53,6 +53,13 @@ const MyDrawer = (props: Props) => {
                         >
                             Counter
                         </ListItemButton>
+                        <ListItemButton
+                            component={NavLink}
+                            onClick={closeDrawer}
+                            to="/meet"
+                        >
+                            Meet!
+                        </ListItemButton>
                     </List>
                 </Box>
             </Drawer>

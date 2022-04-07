@@ -5,6 +5,18 @@ import { alertsReducer } from './features/alerts/alertsSlice';
 import { darkThemeProviderReducer } from './features/darkThemeProvider/darkThemeSlice';
 import { authReducer } from './features/auth/userSlice';
 import { colorReducer, colorObserver } from './features/colors/colorSlice';
+import {
+    animalKindReducer,
+    animalKindObserver,
+} from './features/animalKind/animaKindSlice';
+import {
+    specificAnimalKindReducer,
+    specificAnimalKindObserver,
+} from './features/specificAnimalKind/specificAnimalKindSlice';
+import {
+    characterReducer,
+    characterObserver,
+} from './features/characters/charcterSlice';
 
 const store = configureStore({
     reducer: {
@@ -13,6 +25,9 @@ const store = configureStore({
         darkThemeProviderReducer,
         authReducer,
         colorReducer,
+        animalKindReducer,
+        specificAnimalKindReducer,
+        characterReducer,
     },
 });
 
@@ -20,4 +35,9 @@ export type RootState = ReturnType<typeof store.getState>;
 
 export { store };
 
-observe(store, [colorObserver]);
+observe(store, [
+    colorObserver,
+    animalKindObserver,
+    specificAnimalKindObserver,
+    characterObserver,
+]);
