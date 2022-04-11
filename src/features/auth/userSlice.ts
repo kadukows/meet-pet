@@ -4,6 +4,7 @@ export interface User {
     username: string;
     email: string;
     full_name: string;
+    liked_colors: number[];
 }
 
 interface AuthState {

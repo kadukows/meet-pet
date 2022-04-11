@@ -14,6 +14,7 @@ import GetUserAtInit from './features/auth/User';
 import TinderChoose from './features/tinderChoose';
 import HomePage from './features/homePage';
 import RedirectIfNotLoggedIn from './features/auth/RedirectIfNotLoggedIn';
+import Preferences from './features/preferences/preferences';
 
 function App() {
     return (
@@ -41,6 +42,14 @@ function App() {
                                     <Route
                                         path="/counter"
                                         element={<Counter />}
+                                    />
+                                    <Route
+                                        path="/preferences"
+                                        element={
+                                            <RedirectIfNotLoggedIn>
+                                                <Preferences />
+                                            </RedirectIfNotLoggedIn>
+                                        }
                                     />
                                     <Route
                                         path="/meet"

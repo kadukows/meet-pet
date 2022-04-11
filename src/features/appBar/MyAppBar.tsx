@@ -47,6 +47,7 @@ export default MyAppBar;
 
 const REGEX_MAPPING = {
     Counter: /^\/counter$/,
+    Preferences: /^\/preferences$/,
     Home: /^\/$/,
     'Meet the pet!': /^\/meet$/,
 };

@@ -16,7 +16,7 @@ const Loader = ({ selector, children }: React.PropsWithChildren<Props>) => {
         <React.Fragment>{children}</React.Fragment>
     ) : (
         <CenteredFullFlex>
-            <CircularProgress sx={{ height: '50%' }} />
+            <CircularProgress size="3rem" />
             <Typography variant="h4" component="h4">
                 Loading...
             </Typography>

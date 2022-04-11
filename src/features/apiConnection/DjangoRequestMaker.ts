@@ -3,6 +3,7 @@ import { Animal } from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
+import { Size } from '../size/sizeSlice';
 import { IRequestMaker } from './IRequestMaker';
 
 const DjangoRequestMaker: IRequestMaker = {
@@ -33,6 +34,9 @@ const DjangoRequestMaker: IRequestMaker = {
                 user_prefs: null | {
                     has_garden: boolean;
                     location: string;
+                    liked_colors: number[];
+                    liked_characters: number[];
+                    liked_kinds: number[];
                 };
 
                 shelter_prefs: null | {
@@ -51,6 +55,7 @@ const DjangoRequestMaker: IRequestMaker = {
                 username: res.data.username,
                 email: res.data.email,
                 full_name: res.data.first_name.concat(' ', res.data.last_name),
+                liked_colors: res.data.profile.user_prefs?.liked_colors ?? [],
             };
         } catch (e: any) {}
 
@@ -63,6 +68,7 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/colors/',
                 makeAuthHeader(token)
             );
+
             return res.data;
         } catch (e) {}
 
@@ -110,6 +116,18 @@ const DjangoRequestMaker: IRequestMaker = {
         try {
             const res = await axios.get<Character[]>(
                 '/api/characters/',
+                makeAuthHeader(token)
+            );
+            return res.data;
+        } catch (e) {}
+
+        return null;
+    },
+
+    getSizes: async (token) => {
+        try {
+            const res = await axios.get<Size[]>(
+                '/api/sizes/',
                 makeAuthHeader(token)
             );
             return res.data;

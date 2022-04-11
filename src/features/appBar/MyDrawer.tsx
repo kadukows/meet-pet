@@ -56,6 +56,13 @@ const MyDrawer = (props: Props) => {
                         <ListItemButton
                             component={NavLink}
                             onClick={closeDrawer}
+                            to="/preferences"
+                        >
+                            Preferences
+                        </ListItemButton>
+                        <ListItemButton
+                            component={NavLink}
+                            onClick={closeDrawer}
                             to="/meet"
                         >
                             Meet!

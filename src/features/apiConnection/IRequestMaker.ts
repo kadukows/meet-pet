@@ -4,6 +4,7 @@ import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
 import { Character } from '../characters/charcterSlice';
+import { Size } from '../size/sizeSlice';
 
 // TODO: maybe handle errors from server? (so returns will look something like "Promise<string | ErrorType>")
 // It could also throw some error
@@ -21,6 +22,7 @@ interface IRequestMaker {
         token: string
     ) => Promise<SpecificAnimalKind[] | null>;
     getCharacters: (token: string) => Promise<Character[] | null>;
+    getSizes: (token: string) => Promise<Size[] | null>;
     getNextAnimalForTinderLikeChoose: (token: string) => Promise<Animal | null>;
 }
 
