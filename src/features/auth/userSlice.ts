@@ -4,7 +4,11 @@ export interface User {
     username: string;
     email: string;
     full_name: string;
+    liked_kinds: number[];
+    liked_specific_kinds: number[];
     liked_colors: number[];
+    liked_characters: number[];
+    liked_sizes: number[];
 }
 
 interface AuthState {

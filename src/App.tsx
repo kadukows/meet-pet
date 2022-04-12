@@ -14,7 +14,7 @@ import GetUserAtInit from './features/auth/User';
 import TinderChoose from './features/tinderChoose';
 import HomePage from './features/homePage';
 import RedirectIfNotLoggedIn from './features/auth/RedirectIfNotLoggedIn';
-import Preferences from './features/preferences/preferences';
+import Preferences from './features/preferences/Preferences';
 
 function App() {
     return (

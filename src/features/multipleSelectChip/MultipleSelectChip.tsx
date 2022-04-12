@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FormEvent } from 'react';
 import Paper from '@mui/material/Paper';
 import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -24,14 +24,24 @@ interface StandardEnumValue {
 
 type Props = {
     selectorAll: (state: RootState) => MyDict<StandardEnumValue>;
+    selectObjects?: (state: RootState) => StandardEnumValue[];
+
     formik: any;
     name: string;
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     label?: string;
     sx?: SxProps<Theme>;
 };
 
 const MultipleSelectChip = (props: Props) => {
     const dictObjects = useSelector(props.selectorAll);
+
+    let possibleObjects: StandardEnumValue[] = useSelector(
+        props.selectObjects ?? ((s: RootState) => [])
+    );
+    if (!props.selectObjects) {
+        possibleObjects = Object.values(dictObjects) as StandardEnumValue[];
+    }
 
     return (
         <TextField
@@ -40,10 +50,8 @@ const MultipleSelectChip = (props: Props) => {
             label={props.label}
             name={props.name}
             value={props.formik.values[props.name]}
-            onChange={props.formik.handleChange}
-            helperText={props.formik.touched.email && props.formik.errors.email}
-            error={
-                props.formik.touched.email && Boolean(props.formik.errors.email)
+            onChange={
+                props.onChange ? props.onChange : props.formik.handleChange
             }
             SelectProps={{
                 multiple: true,
@@ -65,11 +73,7 @@ const MultipleSelectChip = (props: Props) => {
                 ),
             }}
         >
-            {(
-                Object.values(
-                    dictObjects
-                ) as unknown as Array<StandardEnumValue>
-            ).map((enumValue: StandardEnumValue) => (
+            {possibleObjects.map((enumValue: StandardEnumValue) => (
                 <MenuItem key={enumValue.id} value={enumValue.id}>
                     {enumValue.value}
                 </MenuItem>

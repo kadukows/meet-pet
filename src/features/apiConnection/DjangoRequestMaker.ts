@@ -34,9 +34,11 @@ const DjangoRequestMaker: IRequestMaker = {
                 user_prefs: null | {
                     has_garden: boolean;
                     location: string;
+                    liked_kinds: number[];
+                    liked_specific_kinds: number[];
                     liked_colors: number[];
                     liked_characters: number[];
-                    liked_kinds: number[];
+                    liked_sizes: number[];
                 };
 
                 shelter_prefs: null | {
@@ -50,12 +52,18 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/user/me/',
                 makeAuthHeader(token)
             );
-
+            //TODO: SOME HARDCODING HERE
             return {
                 username: res.data.username,
                 email: res.data.email,
                 full_name: res.data.first_name.concat(' ', res.data.last_name),
-                liked_colors: res.data.profile.user_prefs?.liked_colors ?? [],
+                liked_kinds: res.data.profile.user_prefs?.liked_kinds ?? [1],
+                liked_specific_kinds: res.data.profile.user_prefs
+                    ?.liked_specific_kinds ?? [1],
+                liked_colors: res.data.profile.user_prefs?.liked_colors ?? [1],
+                liked_characters: res.data.profile.user_prefs
+                    ?.liked_characters ?? [1],
+                liked_sizes: res.data.profile.user_prefs?.liked_sizes ?? [1],
             };
         } catch (e: any) {}
 
