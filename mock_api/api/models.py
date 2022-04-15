@@ -77,6 +77,9 @@ class SpecificAnimalKind(models.Model):
     value = models.TextField(null=False, unique=True)
     animal_kind = models.ForeignKey("AnimalKind", on_delete=models.CASCADE)
 
+    # implementation detail
+    randomly_generated = models.BooleanField(null=False, default=False)
+
     def __str__(self):
         return self.value
 
@@ -100,6 +103,9 @@ class Animal(models.Model):
     male = models.BooleanField(null=False)
     likes_child = models.BooleanField(null=False)
     likes_other_animals = models.BooleanField(null=False)
+
+    # impl detail
+    randomly_generated = models.BooleanField(null=False, default=False)
 
     def __str__(self):
         return self.name

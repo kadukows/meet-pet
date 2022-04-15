@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from random import randint
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
@@ -101,7 +101,11 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
-        animal = Animal.objects.filter(id__gt=user_prefs.prev_animal).first()
+        smallest_id = Animal.objects.order_by("id").first().id
+        largest_id = Animal.objects.order_by("-id").first().id
+        random_id = randint(smallest_id, largest_id)
+
+        animal = Animal.objects.filter(id__gte=random_id).first()
         if animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 

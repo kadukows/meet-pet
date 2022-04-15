@@ -1,6 +1,7 @@
 asgiref==3.5.0
 backports.zoneinfo==0.2.1
 black==22.1.0
+catnames==1.0.3
 click==8.0.4
 Django==4.0.3
 django-rest-framework==0.1.0
