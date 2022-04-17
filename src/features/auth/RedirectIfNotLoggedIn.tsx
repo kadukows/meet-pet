@@ -27,13 +27,16 @@ const Impl = ({ children }: React.PropsWithChildren<{}>) => {
     const location = useLocation();
 
     React.useEffect(() => {
-        dispatch(
-            addAlert({
-                type: 'warning',
-                message: 'You need to be logged in order to access this page',
-            })
-        );
-    }, [dispatch]);
+        if (!authed) {
+            dispatch(
+                addAlert({
+                    type: 'warning',
+                    message:
+                        'You need to be logged in order to access this page',
+                })
+            );
+        }
+    }, [dispatch, authed]);
 
     return authed ? (
         <React.Fragment>{children}</React.Fragment>

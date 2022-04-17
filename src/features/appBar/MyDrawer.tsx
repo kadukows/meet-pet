@@ -60,6 +60,13 @@ const MyDrawer = (props: Props) => {
                         >
                             Meet!
                         </ListItemButton>
+                        <ListItemButton
+                            component={NavLink}
+                            onClick={closeDrawer}
+                            to="/search"
+                        >
+                            Search
+                        </ListItemButton>
                     </List>
                 </Box>
             </Drawer>
