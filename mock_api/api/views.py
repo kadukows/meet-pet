@@ -7,10 +7,12 @@ from rest_framework import (
     generics,
     status,
     serializers,
+    pagination,
 )
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from django_filters import rest_framework as filters
 from api.serializers import (
     AnimalKindSerializer,
     AnimalSerializer,
@@ -32,6 +34,7 @@ from api.models import (
     SpecificAnimalKind,
     UserPrefs,
 )
+from api.filters import AnimalFilter
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -85,9 +88,17 @@ class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     queryset = SpecificAnimalKind.objects.all()
 
 
+class MyPagination(pagination.LimitOffsetPagination):
+    default_limit = 50
+    max_limit = 100
+
+
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
+    filterset_class = AnimalFilter
+    filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = MyPagination
 
     @action(methods=["post"], detail=False, serializer_class=serializers.Serializer)
     def next(self, request):
