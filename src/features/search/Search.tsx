@@ -3,6 +3,8 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import ImageList from '@mui/material/ImageList';
 import Pagination from '@mui/material/Pagination';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import { styled } from '@mui/system';
 import QueryForm from './QueryForm';
 import { AnimalQueryParams } from '../apiConnection/IRequestMaker';
@@ -22,6 +24,7 @@ const Search = (props: Props) => {
     const [count, setCount] = React.useState(0);
     const [itemsPerPage, setItemsPerPage] = React.useState(25);
     const [page, setPage] = React.useState(0);
+    const [pageDisabled, setPageDisabled] = React.useState(false);
     const token = useSelector((state: RootState) => state.authReducer.token);
 
     const fetchAnimals = React.useCallback(
@@ -50,7 +53,7 @@ const Search = (props: Props) => {
                 );
             }
         },
-        [token, setAnimals, setCount]
+        [token, setAnimals, setCount, itemsPerPage, page]
     );
 
     const fetchOnLoad = React.useRef(false);
@@ -70,11 +73,26 @@ const Search = (props: Props) => {
     );
 
     const onPageChange = React.useCallback(
-        (event: React.ChangeEvent<unknown>, value: number) => {
+        async (event: React.ChangeEvent<unknown>, value: number) => {
+            setPageDisabled(true);
             setPage(value - 1);
-            fetchAnimals(lastQuery, null, (value - 1) * itemsPerPage);
+            await fetchAnimals(lastQuery, null, (value - 1) * itemsPerPage);
+            setPageDisabled(false);
         },
-        [setPage, lastQuery, itemsPerPage]
+        [setPage, lastQuery, itemsPerPage, fetchAnimals, setPageDisabled]
+    );
+
+    const onPageSizeChange = React.useCallback(
+        async (event: React.MouseEvent<unknown>) => {
+            setPageDisabled(true);
+            const newItemsPerPage = parseInt(
+                (event.target as any).dataset.value
+            );
+            setItemsPerPage(newItemsPerPage);
+            await fetchAnimals(lastQuery, newItemsPerPage);
+            setPageDisabled(false);
+        },
+        [setPageDisabled, setItemsPerPage, fetchAnimals, lastQuery]
     );
 
     return (
@@ -95,24 +113,27 @@ const Search = (props: Props) => {
                 </Paper>
             </Box>
             <Box sx={{ width: '70%', ml: 2 }}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Pagination
-                        count={Math.ceil(count / itemsPerPage)}
-                        page={page + 1}
-                        onChange={onPageChange}
-                    />
-                </Box>
+                <PaginationRow
+                    count={Math.ceil(count / itemsPerPage)}
+                    page={page + 1}
+                    onPageChange={onPageChange}
+                    pageDisabled={pageDisabled}
+                    pageSize={itemsPerPage}
+                    onPageSizeChange={onPageSizeChange}
+                />
                 <ImageList cols={2} variant="masonry" gap={8}>
                     {animals.map((a) => (
                         <AnimalImageListItem key={a.id} animal={a} />
                     ))}
                 </ImageList>
+                <PaginationRow
+                    count={Math.ceil(count / itemsPerPage)}
+                    page={page + 1}
+                    onPageChange={onPageChange}
+                    pageDisabled={pageDisabled}
+                    pageSize={itemsPerPage}
+                    onPageSizeChange={onPageSizeChange}
+                />
             </Box>
         </Container>
     );
@@ -126,16 +147,52 @@ const Container = styled(Box)`
     display: flex;
 `;
 
-//const InnerContainer = styled(Box)
+interface PaginationRowProps {
+    count: number;
+    page: number;
+    onPageChange: (event: React.ChangeEvent<unknown>, value: number) => void;
+    onPageSizeChange: (event: React.MouseEvent<unknown>) => void;
+    pageSize: number;
+    pageDisabled: boolean;
+}
 
-/*
-const SearchBox = () => {
-    const WIDTH = 320;
-
-
-
-    return <Box sx={{ width: WIDTH, height: '60vh' }}>
-
-    </>
+const PaginationRow = ({
+    count,
+    page,
+    onPageChange,
+    pageDisabled,
+    pageSize,
+    onPageSizeChange,
+}: PaginationRowProps) => {
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+            }}
+        >
+            <div />
+            <Pagination
+                count={count}
+                page={page}
+                onChange={onPageChange}
+                disabled={pageDisabled}
+            />
+            <ButtonGroup variant="text">
+                {ALLOWED_LIMITS.map((l) => (
+                    <Button
+                        key={l}
+                        data-value={l}
+                        disabled={pageSize === l}
+                        onClick={onPageSizeChange}
+                    >
+                        {l}
+                    </Button>
+                ))}
+            </ButtonGroup>
+        </Box>
+    );
 };
-*/
+
+const ALLOWED_LIMITS = [10, 25, 50];
