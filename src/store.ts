@@ -17,6 +17,7 @@ import {
     characterReducer,
     characterObserver,
 } from './features/characters/charcterSlice';
+import { sizeReducer, sizeObserver } from './features/size/sizeSlice';
 
 const store = configureStore({
     reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
         animalKindReducer,
         specificAnimalKindReducer,
         characterReducer,
+        sizeReducer,
     },
 });
 
@@ -40,4 +42,5 @@ observe(store, [
     animalKindObserver,
     specificAnimalKindObserver,
     characterObserver,
+    sizeObserver,
 ]);

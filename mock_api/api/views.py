@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from random import randint
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
@@ -7,10 +7,12 @@ from rest_framework import (
     generics,
     status,
     serializers,
+    pagination,
 )
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from django_filters import rest_framework as filters
 from api.serializers import (
     AnimalKindSerializer,
     AnimalSerializer,
@@ -32,6 +34,7 @@ from api.models import (
     SpecificAnimalKind,
     UserPrefs,
 )
+from api.filters import AnimalFilter
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -85,9 +88,17 @@ class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     queryset = SpecificAnimalKind.objects.all()
 
 
+class MyPagination(pagination.LimitOffsetPagination):
+    default_limit = 50
+    max_limit = 100
+
+
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
+    filterset_class = AnimalFilter
+    filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = MyPagination
 
     @action(methods=["post"], detail=False, serializer_class=serializers.Serializer)
     def next(self, request):
@@ -101,7 +112,11 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
-        animal = Animal.objects.filter(id__gt=user_prefs.prev_animal).first()
+        smallest_id = Animal.objects.order_by("id").first().id
+        largest_id = Animal.objects.order_by("-id").first().id
+        random_id = randint(smallest_id, largest_id)
+
+        animal = Animal.objects.filter(id__gte=random_id).first()
         if animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
