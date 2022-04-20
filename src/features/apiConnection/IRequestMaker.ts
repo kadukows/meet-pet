@@ -23,7 +23,34 @@ interface IRequestMaker {
     ) => Promise<SpecificAnimalKind[] | null>;
     getCharacters: (token: string) => Promise<Character[] | null>;
     getSizes: (token: string) => Promise<Size[] | null>;
+    //
     getNextAnimalForTinderLikeChoose: (token: string) => Promise<Animal | null>;
+    getAnimalList: (
+        token: string,
+        animal_query_params: AnimalQueryParams
+    ) => Promise<PaginatedResponse<Animal> | null>;
 }
 
 export type { IRequestMaker };
+
+////////////////////////
+
+export interface AnimalQueryParams {
+    characters?: number[];
+    colors?: number[];
+    male?: boolean | null;
+    likes_child?: boolean | null;
+    likes_other_animals?: boolean | null;
+    name_contains?: string | null;
+    specific_animal_kind?: number[];
+    size?: number[];
+    animal_kind?: number[];
+    ////
+    limit?: number | null;
+    offset?: number | null;
+}
+
+interface PaginatedResponse<T> {
+    count: number;
+    results: T[];
+}

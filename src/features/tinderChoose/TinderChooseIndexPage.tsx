@@ -12,7 +12,6 @@ type Props = {};
 
 const TinderChooseIndexPage = (props: Props) => {
     const [animal, setAnimal] = React.useState<Animal | null>(null);
-    const [trigger, setTrigger] = React.useState(0);
     const token = useSelector((state: RootState) => state.authReducer.token);
 
     const fetchAnimal = React.useCallback(async () => {
@@ -23,24 +22,19 @@ const TinderChooseIndexPage = (props: Props) => {
     }, [setAnimal, token]);
 
     const nextAnimalCallback = React.useCallback(() => {
-        setTrigger(trigger + 1);
         setAnimal(null);
         fetchAnimal();
-    }, [setTrigger, trigger, setAnimal, fetchAnimal]);
+    }, [setAnimal, fetchAnimal]);
 
     React.useEffect(() => {
         fetchAnimal();
     }, [fetchAnimal]);
 
     return (
-        <TransitionGroup style={{ position: 'relative' }} appear enter>
-            <Grow key={trigger}>
-                <TinderChooseMain
-                    nextAnimalCallback={nextAnimalCallback}
-                    animal={animal}
-                />
-            </Grow>
-        </TransitionGroup>
+        <TinderChooseMain
+            nextAnimalCallback={nextAnimalCallback}
+            animal={animal}
+        />
     );
 };
 

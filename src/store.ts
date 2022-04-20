@@ -5,7 +5,6 @@ import { alertsReducer } from './features/alerts/alertsSlice';
 import { darkThemeProviderReducer } from './features/darkThemeProvider/darkThemeSlice';
 import { authReducer } from './features/auth/userSlice';
 import { colorReducer, colorObserver } from './features/colors/colorSlice';
-import { sizeReducer, sizeObserver } from './features/size/sizeSlice';
 import {
     animalKindReducer,
     animalKindObserver,
@@ -18,6 +17,7 @@ import {
     characterReducer,
     characterObserver,
 } from './features/characters/charcterSlice';
+import { sizeReducer, sizeObserver } from './features/size/sizeSlice';
 
 const store = configureStore({
     reducer: {

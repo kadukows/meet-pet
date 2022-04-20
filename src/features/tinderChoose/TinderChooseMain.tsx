@@ -34,7 +34,7 @@ const TinderChooseMain = React.forwardRef(
         return (
             <GridFullHeight
                 container
-                sx={{ border: '1px solid blck', mt: 0, position: 'absolute' }}
+                sx={{ border: '1px solid blck', mt: 0 }}
                 spacing={2}
                 ref={ref}
             >

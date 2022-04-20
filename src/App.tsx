@@ -15,6 +15,13 @@ import TinderChoose from './features/tinderChoose';
 import HomePage from './features/homePage';
 import RedirectIfNotLoggedIn from './features/auth/RedirectIfNotLoggedIn';
 import Preferences from './features/preferences/Preferences';
+import Search from './features/search/Search';
+
+/*
+const Container = (p: any) => (
+    <Box {...p} sx={{ ml: 8, mr: 8, width: '100%', ...p?.sx }} />
+);
+*/
 
 function App() {
     return (
@@ -26,42 +33,37 @@ function App() {
                     <NotifierComponent />
 
                     <Router>
-                        <Box
-                            sx={{
-                                display: 'inline-flex',
-                                width: '100%',
-                                flexDirection: 'column',
-                                p: 0,
-                                m: 0,
-                            }}
-                        >
-                            <MyAppBar />
-                            <Container maxWidth="lg">
-                                <Routes>
-                                    <Route path="/" element={<HomePage />} />
-                                    <Route
-                                        path="/counter"
-                                        element={<Counter />}
-                                    />
-                                    <Route
-                                        path="/preferences"
-                                        element={
-                                            <RedirectIfNotLoggedIn>
-                                                <Preferences />
-                                            </RedirectIfNotLoggedIn>
-                                        }
-                                    />
-                                    <Route
-                                        path="/meet"
-                                        element={
-                                            <RedirectIfNotLoggedIn>
-                                                <TinderChoose />
-                                            </RedirectIfNotLoggedIn>
-                                        }
-                                    />
-                                </Routes>
-                            </Container>
-                        </Box>
+                        <MyAppBar />
+                        <Container maxWidth="lg">
+                            <Routes>
+                                <Route path="/" element={<HomePage />} />
+                                <Route path="/counter" element={<Counter />} />
+                                <Route
+                                    path="/meet"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <TinderChoose />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/preferences"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <Preferences />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/search"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <Search />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                            </Routes>
+                        </Container>
                     </Router>
                 </SnackbarProvider>
             </DarkThemeProvider>

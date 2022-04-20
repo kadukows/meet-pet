@@ -24,7 +24,7 @@ const MyAppBar = (props: Props) => {
 
     return (
         <React.Fragment>
-            <AppBar>
+            <AppBar position="sticky">
                 <Toolbar>
                     <MyDrawer />
                     <Typography
@@ -38,7 +38,7 @@ const MyAppBar = (props: Props) => {
                     {authed ? <MenuBar /> : <Login />}
                 </Toolbar>
             </AppBar>
-            <Offset />
+            {/*<Offset />*/}
         </React.Fragment>
     );
 };
