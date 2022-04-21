@@ -6,15 +6,16 @@ import { resetAuth } from '../auth/userSlice';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { addAlert } from '../alerts/alertsSlice';
+import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box';
+import { UserType } from '../auth/userSlice';
 
 type Props = {
     text?: string;
 };
 
 const MenuBar = (props: Props) => {
-    const fullName = useSelector(
-        (state: RootState) => state.authReducer.user?.full_name
-    );
+    const user = useSelector((state: RootState) => state.authReducer.user);
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -47,7 +48,19 @@ const MenuBar = (props: Props) => {
                 onClick={handleClick}
                 color="inherit"
             >
-                {fullName}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 1,
+                        height: '3rem',
+                    }}
+                >
+                    <p>{user?.full_name}</p>
+                    <Divider orientation="vertical" flexItem />
+                    <p>{translateUserType(user?.user_type)}</p>
+                </Box>
             </Button>
             <Menu
                 id="basic-menu"
@@ -66,3 +79,16 @@ const MenuBar = (props: Props) => {
 };
 
 export default MenuBar;
+
+const translateUserType = (user_type: UserType | undefined) => {
+    switch (user_type) {
+        case UserType.Normal:
+            return 'User';
+        case UserType.Shelter:
+            return 'Shelter';
+        default:
+            break;
+    }
+
+    return '';
+};

@@ -6,6 +6,9 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import { NavLink } from 'react-router-dom';
+import { UserType } from '../auth/userSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 type Props = {};
 
@@ -13,6 +16,9 @@ const MyDrawer = (props: Props) => {
     const [open, setOpen] = React.useState(false);
     const openDrawer = React.useCallback(() => setOpen(true), [setOpen]);
     const closeDrawer = React.useCallback(() => setOpen(false), [setOpen]);
+    const userType = useSelector(
+        (state: RootState) => state.authReducer.user?.user_type
+    );
 
     return (
         <React.Fragment>
@@ -26,12 +32,7 @@ const MyDrawer = (props: Props) => {
             >
                 <MenuIcon />
             </IconButton>
-            <Drawer
-                anchor="left"
-                open={open}
-                onClose={closeDrawer}
-                //onOpen={openDrawer}
-            >
+            <Drawer anchor="left" open={open} onClose={closeDrawer}>
                 <Box
                     sx={{
                         width: 250,
@@ -46,27 +47,10 @@ const MyDrawer = (props: Props) => {
                         >
                             Home
                         </ListItemButton>
-                        <ListItemButton
-                            component={NavLink}
-                            onClick={closeDrawer}
-                            to="/counter"
-                        >
-                            Counter
-                        </ListItemButton>
-                        <ListItemButton
-                            component={NavLink}
-                            onClick={closeDrawer}
-                            to="/meet"
-                        >
-                            Meet!
-                        </ListItemButton>
-                        <ListItemButton
-                            component={NavLink}
-                            onClick={closeDrawer}
-                            to="/search"
-                        >
-                            Search
-                        </ListItemButton>
+                        <UserLinks
+                            userType={userType}
+                            closeDrawer={closeDrawer}
+                        />
                     </List>
                 </Box>
             </Drawer>
@@ -75,3 +59,45 @@ const MyDrawer = (props: Props) => {
 };
 
 export default MyDrawer;
+
+interface LinksProps {
+    closeDrawer: () => void;
+}
+
+const NormalUserLinks = ({ closeDrawer }: LinksProps) => (
+    <React.Fragment>
+        <ListItemButton component={NavLink} onClick={closeDrawer} to="/meet">
+            Meet!
+        </ListItemButton>
+        <ListItemButton component={NavLink} onClick={closeDrawer} to="/search">
+            Search
+        </ListItemButton>
+    </React.Fragment>
+);
+
+const ShelterUserLinks = ({ closeDrawer }: LinksProps) => (
+    <React.Fragment>
+        <ListItemButton
+            component={NavLink}
+            onClick={closeDrawer}
+            to="/shelters_animal"
+        >
+            Manage animals
+        </ListItemButton>
+    </React.Fragment>
+);
+
+interface UserLinksProps extends LinksProps {
+    userType?: UserType;
+}
+
+const UserLinks = ({ userType, ...rest }: UserLinksProps) => {
+    switch (userType) {
+        case UserType.Normal:
+            return <NormalUserLinks {...rest} />;
+        case UserType.Shelter:
+            return <ShelterUserLinks {...rest} />;
+    }
+
+    return <React.Fragment />;
+};

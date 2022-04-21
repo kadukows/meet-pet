@@ -29,6 +29,11 @@ interface IRequestMaker {
         token: string,
         animal_query_params: AnimalQueryParams
     ) => Promise<PaginatedResponse<Animal> | null>;
+
+    // shelters things
+    shelter: {
+        getOwnAnimals: (token: string) => Promise<Animal[] | null>;
+    };
 }
 
 export type { IRequestMaker };

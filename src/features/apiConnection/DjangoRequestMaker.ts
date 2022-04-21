@@ -5,6 +5,7 @@ import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
+import { User, UserType } from '../auth/userSlice';
 
 const DjangoRequestMaker: IRequestMaker = {
     getToken: async (username, password) => {
@@ -52,6 +53,9 @@ const DjangoRequestMaker: IRequestMaker = {
                 username: res.data.username,
                 email: res.data.email,
                 full_name: res.data.first_name.concat(' ', res.data.last_name),
+                user_type: res.data.profile.user_prefs
+                    ? UserType.Normal
+                    : UserType.Shelter,
             };
         } catch (e: any) {}
 
@@ -162,11 +166,26 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return {
                 count: res.data.count,
-                results: res.data.results.map((ar) => transformAnimal(ar)),
+                results: res.data.results.map(transformAnimal),
             };
         } catch (e) {}
 
         return null;
+    },
+
+    shelter: {
+        getOwnAnimals: async (token) => {
+            try {
+                const res = await axios.get<AnimalResponse[]>(
+                    '/api/animals/shelters/',
+                    makeAuthHeader(token)
+                );
+
+                return res.data.map(transformAnimal);
+            } catch (e) {}
+
+            return null;
+        },
     },
 };
 
@@ -190,6 +209,10 @@ interface AnimalResponse {
     specific_animal_kind: {
         id: number;
         value: string;
+        animal_kind: {
+            id: number;
+            value: string;
+        };
     };
     description: string;
     characters: Array<{ value: string }>;
@@ -228,6 +251,7 @@ function transformAnimal(res: AnimalResponse): Animal {
         name,
         description,
         specific_animal_kind: specific_animal_kind.value,
+        animal_kind: specific_animal_kind.animal_kind.value,
         characters: characters.map((el) => el.value),
         colors: colors.map((el) => el.value),
         size: size.value,
@@ -296,4 +320,19 @@ const parseAnimalQueryParams = (q: AnimalQueryParams) => {
     }
 
     return result;
+};
+
+const translateUserType = (res_user_type: 'SH' | 'NO' | 'AD'): UserType => {
+    switch (res_user_type) {
+        case 'NO':
+            return UserType.Normal;
+        case 'SH':
+            return UserType.Shelter;
+        case 'AD':
+            return UserType.Admin;
+        default:
+            break;
+    }
+
+    return UserType.Normal;
 };

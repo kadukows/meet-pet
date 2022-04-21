@@ -3,7 +3,6 @@ import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Provider as ReduxProvider } from 'react-redux';
 import { SnackbarProvider } from 'notistack';
 import { store } from './store';
-import Counter from './features/counter/Counter';
 import NotifierComponent from './features/alerts/NotifierComponent';
 import DarkThemeProvider from './features/darkThemeProvider/DarkThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,12 +14,7 @@ import TinderChoose from './features/tinderChoose';
 import HomePage from './features/homePage';
 import RedirectIfNotLoggedIn from './features/auth/RedirectIfNotLoggedIn';
 import Search from './features/search/Search';
-
-/*
-const Container = (p: any) => (
-    <Box {...p} sx={{ ml: 8, mr: 8, width: '100%', ...p?.sx }} />
-);
-*/
+import SheltersAnimal from './features/shelter/animals/SheltersAnimal';
 
 function App() {
     return (
@@ -36,7 +30,6 @@ function App() {
                         <Container maxWidth="lg">
                             <Routes>
                                 <Route path="/" element={<HomePage />} />
-                                <Route path="/counter" element={<Counter />} />
                                 <Route
                                     path="/meet"
                                     element={
@@ -50,6 +43,14 @@ function App() {
                                     element={
                                         <RedirectIfNotLoggedIn>
                                             <Search />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/shelters_animal"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <SheltersAnimal />
                                         </RedirectIfNotLoggedIn>
                                     }
                                 />

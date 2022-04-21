@@ -1,9 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export enum UserType {
+    Normal = 'Normal',
+    Shelter = 'Shelter',
+    Admin = 'Admin',
+}
+
 export interface User {
     username: string;
     email: string;
     full_name: string;
+    user_type: UserType;
 }
 
 interface AuthState {

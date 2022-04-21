@@ -9,22 +9,17 @@ from django.dispatch import receiver
 # we need one-to-one link to exsiting User model
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user_prefs = models.OneToOneField("UserPrefs", null=True, on_delete=models.CASCADE)
-    shelter_prefs = models.OneToOneField(
-        "ShelterPrefs", null=True, on_delete=models.CASCADE
+    user_prefs = models.OneToOneField(
+        "UserPrefs", null=True, on_delete=models.CASCADE, blank=True
     )
-    NORMAL = "NO"
-    SHELTER = "SH"
-    ADMIN = "AD"
-    USER_TYPE_CHOICES = [(NORMAL, "Normal"), (SHELTER, "Shelter"), (ADMIN, "Admin")]
-    user_type = models.CharField(
-        max_length=2, choices=USER_TYPE_CHOICES, default=NORMAL
+    shelter_prefs = models.OneToOneField(
+        "ShelterPrefs", null=True, on_delete=models.CASCADE, blank=True
     )
 
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=Q(user_prefs__isnull=False) | Q(shelter_prefs__isnull=False),
+                check=Q(user_prefs__isnull=True) | Q(shelter_prefs__isnull=True),
                 name="either_user_prefs_or_shelter_prefs_must_not_be_null",
             )
         ]
@@ -103,6 +98,9 @@ class Animal(models.Model):
     male = models.BooleanField(null=False)
     likes_child = models.BooleanField(null=False)
     likes_other_animals = models.BooleanField(null=False)
+    shelter = models.ForeignKey(
+        ShelterPrefs, on_delete=models.DO_NOTHING, null=True, default=None
+    )
 
     # impl detail
     randomly_generated = models.BooleanField(null=False, default=False)

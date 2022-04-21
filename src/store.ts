@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { observe } from 'redux-observers';
-import { countReducer } from './features/counter/counterSlice';
 import { alertsReducer } from './features/alerts/alertsSlice';
 import { darkThemeProviderReducer } from './features/darkThemeProvider/darkThemeSlice';
 import { authReducer } from './features/auth/userSlice';
@@ -18,10 +17,13 @@ import {
     characterObserver,
 } from './features/characters/charcterSlice';
 import { sizeReducer, sizeObserver } from './features/size/sizeSlice';
+import {
+    shelterAnimalReducer,
+    shelterAnimalObserver,
+} from './features/shelter/animals/animalSlice';
 
 const store = configureStore({
     reducer: {
-        countReducer: countReducer,
         alertsReducer,
         darkThemeProviderReducer,
         authReducer,
@@ -30,6 +32,7 @@ const store = configureStore({
         specificAnimalKindReducer,
         characterReducer,
         sizeReducer,
+        shelterAnimalReducer,
     },
 });
 
@@ -43,4 +46,5 @@ observe(store, [
     specificAnimalKindObserver,
     characterObserver,
     sizeObserver,
+    shelterAnimalObserver,
 ]);

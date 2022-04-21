@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import { useDispatch } from 'react-redux';
-import { setUserTokenAuth } from './userSlice';
+import { setUserTokenAuth } from '../auth/userSlice';
 import { addAlert } from '../alerts/alertsSlice';
 import LoginDialog from './LoginDialog';
 import { getRequestMaker } from '../apiConnection';

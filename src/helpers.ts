@@ -84,6 +84,10 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
                 })
             );
 
+            console.error(
+                'Problem occured when fetching some data from reducer: ' + name
+            );
+
             return thunkApi.rejectWithValue(null);
         }
 
@@ -116,5 +120,6 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
         reducer: slice.reducer,
         actions: slice.actions,
         observer: makeObserverOnAuthed(fetch(), slice.actions.removeAll()),
+        fetchAction: fetch,
     };
 }

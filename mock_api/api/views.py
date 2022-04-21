@@ -122,6 +122,17 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
 
         return self.returnAndSetAnimal(user_prefs, animal)
 
+    @action(methods=["get"], detail=False, pagination_class=None)
+    def shelters(self, request):
+        return Response(
+            data=self.get_serializer(
+                Animal.objects.filter(
+                    shelter=self.request.user.profile.shelter_prefs
+                ).all(),
+                many=True,
+            ).data
+        )
+
     def returnAndSetAnimal(self, user_prefs: UserPrefs, animal: Animal):
         user_prefs.prev_animal = animal.id
         user_prefs.save()
