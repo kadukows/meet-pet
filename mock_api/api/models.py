@@ -45,6 +45,9 @@ class UserPrefs(models.Model):
     liked_colors = models.ManyToManyField("Color")
     liked_charactes = models.ManyToManyField("Character")
     liked_kinds = models.ManyToManyField("AnimalKind")
+    is_male = models.BooleanField(null=False, default=False)
+    likes_children = models.BooleanField(null=False, default=False)
+    likes_other_animals = models.BooleanField(null=False, default=False)
     prev_animal = models.IntegerField(null=True)
 
 

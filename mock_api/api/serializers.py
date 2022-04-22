@@ -54,6 +54,9 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             "liked_colors",
             "liked_charactes",
             "liked_kinds",
+            "is_male",
+            "likes_children",
+            "likes_other_animals",
         ]
 
 
