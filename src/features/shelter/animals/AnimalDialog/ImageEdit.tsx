@@ -13,7 +13,7 @@ import List from '@mui/material/List';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { styled } from '@mui/material/styles';
+import { styled, css } from '@mui/material/styles';
 import { TransitionGroup } from 'react-transition-group';
 
 import { Animal } from '../../../animal/animalSlice';
@@ -24,6 +24,7 @@ import styles from './ImageEdit.module.css';
 import { addAlert } from '../../../alerts/alertsSlice';
 import { shelterAnimalActions } from '../animalSlice';
 import { MarginedForm } from './utils';
+import AsyncButton from './AsyncButton';
 
 interface ImageEditProps {
     animal: Animal;
@@ -47,10 +48,13 @@ const ImageEdit = ({ animal }: ImageEditProps) => {
             </Typography>
             <List
                 sx={{
-                    display: 'grid',
-                    gridTemplateColumns: isSmall ? '1fr' : 'repeat(2, 1fr)',
-                    gridAutoRows: '192px',
-                    width: isSmall ? 'min(90%, 192px)' : '100%',
+                    //display: 'grid',
+                    //gridTemplateColumns: isSmall ? '1fr' : 'repeat(2, 1fr)',
+                    //gridAutoRows: '192px',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    width: isSmall ? '90%' : '100%',
                     gap: 1,
                     alignSelf: 'center',
                 }}
@@ -202,7 +206,7 @@ const MyImageListItem = ({ photo, animal, ...rest }: MyImageListItemProps) => {
     }, [photo.id, animal, setSelected]);
 
     return (
-        <MyCollapse {...rest} sx={{ width: '100%', height: '100%' }}>
+        <MyCollapse {...rest}>
             <ImageListItem
                 sx={{
                     width: '100%',
@@ -257,7 +261,7 @@ const MyImageListItem = ({ photo, animal, ...rest }: MyImageListItemProps) => {
                                     >
                                         Cancel
                                     </Button>
-                                    <Button
+                                    <AsyncButton
                                         variant="contained"
                                         color="error"
                                         sx={{
@@ -270,7 +274,7 @@ const MyImageListItem = ({ photo, animal, ...rest }: MyImageListItemProps) => {
                                         onClick={handleDelete}
                                     >
                                         Yes, I'm sure
-                                    </Button>
+                                    </AsyncButton>
                                 </Box>
                             </Slide>
                             <Slide
@@ -298,12 +302,24 @@ const MyImageListItem = ({ photo, animal, ...rest }: MyImageListItemProps) => {
     );
 };
 
-const MyCollapse = styled(Collapse)`
-    .MuiCollapse-wrapper {
-        height: 100%;
-    }
+const MyCollapse = styled(Collapse)(
+    ({ theme }) => css`
+        .MuiCollapse-wrapper {
+            height: 100%;
+        }
 
-    .MuiCollapse-wrapperInner {
-        height: 100%;
-    }
-`;
+        .MuiCollapse-wrapperInner {
+            height: 100%;
+        }
+
+        ${theme.breakpoints.down('sm')} {
+            width: 95%;
+        }
+
+        ${theme.breakpoints.up('sm')} {
+            width: 49%;
+        }
+
+        aspect-ratio: 1/1;
+    `
+);

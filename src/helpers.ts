@@ -137,3 +137,9 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
         fetchAction: fetch,
     };
 }
+
+export const sleep = (ms: number) => {
+    return new Promise<null>((accept, reject) =>
+        setTimeout(() => accept(null), ms)
+    );
+};

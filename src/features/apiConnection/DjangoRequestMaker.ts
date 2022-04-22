@@ -6,6 +6,7 @@ import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
 import { UserType } from '../auth/userSlice';
+import { sleep } from '../../helpers';
 
 const DjangoRequestMaker: IRequestMaker = {
     getToken: async (username, password) => {
@@ -256,12 +257,6 @@ const makeAuthHeader = (token: string) => ({
         Authorization: `Bearer ${token}`,
     },
 });
-
-const sleep = (ms: number) => {
-    return new Promise<null>((accept, reject) =>
-        setTimeout(() => accept(null), ms)
-    );
-};
 
 export { DjangoRequestMaker };
 
