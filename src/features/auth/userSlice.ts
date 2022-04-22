@@ -1,14 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export interface UserPreferences {
+    has_garden?: boolean | null;
+    animal_kind?: number[];
+    specific_animal_kind?: number[];
+    colors?: number[];
+    characters?: number[];
+    size?: number[];
+    ////
+    male?: boolean | null;
+    likes_children?: boolean | null;
+    likes_other_animals?: boolean | null;
+}
+
 export interface User {
     username: string;
     email: string;
     full_name: string;
-    liked_kinds: number[];
-    liked_specific_kinds: number[];
-    liked_colors: number[];
-    liked_characters: number[];
-    liked_sizes: number[];
+    preferences?: UserPreferences;
 }
 
 interface AuthState {

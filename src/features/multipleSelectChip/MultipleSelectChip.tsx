@@ -49,6 +49,7 @@ const MultipleSelectChip = (props: Props) => {
             sx={props.sx}
             label={props.label}
             name={props.name}
+            fullWidth={true}
             value={props.formik.values[props.name]}
             onChange={
                 props.onChange ? props.onChange : props.formik.handleChange

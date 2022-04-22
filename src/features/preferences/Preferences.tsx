@@ -18,40 +18,75 @@ import Loader from '../loader/Loader';
 import Button from '@mui/material/Button';
 import { specificAnimalKindSelectors } from '../specificAnimalKind/specificAnimalKindSlice';
 import { animalKindSelectors } from '../animalKind/animaKindSlice';
+import TernaryField, {
+    Ternary,
+    translateTernary,
+} from '../search/TernaryField';
+import { UserPreferencesResponse } from '../apiConnection/IRequestMaker';
+import { UserPreferences } from '../auth/userSlice';
+import { getRequestMaker } from '../apiConnection';
 
 interface Props {}
 
 const Preferences = (props: Props) => {
-    const width = '75%';
-    const height = '100%';
-
+    const token = useSelector((state: RootState) => state.authReducer.token);
     const formik: any = useFormik({
         initialValues: {
             animal_kinds:
                 useSelector(
-                    (state: RootState) => state.authReducer.user?.liked_kinds
+                    (state: RootState) =>
+                        state.authReducer.user?.preferences?.animal_kind
                 ) ?? [],
             specific_animal_kinds:
                 useSelector(
                     (state: RootState) =>
                         //TODO: When animal kind changed, do not display the initial liked_specific_kind
-                        state.authReducer.user?.liked_specific_kinds
+                        state.authReducer.user?.preferences
+                            ?.specific_animal_kind
                 ) ?? [],
             colors:
                 useSelector(
-                    (state: RootState) => state.authReducer.user?.liked_colors
+                    (state: RootState) =>
+                        state.authReducer.user?.preferences?.colors
                 ) ?? [],
             characters:
                 useSelector(
                     (state: RootState) =>
-                        state.authReducer.user?.liked_characters
+                        state.authReducer.user?.preferences?.characters
                 ) ?? [],
             size:
                 useSelector(
-                    (state: RootState) => state.authReducer.user?.liked_sizes
+                    (state: RootState) =>
+                        state.authReducer.user?.preferences?.size
                 ) ?? [],
+
+            male: useSelector(
+                (state: RootState) => state.authReducer.user?.preferences?.male
+            ),
+            likes_children: useSelector(
+                (state: RootState) =>
+                    state.authReducer.user?.preferences?.likes_children
+            ),
+            likes_other_animals: useSelector(
+                (state: RootState) =>
+                    state.authReducer.user?.preferences?.likes_other_animals
+            ),
         },
-        onSubmit: (values) => alert(JSON.stringify(values, null, 2)),
+        onSubmit: (values) => {
+            alert(JSON.stringify(values, null, 2));
+            const result: UserPreferences = {
+                animal_kind: values.animal_kinds,
+                specific_animal_kind: values.specific_animal_kinds,
+                characters: values.characters,
+                colors: values.colors,
+                size: values.size,
+                male: values.male,
+                likes_children: values.likes_children,
+                likes_other_animals: values.likes_other_animals,
+            };
+
+            getRequestMaker().setUserAnimalPreferences(token as string, result);
+        },
     });
 
     const specificAnimalKindSelectorObjects = React.useCallback(
@@ -74,69 +109,85 @@ const Preferences = (props: Props) => {
                 <Box
                     sx={{
                         display: 'flex',
-                        justifyContent: 'space-around',
-                        alignItems: 'center',
-                        alignContent: 'center',
-                        flexDirection: 'column',
+                        justifyContent: 'center',
                     }}
                 >
-                    <h1>Change your preferences for the dreamed animal:</h1>
-                    <MultipleSelectChip
-                        sx={{ mt: 3, width: width, height: height }}
-                        name="animal_kinds"
-                        label="Animal Kind"
-                        formik={formik}
-                        selectorAll={animalKindSelectors.selectEntities}
-                        selectObjects={animalKindSelectors.selectAll}
-                    />
-
-                    {formik.values.animal_kinds.length > 0 && (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            alignContent: 'center',
+                            flexDirection: 'column',
+                            gap: 3,
+                            width: '75%',
+                        }}
+                    >
+                        <h1>Change your preferences for the dreamed animal:</h1>
                         <MultipleSelectChip
-                            sx={{ mt: 3, width: width, height: height }}
-                            name="specific_animal_kinds"
-                            label="Specific Animal Kind"
+                            name="animal_kinds"
+                            label="Animal Kind"
+                            formik={formik}
+                            selectorAll={animalKindSelectors.selectEntities}
+                            selectObjects={animalKindSelectors.selectAll}
+                        />
+
+                        {formik.values.animal_kinds.length > 0 && (
+                            <MultipleSelectChip
+                                name="specific_animal_kinds"
+                                label="Specific Animal Kind"
+                                formik={formik}
+                                selectorAll={(state: RootState) =>
+                                    state.specificAnimalKindReducer.entities
+                                }
+                                selectObjects={
+                                    specificAnimalKindSelectorObjects
+                                }
+                            />
+                        )}
+
+                        <MultipleSelectChip
+                            name="colors"
+                            label="Colors"
                             formik={formik}
                             selectorAll={(state: RootState) =>
-                                state.specificAnimalKindReducer.entities
+                                state.colorReducer.entities
                             }
-                            selectObjects={specificAnimalKindSelectorObjects}
                         />
-                    )}
-
-                    <MultipleSelectChip
-                        sx={{ mt: 3, width: width, height: height }}
-                        name="colors"
-                        label="Colors"
-                        formik={formik}
-                        selectorAll={(state: RootState) =>
-                            state.colorReducer.entities
-                        }
-                    />
-                    <MultipleSelectChip
-                        sx={{ mt: 3, width: width, height: height }}
-                        name="characters"
-                        label="Characters"
-                        formik={formik}
-                        selectorAll={(state: RootState) =>
-                            state.characterReducer.entities
-                        }
-                    />
-                    <MultipleSelectChip
-                        sx={{ mt: 3, width: width, height: height }}
-                        name="size"
-                        label="Size"
-                        formik={formik}
-                        selectorAll={(state: RootState) =>
-                            state.sizeReducer.entities
-                        }
-                    />
-                    <Button
-                        sx={{ mt: 3, width: width, height: height }}
-                        variant="contained"
-                        type="submit"
-                    >
-                        Request!
-                    </Button>
+                        <MultipleSelectChip
+                            name="characters"
+                            label="Characters"
+                            formik={formik}
+                            selectorAll={(state: RootState) =>
+                                state.characterReducer.entities
+                            }
+                        />
+                        <MultipleSelectChip
+                            name="size"
+                            label="Size"
+                            formik={formik}
+                            selectorAll={(state: RootState) =>
+                                state.sizeReducer.entities
+                            }
+                        />
+                        <TernaryField
+                            name="male"
+                            label="Male?"
+                            formik={formik}
+                        />
+                        <TernaryField
+                            name="likes_children"
+                            label="Likes children?"
+                            formik={formik}
+                        />
+                        <TernaryField
+                            name="likes_other_animals"
+                            label="Likes other animals?"
+                            formik={formik}
+                        />
+                        <Button variant="contained" type="submit">
+                            Request!
+                        </Button>
+                    </Box>
                 </Box>
             </form>
         </React.Fragment>

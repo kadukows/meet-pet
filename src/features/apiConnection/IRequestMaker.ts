@@ -1,5 +1,5 @@
 import { AnimalKind } from '../animalKind/animaKindSlice';
-import { User } from '../auth/userSlice';
+import { User, UserPreferences } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
@@ -29,11 +29,29 @@ interface IRequestMaker {
         token: string,
         animal_query_params: AnimalQueryParams
     ) => Promise<PaginatedResponse<Animal> | null>;
+
+    setUserAnimalPreferences: (
+        token: string,
+        user_animal_prefs: UserPreferences
+    ) => null;
 }
 
 export type { IRequestMaker };
 
 ////////////////////////
+
+export interface UserPreferencesResponse {
+    has_garden: boolean;
+    location: string;
+    liked_kinds: number[];
+    liked_specific_kinds: number[];
+    liked_colors: number[];
+    liked_charactes: number[];
+    liked_sizes: number[];
+    is_male: boolean;
+    likes_children: boolean;
+    likes_other_animals: boolean;
+}
 
 export interface AnimalQueryParams {
     characters?: number[];
