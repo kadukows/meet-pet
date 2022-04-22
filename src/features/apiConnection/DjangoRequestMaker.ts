@@ -205,8 +205,9 @@ const DjangoRequestMaker: IRequestMaker = {
         };
 
         try {
-            axios.post<UserPreferencesResponse>(
+            axios.post(
                 '/api/preferences/',
+                JSON.stringify(prefs),
                 makeAuthHeader(token)
             );
         } catch (e) {}
