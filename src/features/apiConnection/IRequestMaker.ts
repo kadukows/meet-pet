@@ -41,6 +41,7 @@ interface IRequestMaker {
             token: string,
             formData: FormData
         ) => Promise<Photo | null>;
+        deletePhoto: (token: string, photo_id: number) => Promise<true | null>;
     };
 }
 

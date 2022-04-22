@@ -234,6 +234,20 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return null;
         },
+
+        deletePhoto: async (token, photo_id) => {
+            try {
+                const res = await axios.delete(
+                    `/api/my_photos/${photo_id}/`,
+                    makeAuthHeader(token)
+                );
+                return true;
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
     },
 };
 
