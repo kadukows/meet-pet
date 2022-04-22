@@ -11,9 +11,8 @@ import Chip from '@mui/material/Chip';
 import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { Color } from '../colors/colorSlice';
+import { Color, colorSelectors } from '../colors/colorSlice';
 import { useFormik } from 'formik';
-import MultipleSelectChip from '../multipleSelectChip/MultipleSelectChip';
 import Loader from '../loader/Loader';
 import Button from '@mui/material/Button';
 import { specificAnimalKindSelectors } from '../specificAnimalKind/specificAnimalKindSlice';
@@ -21,10 +20,13 @@ import { animalKindSelectors } from '../animalKind/animaKindSlice';
 import TernaryField, {
     Ternary,
     translateTernary,
-} from '../search/TernaryField';
+} from '../selectFields/TernaryField';
 import { UserPreferencesResponse } from '../apiConnection/IRequestMaker';
 import { UserPreferences } from '../auth/userSlice';
 import { getRequestMaker } from '../apiConnection';
+import MultipleSelectField from '../selectFields/MultipleSelectField';
+import { characterSelectors } from '../characters/charcterSlice';
+import { sizeSelectors } from '../size/sizeSlice';
 
 interface Props {}
 
@@ -99,10 +101,6 @@ const Preferences = (props: Props) => {
         [formik.values.animal_kinds]
     );
 
-    //is_male: boolean;
-    //likes_child: boolean;
-    //likes_other_animals: boolean;
-
     return (
         <React.Fragment>
             <form onSubmit={formik.handleSubmit}>
@@ -123,51 +121,48 @@ const Preferences = (props: Props) => {
                         }}
                     >
                         <h1>Change your preferences for the dreamed animal:</h1>
-                        <MultipleSelectChip
+                        <MultipleSelectField
                             name="animal_kinds"
                             label="Animal Kind"
                             formik={formik}
-                            selectorAll={animalKindSelectors.selectEntities}
-                            selectObjects={animalKindSelectors.selectAll}
+                            selectAll={animalKindSelectors.selectAll}
+                            selectEntities={animalKindSelectors.selectEntities}
                         />
 
                         {formik.values.animal_kinds.length > 0 && (
-                            <MultipleSelectChip
+                            <MultipleSelectField
                                 name="specific_animal_kinds"
                                 label="Specific Animal Kind"
                                 formik={formik}
-                                selectorAll={(state: RootState) =>
-                                    state.specificAnimalKindReducer.entities
+                                selectAll={
+                                    specificAnimalKindSelectors.selectAll
                                 }
-                                selectObjects={
-                                    specificAnimalKindSelectorObjects
+                                selectEntities={
+                                    specificAnimalKindSelectors.selectEntities
                                 }
                             />
                         )}
 
-                        <MultipleSelectChip
+                        <MultipleSelectField
                             name="colors"
                             label="Colors"
                             formik={formik}
-                            selectorAll={(state: RootState) =>
-                                state.colorReducer.entities
-                            }
+                            selectAll={colorSelectors.selectAll}
+                            selectEntities={colorSelectors.selectEntities}
                         />
-                        <MultipleSelectChip
+                        <MultipleSelectField
                             name="characters"
                             label="Characters"
                             formik={formik}
-                            selectorAll={(state: RootState) =>
-                                state.characterReducer.entities
-                            }
+                            selectAll={characterSelectors.selectAll}
+                            selectEntities={characterSelectors.selectEntities}
                         />
-                        <MultipleSelectChip
+                        <MultipleSelectField
                             name="size"
                             label="Size"
                             formik={formik}
-                            selectorAll={(state: RootState) =>
-                                state.sizeReducer.entities
-                            }
+                            selectAll={sizeSelectors.selectAll}
+                            selectEntities={sizeSelectors.selectEntities}
                         />
                         <TernaryField
                             name="male"

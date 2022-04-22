@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import MultipleSelectField from './MultipleSelectField';
+import MultipleSelectField from '../selectFields/MultipleSelectField';
 import { animalKindSelectors } from '../animalKind/animaKindSlice';
 import { RootState } from '../../store';
 import {
@@ -14,7 +14,10 @@ import { characterSelectors } from '../characters/charcterSlice';
 import { colorSelectors } from '../colors/colorSlice';
 import { sizeSelectors } from '../size/sizeSlice';
 import { styled } from '@mui/system';
-import TernaryField, { Ternary, translateTernary } from './TernaryField';
+import TernaryField, {
+    Ternary,
+    translateTernary,
+} from '../selectFields/TernaryField';
 import { AnimalQueryParams } from '../apiConnection/IRequestMaker';
 
 type Props = {
