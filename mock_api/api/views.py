@@ -16,6 +16,7 @@ from django_filters import rest_framework as filters
 from api.serializers import (
     AnimalKindSerializer,
     AnimalSerializer,
+    AnimalWriteSerializer,
     CharacterSerializer,
     ColorSerializer,
     PhotoSerializer,
@@ -94,11 +95,23 @@ class MyPagination(pagination.LimitOffsetPagination):
 
 
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
-    serializer_class = AnimalSerializer
+    # serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
     filterset_class = AnimalFilter
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
+
+    def get_serializer_class(self):
+        """
+        if self.action == "list" or self.action == "next" or self.action == "shelters":
+            return AnimalSerializer
+
+        return AnimalWriteSerializer
+        """
+        if self.action == "create" or self.action == "update":
+            return AnimalWriteSerializer
+
+        return AnimalSerializer
 
     @action(methods=["post"], detail=False, serializer_class=serializers.Serializer)
     def next(self, request):

@@ -5,6 +5,7 @@ import {
     GridRowParams,
     GridActionsCellItem,
     GridActionsColDef,
+    GridValueGetterParams,
 } from '@mui/x-data-grid';
 import { useSelector } from 'react-redux';
 import { shelterAnimalSelectors } from './animalSlice';
@@ -35,11 +36,16 @@ const AnimalDataGrid = (props: Props) => {
                 field: 'specific_animal_kind',
                 headerName: 'Breed',
                 flex: 3,
+                valueGetter: (params: GridValueGetterParams<Animal>) =>
+                    params.row.specific_animal_kind.value,
             },
             {
                 field: 'animal_kind',
                 headerName: 'Kind',
                 flex: 1,
+                valueGetter: (params: GridValueGetterParams<Animal>) =>
+                    (params.row as Animal).specific_animal_kind.animal_kind
+                        .value,
             },
             {
                 field: 'actions',

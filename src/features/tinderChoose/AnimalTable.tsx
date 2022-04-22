@@ -31,7 +31,7 @@ const AnimalTable = ({ animal }: Props) => {
                         </TableCell>
                         <TableCell>
                             <Typography>
-                                {animal.specific_animal_kind}
+                                {animal.specific_animal_kind.value}
                             </Typography>
                         </TableCell>
                     </DenseTableRow>

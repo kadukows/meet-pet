@@ -1,0 +1,10 @@
+@keyframes appear {
+    from {box-shadow: none;}
+    to {box-shadow: 0px 0px 5px 4px #ff002fac;}
+}
+
+.redSelectedImage {
+    animation-name: appear;
+    animation-duration: 0.5s;
+    box-shadow: 0px 0px 5px 4px #ff002fac;
+}

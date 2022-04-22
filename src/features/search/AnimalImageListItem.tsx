@@ -15,10 +15,10 @@ type Props = {
 const AnimalImageListItem = ({ animal }: Props) => {
     return (
         <ImageListItem sx={{ height: '100%', width: '100%' }}>
-            <Img src={animal.photo_urls[0]} alt={animal.name} loading="lazy" />
+            <Img src={animal.photos[0].url} alt={animal.name} loading="lazy" />
             <ImageListItemBar
                 title={animal.name}
-                subtitle={animal.description.slice(0, 14).concat('...')}
+                subtitle={animal.description.slice(0, 28).concat('...')}
                 actionIcon={
                     <IconButton sx={{ color: 'rgba(255, 255, 255, 0.54)' }}>
                         <InfoIcon />
@@ -33,7 +33,7 @@ export default AnimalImageListItem;
 
 //////////////
 
-const Img = styled('img')`
+export const Img = styled('img')`
     height: 100%;
     width: 100%;
     object-fit: cover;

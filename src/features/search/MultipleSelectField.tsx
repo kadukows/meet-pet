@@ -38,6 +38,8 @@ const MultipleSelectField = ({
                 multiple: true,
             }}
             fullWidth
+            error={formik.touched[name] && Boolean(formik.errors[name])}
+            helperText={formik.touched[name] && formik.errors[name]}
         >
             {objects.map((o) => (
                 <MenuItem key={o.id} value={o.id}>

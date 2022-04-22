@@ -5,7 +5,7 @@ import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
-import { User, UserType } from '../auth/userSlice';
+import { UserType } from '../auth/userSlice';
 
 const DjangoRequestMaker: IRequestMaker = {
     getToken: async (username, password) => {
@@ -182,7 +182,55 @@ const DjangoRequestMaker: IRequestMaker = {
                 );
 
                 return res.data.map(transformAnimal);
+            } catch (e) {
+                console.error('Siema', e);
+            }
+
+            return null;
+        },
+
+        updateAnimal: async (token, animal) => {
+            try {
+                const animalRequest = { ...animal, id: undefined };
+
+                console.log(animalRequest);
+
+                const res = await axios.put<{ id: number }>(
+                    `/api/animals/${animal.id}/`,
+                    animal,
+                    makeAuthHeader(token)
+                );
+
+                const animalRes = await axios.get<AnimalResponse>(
+                    `/api/animals/${res.data.id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return transformAnimal(animalRes.data);
             } catch (e) {}
+
+            return null;
+        },
+
+        uploadPhoto: async (token: string, formData: FormData) => {
+            try {
+                interface PhotoResponse {
+                    id: number;
+                    animal: number;
+                    image_url: string;
+                }
+
+                const res = await axios.post<PhotoResponse>(
+                    '/api/my_photos/',
+                    formData,
+                    makeAuthHeader(token)
+                );
+
+                const { id, animal, image_url } = res.data;
+                return { id, animal, url: image_url };
+            } catch (e) {
+                console.error(e);
+            }
 
             return null;
         },
@@ -215,13 +263,13 @@ interface AnimalResponse {
         };
     };
     description: string;
-    characters: Array<{ value: string }>;
-    colors: Array<{ value: string }>;
-    size: { value: string };
+    characters: Array<{ id: number; value: string }>;
+    colors: Array<{ id: number; value: string }>;
+    size: { id: number; value: string };
     male: boolean;
     likes_child: boolean;
     likes_other_animals: boolean;
-    photos: Array<{ image_url: string }>;
+    photos: Array<{ id: number; image_url: string }>;
 }
 
 interface PaginatedResponse<T> {
@@ -250,15 +298,19 @@ function transformAnimal(res: AnimalResponse): Animal {
         id,
         name,
         description,
-        specific_animal_kind: specific_animal_kind.value,
-        animal_kind: specific_animal_kind.animal_kind.value,
-        characters: characters.map((el) => el.value),
-        colors: colors.map((el) => el.value),
-        size: size.value,
+        specific_animal_kind: specific_animal_kind,
+        characters,
+        colors,
+        size,
         is_male: male,
         likes_child,
         likes_other_animals,
-        photo_urls: photos.map((el) => el.image_url),
+        //photo_urls: photos.map((el) => el.image_url),
+        //photos,
+        photos: photos.map((p) => ({
+            id: p.id,
+            url: p.image_url,
+        })),
     };
 }
 
@@ -320,19 +372,4 @@ const parseAnimalQueryParams = (q: AnimalQueryParams) => {
     }
 
     return result;
-};
-
-const translateUserType = (res_user_type: 'SH' | 'NO' | 'AD'): UserType => {
-    switch (res_user_type) {
-        case 'NO':
-            return UserType.Normal;
-        case 'SH':
-            return UserType.Shelter;
-        case 'AD':
-            return UserType.Admin;
-        default:
-            break;
-    }
-
-    return UserType.Normal;
 };

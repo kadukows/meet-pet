@@ -5,8 +5,10 @@ import {
     createEntityAdapter,
     createSlice,
     EntityAdapter,
+    EntityId,
     EntityState,
     PayloadAction,
+    Update,
 } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/internal';
 import { observer } from 'redux-observers';
@@ -104,6 +106,18 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
             ) => void,
             removeAll: adapter.removeAll as (
                 d: WritableDraft<typeof initialState>
+            ) => void,
+            updateOne: adapter.updateOne as (
+                d: WritableDraft<typeof initialState>,
+                a: PayloadAction<Update<T>>
+            ) => void,
+            addOne: adapter.addOne as (
+                d: WritableDraft<typeof initialState>,
+                a: PayloadAction<T>
+            ) => void,
+            removeOne: adapter.removeOne as (
+                d: WritableDraft<typeof initialState>,
+                a: PayloadAction<EntityId>
             ) => void,
         },
         extraReducers: (builder) => {

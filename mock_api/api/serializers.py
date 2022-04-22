@@ -108,20 +108,14 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ["id", "file", "image_url"]
-        read_only = ["id", "file", "image_url"]
+        fields = ["id", "file", "animal", "image_url"]
+        read_only = ["id", "image_url"]
 
     def get_image_url(self, obj):
         return obj.file.url
 
 
-class AnimalSerializer(serializers.ModelSerializer):
-    specific_animal_kind = SpecificAnimalKindSerializer(read_only=True)
-    characters = CharacterSerializer(read_only=True, many=True)
-    colors = ColorSerializer(read_only=True, many=True)
-    size = SizeSerializer(read_only=True)
-    photos = PhotoSerializer(read_only=True, many=True)
-
+class AnimalWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
         fields = [
@@ -135,6 +129,18 @@ class AnimalSerializer(serializers.ModelSerializer):
             "male",
             "likes_child",
             "likes_other_animals",
-            "photos",
         ]
+        read_only = ["id"]
+
+
+class AnimalSerializer(serializers.ModelSerializer):
+    specific_animal_kind = SpecificAnimalKindSerializer(read_only=True)
+    characters = CharacterSerializer(read_only=True, many=True)
+    colors = ColorSerializer(read_only=True, many=True)
+    size = SizeSerializer(read_only=True)
+    photos = PhotoSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Animal
+        fields = [*AnimalWriteSerializer.Meta.fields, "photos"]
         read_only = ["id"]

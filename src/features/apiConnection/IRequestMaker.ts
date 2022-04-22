@@ -33,6 +33,14 @@ interface IRequestMaker {
     // shelters things
     shelter: {
         getOwnAnimals: (token: string) => Promise<Animal[] | null>;
+        updateAnimal: (
+            token: string,
+            animal: AnimalUpdate
+        ) => Promise<Animal | null>;
+        uploadPhoto: (
+            token: string,
+            formData: FormData
+        ) => Promise<Photo | null>;
     };
 }
 
@@ -58,4 +66,23 @@ export interface AnimalQueryParams {
 interface PaginatedResponse<T> {
     count: number;
     results: T[];
+}
+
+export interface AnimalUpdate {
+    id: number;
+    name: string;
+    specific_animal_kind: number;
+    description: string;
+    characters: number[];
+    colors: number[];
+    size: number;
+    male: boolean;
+    likes_child: boolean;
+    likes_other_animals: boolean;
+}
+
+export interface Photo {
+    id: number;
+    animal: number;
+    url: string;
 }

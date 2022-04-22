@@ -14,9 +14,9 @@ const AnimalCarousel = ({ animal }: Props) => {
             sx={{ width: '100%', height: '100%' }}
             height={'calc(100% - 30px)'}
         >
-            {animal.photo_urls.map((el) => (
+            {animal.photos.map((el) => (
                 <Box
-                    key={el}
+                    key={el.id}
                     sx={{
                         width: '100%',
                         height: '100%',
@@ -38,7 +38,7 @@ const AnimalCarousel = ({ animal }: Props) => {
                                 width: '100%',
                             }}
                             component="img"
-                            src={el}
+                            src={el.url}
                         />
                     </Box>
                     <Box
@@ -58,7 +58,7 @@ const AnimalCarousel = ({ animal }: Props) => {
                                 filter: 'blur(15px) saturate(50%)',
                             }}
                             component="img"
-                            src={el}
+                            src={el.url}
                         />
                     </Box>
                 </Box>

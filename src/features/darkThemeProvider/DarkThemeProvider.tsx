@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { createTheme, ThemeProvider, ThemeOptions } from '@mui/material/styles';
+import { grey } from '@mui/material/colors';
 
 import { RootState } from '../../store';
 
@@ -15,6 +16,10 @@ const DarkThemeProvider = ({ children }: React.PropsWithChildren<Props>) => {
         const theme: ThemeOptions = {
             palette: {
                 mode: darkMode ? 'dark' : 'light',
+                neutral: {
+                    main: '#64748B',
+                    contrastText: '#fff',
+                },
             },
         };
 
@@ -25,3 +30,14 @@ const DarkThemeProvider = ({ children }: React.PropsWithChildren<Props>) => {
 };
 
 export default DarkThemeProvider;
+
+////////////////////////
+
+declare module '@mui/material/styles' {
+    interface Palette {
+        neutral: Palette['primary'];
+    }
+    interface PaletteOptions {
+        neutral: PaletteOptions['primary'];
+    }
+}
