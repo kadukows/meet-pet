@@ -1,11 +1,21 @@
 import React from 'react';
+
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import AnimalDataGrid from './AnimalDataGrid';
-import AnimalDialog from './AnimalDialog';
-import EventProvider from '../../events/EventProvider';
+import Typography from '@mui/material/Typography';
+import Button, { ButtonProps } from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+
+import AnimalDataGrid from './AnimalDataGrid';
+import EventProvider, { useSignal } from '../../events/EventProvider';
+import {
+    AnimalUpdateDialog,
+    AddAnimalDialog,
+    AnimalDeleteDialog,
+    SlotTypes,
+    SlotTypesToCallbacks,
+} from './AnimalDialog';
 
 type Props = {};
 
@@ -24,11 +34,28 @@ const SheltersAnimal = (props: Props) => {
                     <React.Fragment />
                 )}
                 <Box sx={{ flex: 1, height: '100%' }}>
-                    <Paper sx={{ height: '100%', p: 3 }}>
+                    <Paper
+                        sx={{
+                            height: '100%',
+                            p: 3,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2,
+                        }}
+                    >
+                        <Box sx={{ display: 'flex' }}>
+                            <Typography variant="h5" component="h5">
+                                Animals in shelter
+                            </Typography>
+                            <Box sx={{ flex: 1 }} />
+                            <CreateButton variant="contained">Add</CreateButton>
+                        </Box>
                         <AnimalDataGrid />
                     </Paper>
                 </Box>
-                <AnimalDialog />
+                <AnimalUpdateDialog />
+                <AddAnimalDialog />
+                <AnimalDeleteDialog />
             </Box>
         </EventProvider>
     );
@@ -37,3 +64,10 @@ const SheltersAnimal = (props: Props) => {
 export default SheltersAnimal;
 
 //////////////////////////////
+
+const CreateButton = (props: ButtonProps) => {
+    const createAnimalSignal: SlotTypesToCallbacks[SlotTypes.CreateAnimal] =
+        useSignal(SlotTypes.CreateAnimal);
+
+    return <Button {...props} onClick={createAnimalSignal} />;
+};

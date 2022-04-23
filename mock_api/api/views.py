@@ -36,6 +36,7 @@ from api.models import (
     UserPrefs,
 )
 from api.filters import AnimalFilter
+from api.permissions import ShelterPermission
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -95,11 +96,19 @@ class MyPagination(pagination.LimitOffsetPagination):
 
 
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
-    # serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
     filterset_class = AnimalFilter
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
+
+    list_permissions = [permissions.IsAuthenticated()]
+    edit_permissions = [ShelterPermission()]
+
+    def get_permissions(self):
+        if self.action == "list" or self.action == "retrieve":
+            return self.list_permissions
+
+        return self.edit_permissions
 
     def get_serializer_class(self):
         """

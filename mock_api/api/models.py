@@ -16,6 +16,15 @@ class Profile(models.Model):
         "ShelterPrefs", null=True, on_delete=models.CASCADE, blank=True
     )
 
+    def is_normal_user(self):
+        return self.user_prefs != None
+
+    def is_shelter(self):
+        return self.shelter_prefs != None
+
+    def is_admin(self):
+        return self.user_prefs == None and self.shelter_prefs == None
+
     class Meta:
         constraints = [
             models.CheckConstraint(

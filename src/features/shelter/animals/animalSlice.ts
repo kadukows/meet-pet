@@ -29,3 +29,5 @@ export const shelterAnimalObserver = observer(
         }
     }
 );
+
+export type { Animal };

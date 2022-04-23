@@ -83,14 +83,16 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user: User = User.objects.create(username=validated_data["username"])
         user.set_password(validated_data["password"])
+        user.save()
+        """
         profile = Profile.objects.create(
             user=user,
             user_prefs=UserPrefs.objects.create(
                 has_garden=False, location="51.1161764981763, 17.037053837245473"
             ),
         )
-        user.save()
         profile.save()
+        """
         return user
 
 
@@ -116,6 +118,22 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 
 class AnimalWriteSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        shelter = self.context["request"].user.profile.shelter_prefs
+        assert shelter is not None
+
+        characters = validated_data.pop("characters")
+        colors = validated_data.pop("colors")
+
+        animal = Animal.objects.create(shelter=shelter, **validated_data)
+        animal.save()
+
+        animal.characters.set(characters)
+        animal.colors.set(colors)
+        animal.save()
+
+        return animal
+
     class Meta:
         model = Animal
         fields = [

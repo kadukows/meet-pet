@@ -1,44 +1,39 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TextField, { TextFieldProps } from '@mui/material/TextField';
+import { useSelector } from 'react-redux';
+
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import FormGroup from '@mui/material/FormGroup';
 import Grid from '@mui/material/Grid';
-import { useFormik } from 'formik';
-import * as yup from 'yup';
+
 import { Animal } from '../../../animal/animalSlice';
 import { useSlot } from '../../../events/EventProvider';
-import MultipleSelectField from '../../../search/MultipleSelectField';
-import ControlledCheckbox from './ControlledCheckbox';
-import { useSelector } from 'react-redux';
-import { specificAnimalKindSelectors } from '../../../specificAnimalKind/specificAnimalKindSlice';
-import { characterSelectors } from '../../../characters/charcterSlice';
-import { colorSelectors } from '../../../colors/colorSlice';
-import { sizeSelectors } from '../../../size/sizeSlice';
-import { getRequestMaker } from '../../../apiConnection';
 import { RootState, store } from '../../../../store';
-import { addAlert } from '../../../alerts/alertsSlice';
 import { shelterAnimalActions, shelterAnimalSelectors } from '../animalSlice';
-
-import { MarginedForm } from './utils';
 import ImageEdit from './ImageEdit';
+import { AnimalUpdateForm, AnimalAddForm } from './AnimalForm';
+import { addAlert } from '../../../alerts/alertsSlice';
+import { getRequestMaker } from '../../../apiConnection';
+import AsyncButton from './AsyncButton';
 
 type Props = {};
 
 export enum SlotTypes {
+    CreateAnimal = 'CreateAnimal',
     EditAnimal = 'EditAnimal',
+    DeleteAnimal = 'DeleteAnimal',
 }
 
 export type SlotTypesToCallbacks = {
     [SlotTypes.EditAnimal]: (animal: Animal) => void;
+    [SlotTypes.CreateAnimal]: () => void;
+    [SlotTypes.DeleteAnimal]: (animal: Animal) => void;
 };
 
-const AnimalDialog = (props: Props) => {
+export const AnimalUpdateDialog = () => {
     const [animalId, setAnimalId] = React.useState<number | null>(null);
     const animal = useSelector(
         animalId !== null
@@ -104,226 +99,98 @@ const AnimalDialog = (props: Props) => {
     );
 };
 
-const EDIT_ANIMAL_FORM = 'editAnimalForm';
+export const AnimalDeleteDialog = () => {
+    const [open, setOpen] = React.useState(false);
+    const [animal, setAnimal] = React.useState<Animal | null>(null);
 
-export default AnimalDialog;
-
-///////////////////////
-
-interface AnimalUpdateFormProps {
-    animal: Animal;
-    formId: string;
-    dialogActionsRef: React.RefObject<Element>;
-    onSuccesfulSubmit?: () => void;
-}
-
-const AnimalUpdateForm = ({
-    animal,
-    formId,
-    dialogActionsRef,
-    onSuccesfulSubmit,
-}: AnimalUpdateFormProps) => {
-    const formik = useFormik({
-        initialValues: {
-            name: animal.name,
-            description: animal.description,
-            specific_animal_kind: animal.specific_animal_kind.id,
-            characters: animal.characters.map((ch) => ch.id),
-            colors: animal.colors.map((c) => c.id),
-            size: animal.size.id,
-            male: animal.is_male,
-            likes_child: animal.likes_child,
-            likes_other_animals: animal.likes_other_animals,
+    const slotCallback = React.useCallback(
+        (animal) => {
+            setAnimal(animal);
+            setOpen(true);
         },
-        validationSchema,
-        onSubmit: async (values) => {
-            const animalResponse = await getRequestMaker().shelter.updateAnimal(
-                store.getState().authReducer.token as string,
-                { id: animal.id, ...values }
-            );
-
-            if (animalResponse !== null) {
-                store.dispatch(
-                    addAlert({
-                        type: 'success',
-                        message: `${animalResponse.name} successfully updated!`,
-                    })
-                );
-
-                const updateAnimal = {
-                    id: animalResponse.id,
-                    changes: animalResponse,
-                };
-
-                store.dispatch(shelterAnimalActions.updateOne(updateAnimal));
-
-                if (onSuccesfulSubmit !== undefined) {
-                    onSuccesfulSubmit();
-                }
-            } else {
-                store.dispatch(
-                    addAlert({
-                        type: 'error',
-                        message: 'Something went wrong when updating animal',
-                    })
-                );
-            }
-        },
-    });
-
-    const saks = useSelector(specificAnimalKindSelectors.selectAll).filter(
-        (sak) =>
-            sak.animal_kind_id === animal.specific_animal_kind.animal_kind.id
+        [setAnimal, setOpen]
     );
-    const sizes = useSelector(sizeSelectors.selectAll);
+    useSlot(SlotTypes.DeleteAnimal, slotCallback);
 
-    return (
-        <MarginedForm id={formId} onSubmit={formik.handleSubmit}>
-            <FormikTextField
-                fullWidth
-                name="name"
-                label="Name"
-                formik={formik}
-            />
-            <FormikTextField
-                fullWidth
-                multiline
-                maxRows={10}
-                name="description"
-                label="Description"
-                formik={formik}
-            />
-            <FormikTextField
-                fullWidth
-                select
-                name="specific_animal_kind"
-                label="Breed"
-                formik={formik}
-            >
-                {saks.map((sak) => (
-                    <MenuItem key={sak.id} value={sak.id}>
-                        {sak.value}
-                    </MenuItem>
-                ))}
-            </FormikTextField>
-            <MultipleSelectField
-                name="characters"
-                label="Characters"
-                formik={formik}
-                selectAll={characterSelectors.selectAll}
-                selectEntities={characterSelectors.selectEntities}
-            />
-            <MultipleSelectField
-                name="colors"
-                label="Colors"
-                formik={formik}
-                selectAll={colorSelectors.selectAll}
-                selectEntities={colorSelectors.selectEntities}
-            />
-            <FormikTextField
-                fullWidth
-                select
-                name="size"
-                label="Size"
-                formik={formik}
-            >
-                {sizes.map((size) => (
-                    <MenuItem key={size.id} value={size.id}>
-                        {size.value}
-                    </MenuItem>
-                ))}
-            </FormikTextField>
-            <FormGroup>
-                <ControlledCheckbox
-                    name="male"
-                    formik={formik}
-                    label="Is male"
-                />
-                <ControlledCheckbox
-                    name="likes_child"
-                    formik={formik}
-                    label="Is ok with children"
-                />
-                <ControlledCheckbox
-                    name="likes_other_animals"
-                    formik={formik}
-                    label="Likes other animals"
-                />
-            </FormGroup>
-            <PortalledButton
-                formId={formId}
-                disabled={formik.isSubmitting || !formik.dirty}
-                dialogActionsRef={dialogActionsRef}
-            />
-        </MarginedForm>
-    );
-};
+    const handleClose = React.useCallback(() => setOpen(false), [setOpen]);
 
-const validationSchema = yup.object({
-    name: yup.string().required('Name is required'),
-    description: yup.string().max(2048),
-    specific_animal_kind: yup.number().required('Breed is required'),
-    characters: yup
-        .array()
-        .of(yup.number().required())
-        .min(1, 'You need to select one or more characters'),
-    colors: yup
-        .array()
-        .of(yup.number().required())
-        .min(1, 'You need to select one or more colors'),
-    size: yup.number().required(),
-    male: yup.boolean(),
-    likes_child: yup.boolean(),
-    likes_other_animals: yup.boolean(),
-});
+    const handleDeletion = React.useCallback(async () => {
+        const errorAction = addAlert({
+            type: 'error',
+            message: "Something went wrong when removing animal's listing",
+        });
 
-interface PortalledButtonProps {
-    formId: string;
-    disabled: boolean;
-    dialogActionsRef: React.RefObject<Element>;
-}
-
-const PortalledButton = ({
-    formId,
-    disabled,
-    dialogActionsRef,
-}: PortalledButtonProps) => {
-    const [currentRef, setCurrentRef] = React.useState<Element | null>(null);
-
-    const propsRef = dialogActionsRef.current;
-
-    React.useEffect(() => {
-        if (currentRef !== dialogActionsRef.current) {
-            setCurrentRef(dialogActionsRef.current);
+        if (animal === null) {
+            store.dispatch(errorAction);
+            return;
         }
-    }, [currentRef, dialogActionsRef, setCurrentRef, propsRef]);
 
-    return currentRef ? (
-        ReactDOM.createPortal(
-            <Button type="submit" form={formId} disabled={disabled}>
-                Submit
-            </Button>,
-            currentRef
-        )
-    ) : (
-        <React.Fragment />
+        const res = await getRequestMaker().shelter.deleteAnimal(
+            store.getState().authReducer.token as string,
+            animal.id
+        );
+
+        if (res === null) {
+            store.dispatch(errorAction);
+            return;
+        }
+
+        store.dispatch(
+            addAlert({
+                type: null,
+                message: `Removed ${animal.name} listing`,
+            })
+        );
+
+        store.dispatch(shelterAnimalActions.removeOne(animal.id));
+
+        setOpen(false);
+    }, [animal, setOpen]);
+
+    return (
+        <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>{`Are you sure you want to remove ${animal?.name}'s listing?`}</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    This will make it impossible for any user to see and like{' '}
+                    <b>{animal?.name}</b>!
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose}>Cancel</Button>
+                <AsyncButton onClick={handleDeletion} color="error">
+                    Remove
+                </AsyncButton>
+            </DialogActions>
+        </Dialog>
     );
 };
 
-type FormikTextFieldProps = TextFieldProps & {
-    formik: any;
-    name: string;
-};
+const EDIT_ANIMAL_FORM = 'editAnimalForm';
+const ADD_ANIMAL_FORM = 'addAnimalForm';
 
-const FormikTextField = ({ formik, name, ...rest }: FormikTextFieldProps) => {
+export const AddAnimalDialog = () => {
+    const [open, setOpen] = React.useState(false);
+    const handleClose = React.useCallback(() => setOpen(false), [setOpen]);
+
+    const dialogActionsRef = React.useRef<Element>(null);
+
+    const slotCallback = React.useCallback(() => setOpen(true), [setOpen]);
+    useSlot(SlotTypes.CreateAnimal, slotCallback);
+
     return (
-        <TextField
-            name={name}
-            value={formik.values[name]}
-            onChange={formik.handleChange}
-            error={formik.touched[name] && Boolean(formik.errors[name])}
-            helperText={formik.touched[name] && formik.errors[name]}
-            {...rest}
-        />
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+            <DialogTitle>Create Animal</DialogTitle>
+            <DialogContent sx={{ p: 1 }}>
+                <AnimalAddForm
+                    dialogActionsRef={dialogActionsRef}
+                    formId={ADD_ANIMAL_FORM}
+                    onSuccessfulSubmit={handleClose}
+                />
+            </DialogContent>
+            <DialogActions ref={dialogActionsRef}>
+                <Button onClick={handleClose}>Cancel</Button>
+            </DialogActions>
+        </Dialog>
     );
 };

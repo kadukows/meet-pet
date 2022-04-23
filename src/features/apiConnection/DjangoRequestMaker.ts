@@ -190,6 +190,27 @@ const DjangoRequestMaker: IRequestMaker = {
             return null;
         },
 
+        createAnimal: async (token, animal) => {
+            try {
+                const res = await axios.post<{ id: number }>(
+                    '/api/animals/',
+                    animal,
+                    makeAuthHeader(token)
+                );
+
+                const animalRes = await axios.get<AnimalResponse>(
+                    `/api/animals/${res.data.id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return transformAnimal(animalRes.data);
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
+
         updateAnimal: async (token, animal) => {
             try {
                 const animalRequest = { ...animal, id: undefined };
@@ -209,6 +230,21 @@ const DjangoRequestMaker: IRequestMaker = {
 
                 return transformAnimal(animalRes.data);
             } catch (e) {}
+
+            return null;
+        },
+
+        deleteAnimal: async (token, animal_id) => {
+            try {
+                const r = await axios.delete(
+                    `/api/animals/${animal_id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return true;
+            } catch (e) {
+                console.error();
+            }
 
             return null;
         },

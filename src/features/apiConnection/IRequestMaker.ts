@@ -33,10 +33,18 @@ interface IRequestMaker {
     // shelters things
     shelter: {
         getOwnAnimals: (token: string) => Promise<Animal[] | null>;
+        createAnimal: (
+            token: string,
+            animal: AnimalCreate
+        ) => Promise<Animal | null>;
         updateAnimal: (
             token: string,
             animal: AnimalUpdate
         ) => Promise<Animal | null>;
+        deleteAnimal: (
+            token: string,
+            animal_id: number
+        ) => Promise<true | null>;
         uploadPhoto: (
             token: string,
             formData: FormData
@@ -81,6 +89,8 @@ export interface AnimalUpdate {
     likes_child: boolean;
     likes_other_animals: boolean;
 }
+
+export type AnimalCreate = Omit<AnimalUpdate, 'id'>;
 
 export interface Photo {
     id: number;
