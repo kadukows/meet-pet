@@ -4,6 +4,7 @@ from api.models import (
     Animal,
     AnimalKind,
     Character,
+    Location,
     Photo,
     Profile,
     Size,
@@ -42,25 +43,55 @@ class AnimalKindSerializer(serializers.ModelSerializer):
         read_only = ["id"]
 
 
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ["id", "longitude", "latitude"]
+        read_only = ["id"]
+
+
 class UserPrefsSerializer(serializers.ModelSerializer):
-    # liked_colors = ColorSerializer(many=True)
-    # liked_charactes = CharacterSerializer(many=True)
+    location = LocationSerializer()
 
     class Meta:
         model = UserPrefs
         fields = [
             "has_garden",
-            "location",
             "liked_colors",
             "liked_charactes",
             "liked_kinds",
+            "location",
         ]
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):
+    location = LocationSerializer()
+
     class Meta:
         model = ShelterPrefs
-        fields = ["location"]
+        fields = ["id", "description", "location"]
+        read_only = ["id"]
+
+    def create(self, validated_data):
+        location_data = validated_data.pop("location")
+
+        shelter_prefs = ShelterPrefs.objects.create(**validated_data)
+        location = Location.objects.create(shelter_prefs=shelter_prefs, **location_data)
+
+        shelter_prefs.save()
+
+        return shelter_prefs
+
+    def update(self, instance: ShelterPrefs, validated_data):
+        location = validated_data.pop("location")
+
+        instance.description = validated_data["description"]
+        instance.location.latitude = location["latitude"]
+        instance.location.longitude = location["longitude"]
+
+        instance.save()
+
+        return instance
 
 
 class ProfileSerializer(serializers.ModelSerializer):

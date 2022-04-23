@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { number } from 'yup';
 
 export enum UserType {
     Normal = 'Normal',
@@ -6,11 +7,20 @@ export enum UserType {
     Admin = 'Admin',
 }
 
+export interface ShelterPrefs {
+    description: string;
+    location: {
+        longitude: number;
+        latitude: number;
+    };
+}
+
 export interface User {
     username: string;
     email: string;
     full_name: string;
     user_type: UserType;
+    shelter_prefs?: ShelterPrefs | null;
 }
 
 interface AuthState {

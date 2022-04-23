@@ -5,7 +5,7 @@ import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
-import { UserType } from '../auth/userSlice';
+import { User, UserType } from '../auth/userSlice';
 import { sleep } from '../../helpers';
 
 const DjangoRequestMaker: IRequestMaker = {
@@ -27,37 +27,13 @@ const DjangoRequestMaker: IRequestMaker = {
     },
 
     getUser: async (token) => {
-        interface UserResponse {
-            username: string;
-            first_name: string;
-            last_name: string;
-            email: string;
-            profile: {
-                user_prefs: null | {
-                    has_garden: boolean;
-                    location: string;
-                };
-
-                shelter_prefs: null | {
-                    location: string;
-                };
-            };
-        }
-
         try {
             const res = await axios.get<UserResponse>(
                 '/api/user/me/',
                 makeAuthHeader(token)
             );
 
-            return {
-                username: res.data.username,
-                email: res.data.email,
-                full_name: res.data.first_name.concat(' ', res.data.last_name),
-                user_type: res.data.profile.user_prefs
-                    ? UserType.Normal
-                    : UserType.Shelter,
-            };
+            return transformUser(res.data);
         } catch (e: any) {}
 
         return null;
@@ -236,7 +212,7 @@ const DjangoRequestMaker: IRequestMaker = {
 
         deleteAnimal: async (token, animal_id) => {
             try {
-                const r = await axios.delete(
+                await axios.delete(
                     `/api/animals/${animal_id}/`,
                     makeAuthHeader(token)
                 );
@@ -274,7 +250,7 @@ const DjangoRequestMaker: IRequestMaker = {
 
         deletePhoto: async (token, photo_id) => {
             try {
-                const res = await axios.delete(
+                await axios.delete(
                     `/api/my_photos/${photo_id}/`,
                     makeAuthHeader(token)
                 );
@@ -417,4 +393,56 @@ const parseAnimalQueryParams = (q: AnimalQueryParams) => {
     }
 
     return result;
+};
+
+interface Location {
+    longitude: string;
+    latitude: string;
+}
+
+interface UserResponse {
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    ///////
+    profile: {
+        user_prefs: null | {
+            has_garden: boolean;
+            likes_colors: number[];
+            liked_charactes: number[];
+            likes_kinds: number[];
+            location: Location | null;
+        };
+        /////
+        shelter_prefs: null | {
+            description: string;
+            location: Location | null;
+        };
+    };
+}
+
+const transformUser = (user_response: UserResponse): User => {
+    let shelter_prefs = null;
+    let user_type = UserType.Normal;
+
+    if (user_response.profile.shelter_prefs) {
+        const sp = user_response.profile.shelter_prefs;
+
+        shelter_prefs = {
+            description: sp.description,
+            location: sp.location,
+        };
+    }
+
+    return {
+        username: user_response.username,
+        email: user_response.email,
+        full_name: user_response.first_name.concat(
+            ' ',
+            user_response.last_name
+        ),
+        user_type,
+        shelter_prefs,
+    };
 };

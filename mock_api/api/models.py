@@ -43,9 +43,20 @@ def add_user_to_normal_group(sender, instance: User, created, **kwargs):
         profile.save()
 
 
+class Location(models.Model):
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(max_digits=8, decimal_places=6)
+
+
 class UserPrefs(models.Model):
     has_garden = models.BooleanField(null=False, default=False)
-    location = models.TextField(null=False, default="Some location")
+    location: Location = models.OneToOneField(
+        Location,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="user_prefs",
+    )
     liked_colors = models.ManyToManyField("Color")
     liked_charactes = models.ManyToManyField("Character")
     liked_kinds = models.ManyToManyField("AnimalKind")
@@ -53,7 +64,14 @@ class UserPrefs(models.Model):
 
 
 class ShelterPrefs(models.Model):
-    location = models.TextField(null=False)
+    location: Location = models.OneToOneField(
+        Location,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="shelter_prefs",
+    )
+    description = models.TextField(null=False, default="")
 
 
 class Color(models.Model):
