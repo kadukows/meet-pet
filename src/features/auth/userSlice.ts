@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { number } from 'yup';
 
 export enum UserType {
     Normal = 'Normal',
@@ -7,9 +6,10 @@ export enum UserType {
     Admin = 'Admin',
 }
 
-export interface ShelterPrefs {
+export interface ShelterPreferences {
+    id: number;
     description: string;
-    location: {
+    location: null | {
         longitude: number;
         latitude: number;
     };
@@ -20,7 +20,7 @@ export interface User {
     email: string;
     full_name: string;
     user_type: UserType;
-    shelter_prefs?: ShelterPrefs | null;
+    shelter_prefs?: ShelterPreferences | null;
 }
 
 interface AuthState {
@@ -59,6 +59,17 @@ const authSlice = createSlice({
 
             state.loading = false;
         },
+        updateShelterPreferences(
+            state,
+            action: PayloadAction<ShelterPreferences>
+        ) {
+            if (state.user === null || state.user.shelter_prefs === null) {
+                console.error('Not shelter preferences to update');
+                return;
+            }
+
+            state.user.shelter_prefs = action.payload;
+        },
     },
 });
 
@@ -67,5 +78,6 @@ interface UserTokenAuthPayload {
     user: User;
 }
 
-export const { setUserTokenAuth, resetAuth } = authSlice.actions;
+export const { setUserTokenAuth, resetAuth, updateShelterPreferences } =
+    authSlice.actions;
 export const authReducer = authSlice.reducer;

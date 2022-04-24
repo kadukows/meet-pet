@@ -25,4 +25,5 @@ export interface Animal {
         id: number;
         url: string;
     }>;
+    shelter: number | null;
 }

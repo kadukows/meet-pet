@@ -1,8 +1,5 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { TransitionGroup } from 'react-transition-group';
-import Fade from '@mui/material/Fade';
-import Grow from '@mui/material/Grow';
 import { RootState } from '../../store';
 import { Animal } from '../animal/animalSlice';
 import { getRequestMaker } from '../apiConnection/RequestMakerFactory';

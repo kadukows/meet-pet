@@ -1,5 +1,5 @@
 import { AnimalKind } from '../animalKind/animaKindSlice';
-import { User } from '../auth/userSlice';
+import { ShelterPreferences, User } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
@@ -30,6 +30,11 @@ interface IRequestMaker {
         animal_query_params: AnimalQueryParams
     ) => Promise<PaginatedResponse<Animal> | null>;
 
+    fetchShelter: (
+        token: string,
+        shelter_id: number
+    ) => Promise<ShelterPreferences | null>;
+
     // shelters things
     shelter: {
         getOwnAnimals: (token: string) => Promise<Animal[] | null>;
@@ -50,6 +55,10 @@ interface IRequestMaker {
             formData: FormData
         ) => Promise<Photo | null>;
         deletePhoto: (token: string, photo_id: number) => Promise<true | null>;
+        updateShelterPreferences: (
+            token: string,
+            update: ShelterPreferences
+        ) => Promise<ShelterPreferences | null>;
     };
 }
 

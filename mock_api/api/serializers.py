@@ -191,5 +191,5 @@ class AnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = [*AnimalWriteSerializer.Meta.fields, "photos"]
+        fields = [*AnimalWriteSerializer.Meta.fields, "photos", "shelter"]
         read_only = ["id"]

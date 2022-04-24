@@ -1,8 +1,6 @@
 import React from 'react';
-import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
 import InfoIcon from '@mui/icons-material/Info';
 import { Animal } from '../animal/animalSlice';
@@ -14,8 +12,10 @@ type Props = {
 
 const AnimalImageListItem = ({ animal }: Props) => {
     return (
-        <ImageListItem sx={{ height: '100%', width: '100%' }}>
-            <Img src={animal.photos[0].url} alt={animal.name} loading="lazy" />
+        <ImageListItem
+            sx={{ height: '100%', width: '100%', minHeight: '160px' }}
+        >
+            <Img src={animal.photos[0]?.url} alt={animal.name} loading="lazy" />
             <ImageListItemBar
                 title={animal.name}
                 subtitle={animal.description.slice(0, 28).concat('...')}

@@ -4,12 +4,11 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { useSelector } from 'react-redux';
 
-import TextField, { TextFieldProps } from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import FormGroup from '@mui/material/FormGroup';
 import Button from '@mui/material/Button';
 
-import { MarginedForm } from './utils';
+import { MarginedForm, FormikTextField } from './utils';
 import ControlledCheckbox from './ControlledCheckbox';
 import { shelterAnimalActions, Animal } from '../animalSlice';
 
@@ -21,7 +20,6 @@ import { sizeSelectors } from '../../../size/sizeSlice';
 import { getRequestMaker } from '../../../apiConnection';
 import { store } from '../../../../store';
 import { addAlert } from '../../../alerts/alertsSlice';
-import { LoadingButton } from '@mui/lab';
 
 interface FormState {
     name: string;
@@ -279,24 +277,6 @@ export const AnimalForm = ({
                 dialogActionsRef={dialogActionsRef}
             />
         </MarginedForm>
-    );
-};
-
-type FormikTextFieldProps = TextFieldProps & {
-    formik: any;
-    name: string;
-};
-
-const FormikTextField = ({ formik, name, ...rest }: FormikTextFieldProps) => {
-    return (
-        <TextField
-            name={name}
-            value={formik.values[name]}
-            onChange={formik.handleChange}
-            error={formik.touched[name] && Boolean(formik.errors[name])}
-            helperText={formik.touched[name] && formik.errors[name]}
-            {...rest}
-        />
     );
 };
 

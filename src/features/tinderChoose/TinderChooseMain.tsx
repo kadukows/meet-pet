@@ -8,11 +8,10 @@ import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import styled from '@mui/system/styled';
 import { Animal } from '../animal/animalSlice';
-import { characterSelectors } from '../characters/charcterSlice';
-import { useSelector } from 'react-redux';
 
 import AnimalTable from './AnimalTable';
 import AnimalCarousel from './AnimalCarousel';
+import AnimalDescription from './AnimalDescription';
 
 type Props = {
     animal: Animal | null;
@@ -49,6 +48,7 @@ const TinderChooseMain = React.forwardRef(
                         <AnimalCarousel animal={animal} />
                     )}
                 </FullViewportGrid>
+
                 <Grid item sm={4} xs={12} sx={{ height: '100%' }}>
                     <Stack
                         spacing={2}
@@ -60,7 +60,7 @@ const TinderChooseMain = React.forwardRef(
                             sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                height: '40%',
+                                //height: '40%',
                                 flex: 4,
                             }}
                         >
@@ -84,26 +84,12 @@ const TinderChooseMain = React.forwardRef(
                         <MPaper
                             sx={{
                                 flex: 4,
-                                height: '40%',
-                                display: 'flex',
                             }}
                         >
-                            {animal ? (
-                                <OverflowBox>
-                                    <Typography>
-                                        {animal.description}
-                                    </Typography>
-                                </OverflowBox>
-                            ) : (
-                                <Skeleton
-                                    variant="rectangular"
-                                    height="100%"
-                                    width="100%"
-                                />
-                            )}
+                            <AnimalDescription animal={animal} />
                         </MPaper>
 
-                        <Box sx={{ flex: 2 }}>
+                        <Box sx={{ minHeight: '10%' }}>
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -143,6 +129,7 @@ const MPaper = styled((p: PaperProps) => <Paper elevation={3} {...p} />)(
     ({ theme }) => `
     padding: ${theme.spacing(2)};
     height: 100%;
+    overflow: auto;
 `
 );
 

@@ -51,9 +51,6 @@ const SheltersAnimal = (props: Props) => {
                                 Animals in shelter
                             </Typography>
                             <Box sx={{ flex: 1 }} />
-                            <Button variant="contained" sx={{ mr: 2 }}>
-                                Click me
-                            </Button>
                             <CreateButton variant="contained">Add</CreateButton>
                         </Box>
                         <AnimalDataGrid />

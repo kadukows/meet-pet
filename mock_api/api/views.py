@@ -62,26 +62,15 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
         return Response(self.get_serializer(request.user).data)
 
 
-class ShelterPreferencesViewSet(viewsets.ModelViewSet):
-    authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
-    serializer_class = ShelterPrefsSerializer
-    queryset = ShelterPrefs.objects.all()
-
-    def get_permissions(self):
-        if self.action == "create":
-            return [IsAdmin()]
-
-        return [IsShelter(), IsAdmin()]
-
-    def get_queryset(self):
-        return ShelterPrefs.objects.filter(
-            id=self.request.user.profile.shelter_prefs.id
-        ).all()
-
-
 class BaseAuthPerm:
     authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
+
+class ShelterPreferencesViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+    # authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
+    serializer_class = ShelterPrefsSerializer
+    queryset = ShelterPrefs.objects.all()
 
 
 class ColorViewSet(BaseAuthPerm, viewsets.ModelViewSet):
@@ -121,10 +110,11 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     pagination_class = MyPagination
 
     list_permissions = [permissions.IsAuthenticated()]
+    list_actions = ("list", "retrieve", "next")
     edit_permissions = [OrPermission(IsShelter(), IsAdmin())]
 
     def get_permissions(self):
-        if self.action == "list" or self.action == "retrieve":
+        if self.action in self.list_actions:
             return self.list_permissions
 
         return self.edit_permissions

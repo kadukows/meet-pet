@@ -68,7 +68,9 @@ const AnimalTable = ({ animal }: Props) => {
                         </TableCell>
                         <TableCell>
                             <Typography>
-                                {animal.characters.join(', ')}
+                                {animal.characters
+                                    .map((c) => c.value)
+                                    .join(', ')}
                             </Typography>
                         </TableCell>
                     </DenseTableRow>
@@ -77,7 +79,9 @@ const AnimalTable = ({ animal }: Props) => {
                             <Typography>Colors</Typography>
                         </TableCell>
                         <TableCell>
-                            <Typography>{animal.colors.join(', ')}</Typography>
+                            <Typography>
+                                {animal.colors.map((c) => c.value).join(', ')}
+                            </Typography>
                         </TableCell>
                     </DenseTableRow>
                     <DenseTableRow>
@@ -85,7 +89,7 @@ const AnimalTable = ({ animal }: Props) => {
                             <Typography>Size</Typography>
                         </TableCell>
                         <TableCell>
-                            <Typography>{animal.size}</Typography>
+                            <Typography>{animal.size.value}</Typography>
                         </TableCell>
                     </DenseTableRow>
                 </TableBody>

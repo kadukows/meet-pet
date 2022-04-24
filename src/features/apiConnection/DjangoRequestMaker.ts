@@ -5,7 +5,7 @@ import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
-import { User, UserType } from '../auth/userSlice';
+import { ShelterPreferences, User, UserType } from '../auth/userSlice';
 import { sleep } from '../../helpers';
 
 const DjangoRequestMaker: IRequestMaker = {
@@ -150,6 +150,21 @@ const DjangoRequestMaker: IRequestMaker = {
         return null;
     },
 
+    fetchShelter: async (token, shelter_id) => {
+        try {
+            const res = await axios.get<ShelterPreferenceResponse>(
+                `/api/shelter_preferences/${shelter_id}/`,
+                makeAuthHeader(token)
+            );
+
+            return transformShelterPreferences(res.data);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
     shelter: {
         getOwnAnimals: async (token) => {
             try {
@@ -261,6 +276,33 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return null;
         },
+
+        updateShelterPreferences: async (
+            token: string,
+            update: ShelterPreferences
+        ) => {
+            try {
+                const res = await axios.put<ShelterPreferenceResponse>(
+                    `/api/shelter_preferences/${update.id}/`,
+                    {
+                        description: update.description,
+                        location: update.location
+                            ? formatLocation(
+                                  update.location.latitude,
+                                  update.location.longitude
+                              )
+                            : null,
+                    },
+                    makeAuthHeader(token)
+                );
+
+                return transformShelterPreferences(res.data);
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
     },
 };
 
@@ -291,6 +333,7 @@ interface AnimalResponse {
     likes_child: boolean;
     likes_other_animals: boolean;
     photos: Array<{ id: number; image_url: string }>;
+    shelter: number | null;
 }
 
 interface PaginatedResponse<T> {
@@ -313,6 +356,7 @@ function transformAnimal(res: AnimalResponse): Animal {
         likes_child,
         likes_other_animals,
         photos,
+        shelter,
     } = res;
 
     return {
@@ -326,12 +370,11 @@ function transformAnimal(res: AnimalResponse): Animal {
         is_male: male,
         likes_child,
         likes_other_animals,
-        //photo_urls: photos.map((el) => el.image_url),
-        //photos,
         photos: photos.map((p) => ({
             id: p.id,
             url: p.image_url,
         })),
+        shelter,
     };
 }
 
@@ -400,6 +443,12 @@ interface Location {
     latitude: string;
 }
 
+interface ShelterPreferenceResponse {
+    id: number;
+    description: string;
+    location: Location | null;
+}
+
 interface UserResponse {
     username: string;
     first_name: string;
@@ -415,24 +464,19 @@ interface UserResponse {
             location: Location | null;
         };
         /////
-        shelter_prefs: null | {
-            description: string;
-            location: Location | null;
-        };
+        shelter_prefs: null | ShelterPreferenceResponse;
     };
 }
 
 const transformUser = (user_response: UserResponse): User => {
-    let shelter_prefs = null;
+    let shelter_prefs: ShelterPreferences | null = null;
     let user_type = UserType.Normal;
 
-    if (user_response.profile.shelter_prefs) {
-        const sp = user_response.profile.shelter_prefs;
-
-        shelter_prefs = {
-            description: sp.description,
-            location: sp.location,
-        };
+    if (user_response.profile.shelter_prefs !== null) {
+        user_type = UserType.Shelter;
+        shelter_prefs = transformShelterPreferences(
+            user_response.profile.shelter_prefs
+        );
     }
 
     return {
@@ -446,3 +490,38 @@ const transformUser = (user_response: UserResponse): User => {
         shelter_prefs,
     };
 };
+
+const transformShelterPreferences = (
+    response: ShelterPreferenceResponse
+): ShelterPreferences => {
+    return {
+        id: response.id,
+        description: response.description,
+        location: response.location
+            ? {
+                  longitude: parseFloat(response.location.longitude),
+                  latitude: parseFloat(response.location.latitude),
+              }
+            : null,
+    };
+};
+
+function numWholeDigits(x: number) {
+    return (Math.log10((x ^ (x >> 31)) - (x >> 31)) | 0) + 1;
+}
+
+const formatNumber = (
+    x: number,
+    max_digits: number,
+    decimal_places: number
+) => {
+    const wholeDigitNo = numWholeDigits(x);
+    const decimalPlaces = Math.min(max_digits - wholeDigitNo, decimal_places);
+
+    return x.toFixed(decimalPlaces);
+};
+
+const formatLocation = (lat: number, lng: number) => ({
+    latitude: formatNumber(lat, 8, 6),
+    longitude: formatNumber(lng, 9, 6),
+});
