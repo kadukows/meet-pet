@@ -56,11 +56,13 @@ class UserPrefsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPrefs
         fields = [
+            "id",
             "has_garden",
             "liked_colors",
             "liked_charactes",
             "liked_kinds",
             "location",
+            "liked_animals",
         ]
 
 
@@ -78,6 +80,7 @@ class ShelterPrefsSerializer(serializers.ModelSerializer):
         shelter_prefs = ShelterPrefs.objects.create(**validated_data)
         location = Location.objects.create(shelter_prefs=shelter_prefs, **location_data)
 
+        location.save()
         shelter_prefs.save()
 
         return shelter_prefs
@@ -89,6 +92,7 @@ class ShelterPrefsSerializer(serializers.ModelSerializer):
         instance.location.latitude = location["latitude"]
         instance.location.longitude = location["longitude"]
 
+        instance.location.save()
         instance.save()
 
         return instance

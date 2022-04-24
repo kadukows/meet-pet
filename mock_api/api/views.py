@@ -109,15 +109,17 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
 
-    list_permissions = [permissions.IsAuthenticated()]
-    list_actions = ("list", "retrieve", "next")
-    edit_permissions = [OrPermission(IsShelter(), IsAdmin())]
+    # list_permissions = [permissions.IsAuthenticated()]
+    # list_actions = ("list", "retrieve", "next", "like")
+    # edit_permissions = [OrPermission(IsShelter(), IsAdmin())]
 
+    """
     def get_permissions(self):
         if self.action in self.list_actions:
             return self.list_permissions
 
         return self.edit_permissions
+    """
 
     def get_serializer_class(self):
         if self.action == "create" or self.action == "update":
@@ -157,6 +159,14 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
                 many=True,
             ).data
         )
+
+    @action(methods=["post"], detail=True, serializer_class=serializers.Serializer)
+    def like(self, request: Request, pk=None):
+        animal = self.get_object()
+        prefs: UserPrefs = request.user.profile.user_prefs
+        prefs.liked_animals.add(animal)
+        prefs.save()
+        return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
 
     def returnAndSetAnimal(self, user_prefs: UserPrefs, animal: Animal):
         user_prefs.prev_animal = animal.id

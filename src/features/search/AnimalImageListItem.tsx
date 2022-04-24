@@ -29,13 +29,15 @@ const AnimalImageListItem = ({ animal }: Props) => {
         >
             <div ref={ref as any} />
             {seen ? (
-                <React.Fragment>
+                [
                     <Img
                         src={animal.photos[0]?.url}
                         alt={animal.name}
                         loading="lazy"
-                    />
+                        key="k1"
+                    />,
                     <ImageListItemBar
+                        key="k2"
                         title={animal.name}
                         subtitle={animal.description.slice(0, 28).concat('...')}
                         actionIcon={
@@ -46,8 +48,8 @@ const AnimalImageListItem = ({ animal }: Props) => {
                                 <InfoIcon />
                             </IconButton>
                         }
-                    />
-                </React.Fragment>
+                    />,
+                ]
             ) : (
                 <Skeleton
                     variant="rectangular"

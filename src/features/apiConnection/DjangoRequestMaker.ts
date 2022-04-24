@@ -5,7 +5,12 @@ import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
-import { ShelterPreferences, User, UserType } from '../auth/userSlice';
+import {
+    ShelterPreferences,
+    User,
+    UserType,
+    UserPreferences,
+} from '../auth/userSlice';
 import { sleep } from '../../helpers';
 
 const DjangoRequestMaker: IRequestMaker = {
@@ -173,6 +178,21 @@ const DjangoRequestMaker: IRequestMaker = {
             );
 
             return transformAnimal(res.data);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
+    likeAnimal: async (token, animal_id) => {
+        try {
+            await axios.post(
+                `/api/animals/${animal_id}/like/`,
+                null,
+                makeAuthHeader(token)
+            );
+            return true;
         } catch (e) {
             console.error(e);
         }
@@ -464,6 +484,16 @@ interface ShelterPreferenceResponse {
     location: Location | null;
 }
 
+interface UserPreferencesResponse {
+    id: number;
+    has_garden: boolean;
+    liked_colors: number[];
+    liked_charactes: number[];
+    liked_kinds: number[];
+    location: Location | null;
+    liked_animals: number[];
+}
+
 interface UserResponse {
     username: string;
     first_name: string;
@@ -471,20 +501,14 @@ interface UserResponse {
     email: string;
     ///////
     profile: {
-        user_prefs: null | {
-            has_garden: boolean;
-            likes_colors: number[];
-            liked_charactes: number[];
-            likes_kinds: number[];
-            location: Location | null;
-        };
-        /////
         shelter_prefs: null | ShelterPreferenceResponse;
+        user_prefs: null | UserPreferencesResponse;
     };
 }
 
 const transformUser = (user_response: UserResponse): User => {
     let shelter_prefs: ShelterPreferences | null = null;
+    let user_prefs: UserPreferences | null = null;
     let user_type = UserType.Normal;
 
     if (user_response.profile.shelter_prefs !== null) {
@@ -492,6 +516,8 @@ const transformUser = (user_response: UserResponse): User => {
         shelter_prefs = transformShelterPreferences(
             user_response.profile.shelter_prefs
         );
+    } else if (user_response.profile.user_prefs !== null) {
+        user_prefs = transformUserPreferences(user_response.profile.user_prefs);
     }
 
     return {
@@ -503,6 +529,7 @@ const transformUser = (user_response: UserResponse): User => {
         ),
         user_type,
         shelter_prefs,
+        user_prefs,
     };
 };
 
@@ -512,12 +539,27 @@ const transformShelterPreferences = (
     return {
         id: response.id,
         description: response.description,
-        location: response.location
-            ? {
-                  longitude: parseFloat(response.location.longitude),
-                  latitude: parseFloat(response.location.latitude),
-              }
-            : null,
+        location: response.location ? parseLocation(response.location) : null,
+    };
+};
+
+const transformUserPreferences = ({
+    id,
+    has_garden,
+    liked_colors,
+    liked_charactes,
+    liked_kinds,
+    location,
+    liked_animals,
+}: UserPreferencesResponse): UserPreferences => {
+    return {
+        id,
+        has_garden,
+        liked_colors,
+        liked_characters: liked_charactes,
+        liked_kinds,
+        location: location ? parseLocation(location) : null,
+        liked_animals,
     };
 };
 
@@ -539,4 +581,9 @@ const formatNumber = (
 const formatLocation = (lat: number, lng: number) => ({
     latitude: formatNumber(lat, 8, 6),
     longitude: formatNumber(lng, 9, 6),
+});
+
+const parseLocation = (loc: Location) => ({
+    longitude: parseFloat(loc.longitude),
+    latitude: parseFloat(loc.latitude),
 });

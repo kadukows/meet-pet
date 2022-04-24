@@ -6,13 +6,25 @@ export enum UserType {
     Admin = 'Admin',
 }
 
+interface Location {
+    longitude: number;
+    latitude: number;
+}
+
 export interface ShelterPreferences {
     id: number;
     description: string;
-    location: null | {
-        longitude: number;
-        latitude: number;
-    };
+    location: null | Location;
+}
+
+export interface UserPreferences {
+    id: number;
+    has_garden: boolean;
+    liked_colors: number[];
+    liked_characters: number[];
+    liked_kinds: number[];
+    location: null | Location;
+    liked_animals: number[];
 }
 
 export interface User {
@@ -20,7 +32,8 @@ export interface User {
     email: string;
     full_name: string;
     user_type: UserType;
-    shelter_prefs?: ShelterPreferences | null;
+    shelter_prefs: ShelterPreferences | null;
+    user_prefs?: UserPreferences | null;
 }
 
 interface AuthState {

@@ -1,5 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+
 import { RootState } from '../../store';
 import { Animal } from '../animal/animalSlice';
 import { getRequestMaker } from '../apiConnection/RequestMakerFactory';
@@ -28,10 +32,33 @@ const TinderChooseIndexPage = (props: Props) => {
     }, [fetchAnimal]);
 
     return (
-        <TinderChooseMain
-            nextAnimalCallback={nextAnimalCallback}
-            animal={animal}
-        />
+        <TinderChooseMain animal={animal}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    height: '100%',
+                }}
+            >
+                <Button
+                    size="large"
+                    variant="contained"
+                    onClick={nextAnimalCallback}
+                    disabled={animal === null}
+                >
+                    Like
+                </Button>
+                <Button
+                    size="large"
+                    variant="contained"
+                    onClick={nextAnimalCallback}
+                    disabled={animal === null}
+                >
+                    Next
+                </Button>
+            </Box>
+        </TinderChooseMain>
     );
 };
 

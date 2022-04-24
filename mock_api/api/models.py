@@ -62,6 +62,8 @@ class UserPrefs(models.Model):
     liked_kinds = models.ManyToManyField("AnimalKind")
     prev_animal = models.IntegerField(null=True)
 
+    liked_animals = models.ManyToManyField("Animal")
+
 
 class ShelterPrefs(models.Model):
     location: Location = models.OneToOneField(
