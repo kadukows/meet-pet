@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     ActionReducerMapBuilder,
     AsyncThunk,
@@ -142,4 +143,35 @@ export const sleep = (ms: number) => {
     return new Promise<null>((accept, reject) =>
         setTimeout(() => accept(null), ms)
     );
+};
+
+export const useIntersectionWasInViewportOnce = (
+    ref: React.RefObject<Element | null>
+) => {
+    const [seen, setSeen] = React.useState(false);
+
+    React.useEffect(() => {
+        if (ref.current === null) {
+            throw new Error(
+                'useIntersectionWasInViewportOnce(): ref.current is null'
+            );
+        }
+
+        const element = ref.current;
+
+        const iObserver = new IntersectionObserver((entries) => {
+            const [e] = entries;
+            if (e.isIntersecting) {
+                setSeen(true);
+                iObserver.unobserve(element);
+            }
+        });
+
+        iObserver.observe(element);
+        return () => {
+            iObserver.unobserve(element);
+        };
+    }, [setSeen, ref]);
+
+    return seen;
 };

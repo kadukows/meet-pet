@@ -15,7 +15,7 @@ import AnimalDescription from './AnimalDescription';
 
 type Props = {
     animal: Animal | null;
-    nextAnimalCallback: () => void;
+    nextAnimalCallback?: () => void;
 };
 
 const FullViewportGrid = styled(Grid)(

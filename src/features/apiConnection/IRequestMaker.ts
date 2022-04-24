@@ -35,6 +35,8 @@ interface IRequestMaker {
         shelter_id: number
     ) => Promise<ShelterPreferences | null>;
 
+    fetchAnimal: (token: string, shelter_id: number) => Promise<Animal | null>;
+
     // shelters things
     shelter: {
         getOwnAnimals: (token: string) => Promise<Animal[] | null>;

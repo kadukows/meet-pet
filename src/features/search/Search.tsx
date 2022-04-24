@@ -4,6 +4,7 @@ import Paper from '@mui/material/Paper';
 import ImageList from '@mui/material/ImageList';
 import Pagination from '@mui/material/Pagination';
 import Button from '@mui/material/Button';
+import Skeleton from '@mui/material/Skeleton';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import { styled } from '@mui/system';
 import QueryForm from './QueryForm';
@@ -125,6 +126,19 @@ const Search = (props: Props) => {
                     {animals.map((a) => (
                         <AnimalImageListItem key={a.id} animal={a} />
                     ))}
+                    {animals.length === 0 &&
+                        [...Array(10).keys()].map((k) => (
+                            <Skeleton
+                                key={k}
+                                sx={{
+                                    height: `${
+                                        192 + ((88 * (k + 4) + 217) % 48) - 24
+                                    }px`,
+                                    m: 3,
+                                }}
+                                variant="rectangular"
+                            />
+                        ))}
                 </ImageList>
                 <PaginationRow
                     count={Math.ceil(count / itemsPerPage)}
