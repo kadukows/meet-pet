@@ -1,5 +1,5 @@
 import { AnimalKind } from '../animalKind/animaKindSlice';
-import { ShelterPreferences, User } from '../auth/userSlice';
+import { ShelterPreferences, User, UserPreferences } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
@@ -67,11 +67,30 @@ interface IRequestMaker {
             update: ShelterPreferences
         ) => Promise<ShelterPreferences | null>;
     };
+    setUserAnimalPreferences: (
+        token: string,
+        user_animal_prefs: UserPreferences
+    ) => Promise<UserPreferences | null>;
 }
 
 export type { IRequestMaker };
 
 ////////////////////////
+
+export interface UserPreferencesResponse {
+    id: number;
+    has_garden: boolean;
+    location: string;
+    liked_kinds: number[];
+    // TODO
+    //liked_specific_kinds: number[];
+    liked_colors: number[];
+    liked_charactes: number[];
+    liked_sizes: number[];
+    is_male: boolean;
+    likes_children: boolean;
+    likes_other_animals: boolean;
+}
 
 export interface AnimalQueryParams {
     characters?: number[];

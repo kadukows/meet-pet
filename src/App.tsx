@@ -12,6 +12,7 @@ import GetUserAtInit from './features/auth/User';
 import TinderChoose from './features/tinderChoose';
 import HomePage from './features/homePage';
 import RedirectIfNotLoggedIn from './features/auth/RedirectIfNotLoggedIn';
+import Preferences from './features/preferences/Preferences';
 import Search from './features/search/Search';
 import SheltersAnimal from './features/shelter/animals/SheltersAnimal';
 import AnimalRetrieve from './features/animalRetrieve/AnimalRetrieve';
@@ -36,6 +37,14 @@ function App() {
                                     element={
                                         <RedirectIfNotLoggedIn>
                                             <TinderChoose />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/preferences"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <Preferences />
                                         </RedirectIfNotLoggedIn>
                                     }
                                 />

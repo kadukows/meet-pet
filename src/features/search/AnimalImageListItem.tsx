@@ -44,7 +44,12 @@ const AnimalImageListItem = ({ animal, liked }: Props) => {
                     <ImageListItemBar
                         key="k2"
                         title={animal.name}
-                        subtitle={animal.description.slice(0, 28).concat('...')}
+                        subtitle={
+                            <Box sx={{ display: 'flex' }}>
+                                {animal.description.slice(0, 28).concat('...')}
+                                <Box sx={{ flex: 1 }} />
+                            </Box>
+                        }
                         actionIcon={
                             <IconButton
                                 sx={{ color: 'rgba(255, 255, 255, 0.54)' }}

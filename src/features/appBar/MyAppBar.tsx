@@ -9,7 +9,6 @@ import Login from './Login';
 import MenuBar from './MenuBar';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import styled from '@mui/system/styled';
 
 type Props = {};
 
@@ -44,9 +43,10 @@ export default MyAppBar;
 
 const REGEX_MAPPING = {
     Counter: /^\/counter$/,
+    Preferences: /^\/preferences$/,
+    Search: /^\/search$/,
     Home: /^\/$/,
     'Meet the pet!': /^\/meet$/,
-    Search: /^\/search$/,
     'Manage animals': /^\/shelters_animal$/,
     Details: /^\/animal\/[0-9]+$/,
     'Liked animals': /^\/liked_animals$/,

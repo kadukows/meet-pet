@@ -10,6 +10,7 @@ import {
     User,
     UserType,
     UserPreferences,
+    Location,
 } from '../auth/userSlice';
 import { sleep } from '../../helpers';
 
@@ -50,6 +51,7 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/colors/',
                 makeAuthHeader(token)
             );
+
             return res.data;
         } catch (e) {}
 
@@ -111,7 +113,6 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/sizes/',
                 makeAuthHeader(token)
             );
-
             return res.data;
         } catch (e) {}
 
@@ -370,6 +371,45 @@ const DjangoRequestMaker: IRequestMaker = {
             return null;
         },
     },
+    setUserAnimalPreferences: async (
+        token: string,
+        user_animal_prefs: UserPreferences
+    ) => {
+        const prefs: Partial<Omit<UserPreferencesResponse, 'id'>> = {
+            // booleans
+            has_garden: user_animal_prefs.has_garden,
+            is_male: user_animal_prefs.male,
+            likes_children: user_animal_prefs.likes_children,
+            likes_other_animals: user_animal_prefs.likes_other_animals,
+            // m2m rels
+            liked_colors: user_animal_prefs.colors,
+            liked_charactes: user_animal_prefs.characters,
+            liked_kinds: user_animal_prefs.animal_kind,
+            //
+            location:
+                formatObjectLocation(user_animal_prefs.location) ?? undefined,
+            liked_animals: user_animal_prefs.liked_animals,
+            // TODO
+            //liked_specific_kinds: ,
+
+            // TODO
+            // liked_sizes: user_animal_prefs.size as number[],
+        };
+
+        try {
+            const res = await axios.put<UserPreferencesResponse>(
+                `/api/user_preferences/${user_animal_prefs.id}/`,
+                prefs,
+                makeAuthHeader(token)
+            );
+
+            return transformUserPreferences(res.data);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
 };
 
 const makeAuthHeader = (token: string) => ({
@@ -504,7 +544,7 @@ const parseAnimalQueryParams = (q: AnimalQueryParams) => {
     return result;
 };
 
-interface Location {
+interface LocationResponse {
     longitude: string;
     latitude: string;
 }
@@ -512,16 +552,22 @@ interface Location {
 interface ShelterPreferenceResponse {
     id: number;
     description: string;
-    location: Location | null;
+    location: LocationResponse | null;
 }
 
 interface UserPreferencesResponse {
     id: number;
-    has_garden: boolean;
+    // boolean preferences
+    has_garden: boolean | null;
+    is_male: boolean | null;
+    likes_children: boolean | null;
+    likes_other_animals: boolean | null;
+    // m2m relations
     liked_colors: number[];
     liked_charactes: number[];
     liked_kinds: number[];
-    location: Location | null;
+    // additional stuff
+    location: LocationResponse | null;
     liked_animals: number[];
 }
 
@@ -577,6 +623,9 @@ const transformShelterPreferences = (
 const transformUserPreferences = ({
     id,
     has_garden,
+    is_male,
+    likes_children,
+    likes_other_animals,
     liked_colors,
     liked_charactes,
     liked_kinds,
@@ -585,10 +634,17 @@ const transformUserPreferences = ({
 }: UserPreferencesResponse): UserPreferences => {
     return {
         id,
+        animal_kind: liked_kinds,
+        specific_animal_kind: [], // TODO
+        colors: liked_colors,
+        characters: liked_charactes,
+        size: [], // TODO
+        //
+        male: is_male,
+        likes_children,
+        likes_other_animals,
+        //
         has_garden,
-        liked_colors,
-        liked_characters: liked_charactes,
-        liked_kinds,
         location: location ? parseLocation(location) : null,
         liked_animals,
     };
@@ -614,7 +670,10 @@ const formatLocation = (lat: number, lng: number) => ({
     longitude: formatNumber(lng, 9, 6),
 });
 
-const parseLocation = (loc: Location) => ({
+const formatObjectLocation = (loc: Location | null): LocationResponse | null =>
+    loc ? formatLocation(loc.latitude, loc.longitude) : null;
+
+const parseLocation = (loc: LocationResponse) => ({
     longitude: parseFloat(loc.longitude),
     latitude: parseFloat(loc.latitude),
 });

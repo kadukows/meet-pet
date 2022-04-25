@@ -51,19 +51,53 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class UserPrefsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer()
+    location = LocationSerializer(required=False)
+    liked_colors = serializers.PrimaryKeyRelatedField(
+        queryset=Color.objects.all(), many=True, required=False
+    )
+    liked_charactes = serializers.PrimaryKeyRelatedField(
+        queryset=Character.objects.all(), many=True, required=False
+    )
+    liked_kinds = serializers.PrimaryKeyRelatedField(
+        queryset=AnimalKind.objects.all(), many=True, required=False
+    )
+
+    # liked_charactes = serializers.ModelField(Character, required=False)
+    # liked_kinds = serializers.ModelField(AnimalKind, required=False)
 
     class Meta:
         model = UserPrefs
         fields = [
             "id",
+            # boolean preferences
             "has_garden",
+            "is_male",
+            "likes_children",
+            "likes_other_animals",
+            # m2m relations
             "liked_colors",
             "liked_charactes",
             "liked_kinds",
+            # additional stuff
             "location",
             "liked_animals",
         ]
+
+    def update(self, instance: ShelterPrefs, validated_data: dict):
+        location = (
+            validated_data.pop("location") if "location" in validated_data else None
+        )
+
+        super().update(instance, validated_data)
+
+        if location is not None:
+            instance.location.latitude = location["latitude"]
+            instance.location.longitude = location["longitude"]
+            instance.location.save()
+
+        instance.save()
+
+        return instance
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):

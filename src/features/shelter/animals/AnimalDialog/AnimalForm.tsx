@@ -12,7 +12,7 @@ import { MarginedForm, FormikTextField } from './utils';
 import ControlledCheckbox from './ControlledCheckbox';
 import { shelterAnimalActions, Animal } from '../animalSlice';
 
-import MultipleSelectField from '../../../search/MultipleSelectField';
+import MultipleSelectField from '../../../selectFields/MultipleSelectField';
 import { specificAnimalKindSelectors } from '../../../specificAnimalKind/specificAnimalKindSlice';
 import { characterSelectors } from '../../../characters/charcterSlice';
 import { colorSelectors } from '../../../colors/colorSlice';

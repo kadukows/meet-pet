@@ -79,6 +79,13 @@ const NormalUserLinks = ({ closeDrawer }: LinksProps) => (
         >
             Liked animals
         </ListItemButton>
+        <ListItemButton
+            component={NavLink}
+            onClick={closeDrawer}
+            to="/preferences"
+        >
+            Preferences
+        </ListItemButton>
     </React.Fragment>
 );
 

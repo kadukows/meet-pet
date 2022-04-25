@@ -6,7 +6,7 @@ export enum UserType {
     Admin = 'Admin',
 }
 
-interface Location {
+export interface Location {
     longitude: number;
     latitude: number;
 }
@@ -19,10 +19,17 @@ export interface ShelterPreferences {
 
 export interface UserPreferences {
     id: number;
-    has_garden: boolean;
-    liked_colors: number[];
-    liked_characters: number[];
-    liked_kinds: number[];
+    animal_kind: number[];
+    specific_animal_kind: number[];
+    colors: number[];
+    characters: number[];
+    size: number[];
+    //// prefs
+    male: boolean | null;
+    likes_children: boolean | null;
+    likes_other_animals: boolean | null;
+    ///// data
+    has_garden: boolean | null;
     location: null | Location;
     liked_animals: number[];
 }
@@ -33,7 +40,7 @@ export interface User {
     full_name: string;
     user_type: UserType;
     shelter_prefs: ShelterPreferences | null;
-    user_prefs?: UserPreferences | null;
+    user_prefs: UserPreferences | null;
 }
 
 interface AuthState {
@@ -83,6 +90,14 @@ const authSlice = createSlice({
 
             state.user.shelter_prefs = action.payload;
         },
+        updateUserPreferences(state, action: PayloadAction<UserPreferences>) {
+            if (state.user === null || state.user.user_prefs === null) {
+                console.error('Not shelter preferences to update');
+                return;
+            }
+
+            state.user.user_prefs = action.payload;
+        },
         likeAnimal(state, action: PayloadAction<number>) {
             if (!(state.user && state.user?.user_prefs)) {
                 throw new Error('Not user in state');
@@ -112,6 +127,7 @@ export const {
     setUserTokenAuth,
     resetAuth,
     updateShelterPreferences,
+    updateUserPreferences,
     likeAnimal,
     dislikeAnimal,
 } = authSlice.actions;
