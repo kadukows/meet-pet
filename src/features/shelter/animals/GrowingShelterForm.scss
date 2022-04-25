@@ -1,0 +1,49 @@
+$enter-width: 25%;
+$exit-width: 70%;
+$duration: 300ms;
+
+@keyframes shelter-prefs-form-appear {
+    from {
+        width: $enter-width;
+    }
+    to {
+        width: $exit-width;
+    }
+}
+
+.shelter-prefs-form-container {
+    width: $enter-width;
+}
+
+.shelter-prefs-form-container-enter {
+    width: $enter-width;
+}
+
+.shelter-prefs-form-container-enter-active {
+    animation-name: shelter-prefs-form-appear;
+    animation-duration: $duration;
+    width: $exit-width;
+}
+
+.shelter-prefs-form-container-enter-done {
+    width: $exit-width;
+}
+
+.shelter-prefs-form-container-exit {
+    width: $exit-width;
+}
+
+.shelter-prefs-form-container-exit-active {
+    animation-name: shelter-prefs-form-appear;
+    animation-duration: $duration;
+    animation-direction: reverse;
+    width: $enter-width;
+}
+
+.display-none {
+    display: none;
+}
+
+.full-height {
+    height: 100%;
+}

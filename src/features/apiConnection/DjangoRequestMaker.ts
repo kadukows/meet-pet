@@ -1,30 +1,18 @@
 import axios from 'axios';
 import { Animal } from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
-import { UserPreferences } from '../auth/userSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
+import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
 import {
-    AnimalQueryParams,
-    IRequestMaker,
-    UserPreferencesResponse,
-} from './IRequestMaker';
-
-function transformUserPrefs(res: UserPreferencesResponse): UserPreferences {
-    return {
-        id: res.id,
-        has_garden: res.has_garden,
-        animal_kind: res.liked_kinds,
-        specific_animal_kind: res.liked_specific_kinds,
-        colors: res.liked_colors,
-        characters: res.liked_charactes,
-        size: res.liked_sizes,
-        male: res.is_male,
-        likes_children: res.likes_children,
-        likes_other_animals: res.likes_other_animals,
-    };
-}
+    ShelterPreferences,
+    User,
+    UserType,
+    UserPreferences,
+    Location,
+} from '../auth/userSlice';
+import { sleep } from '../../helpers';
 
 const DjangoRequestMaker: IRequestMaker = {
     getToken: async (username, password) => {
@@ -45,31 +33,13 @@ const DjangoRequestMaker: IRequestMaker = {
     },
 
     getUser: async (token) => {
-        interface UserResponse {
-            username: string;
-            first_name: string;
-            last_name: string;
-            email: string;
-            profile: {
-                user_prefs: UserPreferencesResponse;
-
-                shelter_prefs: null | {
-                    location: string;
-                };
-            };
-        }
-
         try {
             const res = await axios.get<UserResponse>(
                 '/api/user/me/',
                 makeAuthHeader(token)
             );
-            return {
-                username: res.data.username,
-                email: res.data.email,
-                full_name: res.data.first_name.concat(' ', res.data.last_name),
-                preferences: transformUserPrefs(res.data.profile.user_prefs),
-            };
+
+            return transformUser(res.data);
         } catch (e: any) {}
 
         return null;
@@ -179,39 +149,264 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return {
                 count: res.data.count,
-                results: res.data.results.map((ar) => transformAnimal(ar)),
+                results: res.data.results.map(transformAnimal),
             };
         } catch (e) {}
 
         return null;
     },
 
-    setUserAnimalPreferences: (
+    fetchShelter: async (token, shelter_id) => {
+        try {
+            const res = await axios.get<ShelterPreferenceResponse>(
+                `/api/shelter_preferences/${shelter_id}/`,
+                makeAuthHeader(token)
+            );
+
+            return transformShelterPreferences(res.data);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
+    fetchAnimal: async (token, animal_id) => {
+        try {
+            const res = await axios.get<AnimalResponse>(
+                `/api/animals/${animal_id}/`,
+                makeAuthHeader(token)
+            );
+
+            return transformAnimal(res.data);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
+    likeAnimal: async (token, animal_id) => {
+        try {
+            await axios.post(
+                `/api/animals/${animal_id}/like/`,
+                null,
+                makeAuthHeader(token)
+            );
+            return true;
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
+    dislikeAnimal: async (token: string, animal_id: number) => {
+        try {
+            await axios.post(
+                `/api/animals/${animal_id}/dislike/`,
+                null,
+                makeAuthHeader(token)
+            );
+
+            return true;
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
+    likedAnimals: async (token) => {
+        try {
+            const res = await axios.get<AnimalResponse[]>(
+                '/api/animals/liked_animals/',
+                makeAuthHeader(token)
+            );
+
+            return res.data.map(transformAnimal);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
+    shelter: {
+        getOwnAnimals: async (token) => {
+            try {
+                const res = await axios.get<AnimalResponse[]>(
+                    '/api/animals/shelters/',
+                    makeAuthHeader(token)
+                );
+
+                return res.data.map(transformAnimal);
+            } catch (e) {
+                console.error('Siema', e);
+            }
+
+            return null;
+        },
+
+        createAnimal: async (token, animal) => {
+            try {
+                const res = await axios.post<{ id: number }>(
+                    '/api/animals/',
+                    animal,
+                    makeAuthHeader(token)
+                );
+
+                const animalRes = await axios.get<AnimalResponse>(
+                    `/api/animals/${res.data.id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return transformAnimal(animalRes.data);
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
+
+        updateAnimal: async (token, animal) => {
+            try {
+                const animalRequest = { ...animal, id: undefined };
+
+                console.log(animalRequest);
+
+                const res = await axios.put<{ id: number }>(
+                    `/api/animals/${animal.id}/`,
+                    animal,
+                    makeAuthHeader(token)
+                );
+
+                const animalRes = await axios.get<AnimalResponse>(
+                    `/api/animals/${res.data.id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return transformAnimal(animalRes.data);
+            } catch (e) {}
+
+            return null;
+        },
+
+        deleteAnimal: async (token, animal_id) => {
+            try {
+                await axios.delete(
+                    `/api/animals/${animal_id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return true;
+            } catch (e) {
+                console.error();
+            }
+
+            return null;
+        },
+
+        uploadPhoto: async (token: string, formData: FormData) => {
+            try {
+                interface PhotoResponse {
+                    id: number;
+                    animal: number;
+                    image_url: string;
+                }
+
+                const res = await axios.post<PhotoResponse>(
+                    '/api/my_photos/',
+                    formData,
+                    makeAuthHeader(token)
+                );
+
+                const { id, animal, image_url } = res.data;
+                return { id, animal, url: image_url };
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
+
+        deletePhoto: async (token, photo_id) => {
+            try {
+                await axios.delete(
+                    `/api/my_photos/${photo_id}/`,
+                    makeAuthHeader(token)
+                );
+                return true;
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
+
+        updateShelterPreferences: async (
+            token: string,
+            update: ShelterPreferences
+        ) => {
+            try {
+                const res = await axios.put<ShelterPreferenceResponse>(
+                    `/api/shelter_preferences/${update.id}/`,
+                    {
+                        description: update.description,
+                        location: update.location
+                            ? formatLocation(
+                                  update.location.latitude,
+                                  update.location.longitude
+                              )
+                            : null,
+                    },
+                    makeAuthHeader(token)
+                );
+
+                return transformShelterPreferences(res.data);
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
+    },
+    setUserAnimalPreferences: async (
         token: string,
         user_animal_prefs: UserPreferences
     ) => {
-        const prefs: Omit<UserPreferencesResponse, 'id'> = {
-            has_garden: user_animal_prefs.has_garden as boolean,
-            location: 'some location',
-            liked_kinds: user_animal_prefs.colors as number[],
-            liked_specific_kinds:
-                user_animal_prefs.specific_animal_kind as number[],
-            liked_colors: user_animal_prefs.colors as number[],
-            liked_charactes: user_animal_prefs.characters as number[],
-            liked_sizes: user_animal_prefs.size as number[],
-            is_male: user_animal_prefs.male as boolean,
-            likes_children: user_animal_prefs.likes_children as boolean,
-            likes_other_animals:
-                user_animal_prefs.likes_other_animals as boolean,
+        const prefs: Partial<Omit<UserPreferencesResponse, 'id'>> = {
+            // booleans
+            has_garden: user_animal_prefs.has_garden,
+            is_male: user_animal_prefs.male,
+            likes_children: user_animal_prefs.likes_children,
+            likes_other_animals: user_animal_prefs.likes_other_animals,
+            // m2m rels
+            liked_colors: user_animal_prefs.colors,
+            liked_charactes: user_animal_prefs.characters,
+            liked_kinds: user_animal_prefs.animal_kind,
+            //
+            location:
+                formatObjectLocation(user_animal_prefs.location) ?? undefined,
+            liked_animals: user_animal_prefs.liked_animals,
+            // TODO
+            //liked_specific_kinds: ,
+
+            // TODO
+            // liked_sizes: user_animal_prefs.size as number[],
         };
 
         try {
-            axios.put(
+            const res = await axios.put<UserPreferencesResponse>(
                 `/api/user_preferences/${user_animal_prefs.id}/`,
                 prefs,
                 makeAuthHeader(token)
             );
-        } catch (e) {}
+
+            return transformUserPreferences(res.data);
+        } catch (e) {
+            console.error(e);
+        }
 
         return null;
     },
@@ -223,12 +418,6 @@ const makeAuthHeader = (token: string) => ({
     },
 });
 
-const sleep = (ms: number) => {
-    return new Promise<null>((accept, reject) =>
-        setTimeout(() => accept(null), ms)
-    );
-};
-
 export { DjangoRequestMaker };
 
 interface AnimalResponse {
@@ -237,15 +426,20 @@ interface AnimalResponse {
     specific_animal_kind: {
         id: number;
         value: string;
+        animal_kind: {
+            id: number;
+            value: string;
+        };
     };
     description: string;
-    characters: Array<{ value: string }>;
-    colors: Array<{ value: string }>;
-    size: { value: string };
+    characters: Array<{ id: number; value: string }>;
+    colors: Array<{ id: number; value: string }>;
+    size: { id: number; value: string };
     male: boolean;
     likes_child: boolean;
     likes_other_animals: boolean;
-    photos: Array<{ image_url: string }>;
+    photos: Array<{ id: number; image_url: string }>;
+    shelter: number | null;
 }
 
 interface PaginatedResponse<T> {
@@ -268,20 +462,25 @@ function transformAnimal(res: AnimalResponse): Animal {
         likes_child,
         likes_other_animals,
         photos,
+        shelter,
     } = res;
 
     return {
         id,
         name,
         description,
-        specific_animal_kind: specific_animal_kind.value,
-        characters: characters.map((el) => el.value),
-        colors: colors.map((el) => el.value),
-        size: size.value,
+        specific_animal_kind: specific_animal_kind,
+        characters,
+        colors,
+        size,
         is_male: male,
         likes_child,
         likes_other_animals,
-        photo_urls: photos.map((el) => el.image_url),
+        photos: photos.map((p) => ({
+            id: p.id,
+            url: p.image_url,
+        })),
+        shelter,
     };
 }
 
@@ -344,3 +543,137 @@ const parseAnimalQueryParams = (q: AnimalQueryParams) => {
 
     return result;
 };
+
+interface LocationResponse {
+    longitude: string;
+    latitude: string;
+}
+
+interface ShelterPreferenceResponse {
+    id: number;
+    description: string;
+    location: LocationResponse | null;
+}
+
+interface UserPreferencesResponse {
+    id: number;
+    // boolean preferences
+    has_garden: boolean | null;
+    is_male: boolean | null;
+    likes_children: boolean | null;
+    likes_other_animals: boolean | null;
+    // m2m relations
+    liked_colors: number[];
+    liked_charactes: number[];
+    liked_kinds: number[];
+    // additional stuff
+    location: LocationResponse | null;
+    liked_animals: number[];
+}
+
+interface UserResponse {
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    ///////
+    profile: {
+        shelter_prefs: null | ShelterPreferenceResponse;
+        user_prefs: null | UserPreferencesResponse;
+    };
+}
+
+const transformUser = (user_response: UserResponse): User => {
+    let shelter_prefs: ShelterPreferences | null = null;
+    let user_prefs: UserPreferences | null = null;
+    let user_type = UserType.Normal;
+
+    if (user_response.profile.shelter_prefs !== null) {
+        user_type = UserType.Shelter;
+        shelter_prefs = transformShelterPreferences(
+            user_response.profile.shelter_prefs
+        );
+    } else if (user_response.profile.user_prefs !== null) {
+        user_prefs = transformUserPreferences(user_response.profile.user_prefs);
+    }
+
+    return {
+        username: user_response.username,
+        email: user_response.email,
+        full_name: user_response.first_name.concat(
+            ' ',
+            user_response.last_name
+        ),
+        user_type,
+        shelter_prefs,
+        user_prefs,
+    };
+};
+
+const transformShelterPreferences = (
+    response: ShelterPreferenceResponse
+): ShelterPreferences => {
+    return {
+        id: response.id,
+        description: response.description,
+        location: response.location ? parseLocation(response.location) : null,
+    };
+};
+
+const transformUserPreferences = ({
+    id,
+    has_garden,
+    is_male,
+    likes_children,
+    likes_other_animals,
+    liked_colors,
+    liked_charactes,
+    liked_kinds,
+    location,
+    liked_animals,
+}: UserPreferencesResponse): UserPreferences => {
+    return {
+        id,
+        animal_kind: liked_kinds,
+        specific_animal_kind: [], // TODO
+        colors: liked_colors,
+        characters: liked_charactes,
+        size: [], // TODO
+        //
+        male: is_male,
+        likes_children,
+        likes_other_animals,
+        //
+        has_garden,
+        location: location ? parseLocation(location) : null,
+        liked_animals,
+    };
+};
+
+function numWholeDigits(x: number) {
+    return (Math.log10((x ^ (x >> 31)) - (x >> 31)) | 0) + 1;
+}
+
+const formatNumber = (
+    x: number,
+    max_digits: number,
+    decimal_places: number
+) => {
+    const wholeDigitNo = numWholeDigits(x);
+    const decimalPlaces = Math.min(max_digits - wholeDigitNo, decimal_places);
+
+    return x.toFixed(decimalPlaces);
+};
+
+const formatLocation = (lat: number, lng: number) => ({
+    latitude: formatNumber(lat, 8, 6),
+    longitude: formatNumber(lng, 9, 6),
+});
+
+const formatObjectLocation = (loc: Location | null): LocationResponse | null =>
+    loc ? formatLocation(loc.latitude, loc.longitude) : null;
+
+const parseLocation = (loc: LocationResponse) => ({
+    longitude: parseFloat(loc.longitude),
+    latitude: parseFloat(loc.latitude),
+});

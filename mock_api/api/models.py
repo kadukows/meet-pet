@@ -9,22 +9,26 @@ from django.dispatch import receiver
 # we need one-to-one link to exsiting User model
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user_prefs = models.OneToOneField("UserPrefs", null=True, on_delete=models.CASCADE)
+    user_prefs = models.OneToOneField(
+        "UserPrefs", null=True, on_delete=models.CASCADE, blank=True
+    )
     shelter_prefs = models.OneToOneField(
-        "ShelterPrefs", null=True, on_delete=models.CASCADE
+        "ShelterPrefs", null=True, on_delete=models.CASCADE, blank=True
     )
-    NORMAL = "NO"
-    SHELTER = "SH"
-    ADMIN = "AD"
-    USER_TYPE_CHOICES = [(NORMAL, "Normal"), (SHELTER, "Shelter"), (ADMIN, "Admin")]
-    user_type = models.CharField(
-        max_length=2, choices=USER_TYPE_CHOICES, default=NORMAL
-    )
+
+    def is_normal_user(self):
+        return self.user_prefs != None
+
+    def is_shelter(self):
+        return self.shelter_prefs != None
+
+    def is_admin(self):
+        return self.user_prefs == None and self.shelter_prefs == None
 
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=Q(user_prefs__isnull=False) | Q(shelter_prefs__isnull=False),
+                check=Q(user_prefs__isnull=True) | Q(shelter_prefs__isnull=True),
                 name="either_user_prefs_or_shelter_prefs_must_not_be_null",
             )
         ]
@@ -39,20 +43,42 @@ def add_user_to_normal_group(sender, instance: User, created, **kwargs):
         profile.save()
 
 
+class Location(models.Model):
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(max_digits=8, decimal_places=6)
+
+
 class UserPrefs(models.Model):
     has_garden = models.BooleanField(null=False, default=False)
-    location = models.TextField(null=False, default="Some location")
+    location: Location = models.OneToOneField(
+        Location,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="user_prefs",
+    )
     liked_colors = models.ManyToManyField("Color")
     liked_charactes = models.ManyToManyField("Character")
     liked_kinds = models.ManyToManyField("AnimalKind")
-    is_male = models.BooleanField(null=False, default=False)
-    likes_children = models.BooleanField(null=False, default=False)
-    likes_other_animals = models.BooleanField(null=False, default=False)
+    # liked_specific_kinds = models.ManyToManyField('SpecificAnimalKind')
+    is_male = models.BooleanField(null=True)
+    likes_children = models.BooleanField(null=True)
+    likes_other_animals = models.BooleanField(null=True)
+
     prev_animal = models.IntegerField(null=True)
+
+    liked_animals = models.ManyToManyField("Animal")
 
 
 class ShelterPrefs(models.Model):
-    location = models.TextField(null=False)
+    location: Location = models.OneToOneField(
+        Location,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="shelter_prefs",
+    )
+    description = models.TextField(null=False, default="")
 
 
 class Color(models.Model):
@@ -106,6 +132,9 @@ class Animal(models.Model):
     male = models.BooleanField(null=False)
     likes_child = models.BooleanField(null=False)
     likes_other_animals = models.BooleanField(null=False)
+    shelter = models.ForeignKey(
+        ShelterPrefs, on_delete=models.DO_NOTHING, null=True, default=None
+    )
 
     # impl detail
     randomly_generated = models.BooleanField(null=False, default=False)

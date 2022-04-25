@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     ActionReducerMapBuilder,
     AsyncThunk,
@@ -5,8 +6,10 @@ import {
     createEntityAdapter,
     createSlice,
     EntityAdapter,
+    EntityId,
     EntityState,
     PayloadAction,
+    Update,
 } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/internal';
 import { observer } from 'redux-observers';
@@ -84,6 +87,10 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
                 })
             );
 
+            console.error(
+                'Problem occured when fetching some data from reducer: ' + name
+            );
+
             return thunkApi.rejectWithValue(null);
         }
 
@@ -101,6 +108,18 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
             removeAll: adapter.removeAll as (
                 d: WritableDraft<typeof initialState>
             ) => void,
+            updateOne: adapter.updateOne as (
+                d: WritableDraft<typeof initialState>,
+                a: PayloadAction<Update<T>>
+            ) => void,
+            addOne: adapter.addOne as (
+                d: WritableDraft<typeof initialState>,
+                a: PayloadAction<T>
+            ) => void,
+            removeOne: adapter.removeOne as (
+                d: WritableDraft<typeof initialState>,
+                a: PayloadAction<EntityId>
+            ) => void,
         },
         extraReducers: (builder) => {
             addCommonBuilderCasesForAsyncThunk(fetch, adapter, builder);
@@ -116,5 +135,43 @@ export function createCommonObjectReducerAndStuff<T extends WithId>(
         reducer: slice.reducer,
         actions: slice.actions,
         observer: makeObserverOnAuthed(fetch(), slice.actions.removeAll()),
+        fetchAction: fetch,
     };
 }
+
+export const sleep = (ms: number) => {
+    return new Promise<null>((accept, reject) =>
+        setTimeout(() => accept(null), ms)
+    );
+};
+
+export const useIntersectionWasInViewportOnce = (
+    ref: React.RefObject<Element | null>
+) => {
+    const [seen, setSeen] = React.useState(false);
+
+    React.useEffect(() => {
+        if (ref.current === null) {
+            throw new Error(
+                'useIntersectionWasInViewportOnce(): ref.current is null'
+            );
+        }
+
+        const element = ref.current;
+
+        const iObserver = new IntersectionObserver((entries) => {
+            const [e] = entries;
+            if (e.isIntersecting) {
+                setSeen(true);
+                iObserver.unobserve(element);
+            }
+        });
+
+        iObserver.observe(element);
+        return () => {
+            iObserver.unobserve(element);
+        };
+    }, [setSeen, ref]);
+
+    return seen;
+};

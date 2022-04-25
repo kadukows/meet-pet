@@ -5,6 +5,7 @@ from api.models import (
     AnimalKind,
     Character,
     Color,
+    Location,
     Photo,
     Profile,
     Size,
@@ -15,6 +16,7 @@ from api.models import (
 
 
 admin.site.register(Profile)
+admin.site.register(Location)
 admin.site.register(UserPrefs)
 admin.site.register(ShelterPrefs)
 admin.site.register(Color)

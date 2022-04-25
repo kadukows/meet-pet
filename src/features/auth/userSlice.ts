@@ -1,24 +1,46 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export enum UserType {
+    Normal = 'Normal',
+    Shelter = 'Shelter',
+    Admin = 'Admin',
+}
+
+export interface Location {
+    longitude: number;
+    latitude: number;
+}
+
+export interface ShelterPreferences {
+    id: number;
+    description: string;
+    location: null | Location;
+}
+
 export interface UserPreferences {
     id: number;
-    has_garden?: boolean | null;
-    animal_kind?: number[];
-    specific_animal_kind?: number[];
-    colors?: number[];
-    characters?: number[];
-    size?: number[];
-    ////
-    male?: boolean | null;
-    likes_children?: boolean | null;
-    likes_other_animals?: boolean | null;
+    animal_kind: number[];
+    specific_animal_kind: number[];
+    colors: number[];
+    characters: number[];
+    size: number[];
+    //// prefs
+    male: boolean | null;
+    likes_children: boolean | null;
+    likes_other_animals: boolean | null;
+    ///// data
+    has_garden: boolean | null;
+    location: null | Location;
+    liked_animals: number[];
 }
 
 export interface User {
     username: string;
     email: string;
     full_name: string;
-    preferences?: UserPreferences;
+    user_type: UserType;
+    shelter_prefs: ShelterPreferences | null;
+    user_prefs: UserPreferences | null;
 }
 
 interface AuthState {
@@ -57,6 +79,42 @@ const authSlice = createSlice({
 
             state.loading = false;
         },
+        updateShelterPreferences(
+            state,
+            action: PayloadAction<ShelterPreferences>
+        ) {
+            if (state.user === null || state.user.shelter_prefs === null) {
+                console.error('Not shelter preferences to update');
+                return;
+            }
+
+            state.user.shelter_prefs = action.payload;
+        },
+        updateUserPreferences(state, action: PayloadAction<UserPreferences>) {
+            if (state.user === null || state.user.user_prefs === null) {
+                console.error('Not shelter preferences to update');
+                return;
+            }
+
+            state.user.user_prefs = action.payload;
+        },
+        likeAnimal(state, action: PayloadAction<number>) {
+            if (!(state.user && state.user?.user_prefs)) {
+                throw new Error('Not user in state');
+            }
+
+            state.user.user_prefs.liked_animals.push(action.payload);
+        },
+        dislikeAnimal(state, action: PayloadAction<number>) {
+            if (!(state.user && state.user?.user_prefs)) {
+                throw new Error('Not user in state');
+            }
+
+            state.user.user_prefs.liked_animals =
+                state.user.user_prefs.liked_animals.filter(
+                    (el) => el !== action.payload
+                );
+        },
     },
 });
 
@@ -65,5 +123,12 @@ interface UserTokenAuthPayload {
     user: User;
 }
 
-export const { setUserTokenAuth, resetAuth } = authSlice.actions;
+export const {
+    setUserTokenAuth,
+    resetAuth,
+    updateShelterPreferences,
+    updateUserPreferences,
+    likeAnimal,
+    dislikeAnimal,
+} = authSlice.actions;
 export const authReducer = authSlice.reducer;

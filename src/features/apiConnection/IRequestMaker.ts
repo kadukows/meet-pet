@@ -1,5 +1,5 @@
 import { AnimalKind } from '../animalKind/animaKindSlice';
-import { User, UserPreferences } from '../auth/userSlice';
+import { ShelterPreferences, User, UserPreferences } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
@@ -30,10 +30,47 @@ interface IRequestMaker {
         animal_query_params: AnimalQueryParams
     ) => Promise<PaginatedResponse<Animal> | null>;
 
+    fetchShelter: (
+        token: string,
+        shelter_id: number
+    ) => Promise<ShelterPreferences | null>;
+
+    fetchAnimal: (token: string, shelter_id: number) => Promise<Animal | null>;
+
+    likeAnimal: (token: string, animal_id: number) => Promise<true | null>;
+    dislikeAnimal: (token: string, animal_id: number) => Promise<true | null>;
+
+    likedAnimals: (token: string) => Promise<Animal[] | null>;
+
+    // shelters things
+    shelter: {
+        getOwnAnimals: (token: string) => Promise<Animal[] | null>;
+        createAnimal: (
+            token: string,
+            animal: AnimalCreate
+        ) => Promise<Animal | null>;
+        updateAnimal: (
+            token: string,
+            animal: AnimalUpdate
+        ) => Promise<Animal | null>;
+        deleteAnimal: (
+            token: string,
+            animal_id: number
+        ) => Promise<true | null>;
+        uploadPhoto: (
+            token: string,
+            formData: FormData
+        ) => Promise<Photo | null>;
+        deletePhoto: (token: string, photo_id: number) => Promise<true | null>;
+        updateShelterPreferences: (
+            token: string,
+            update: ShelterPreferences
+        ) => Promise<ShelterPreferences | null>;
+    };
     setUserAnimalPreferences: (
         token: string,
         user_animal_prefs: UserPreferences
-    ) => null;
+    ) => Promise<UserPreferences | null>;
 }
 
 export type { IRequestMaker };
@@ -45,7 +82,8 @@ export interface UserPreferencesResponse {
     has_garden: boolean;
     location: string;
     liked_kinds: number[];
-    liked_specific_kinds: number[];
+    // TODO
+    //liked_specific_kinds: number[];
     liked_colors: number[];
     liked_charactes: number[];
     liked_sizes: number[];
@@ -72,4 +110,25 @@ export interface AnimalQueryParams {
 interface PaginatedResponse<T> {
     count: number;
     results: T[];
+}
+
+export interface AnimalUpdate {
+    id: number;
+    name: string;
+    specific_animal_kind: number;
+    description: string;
+    characters: number[];
+    colors: number[];
+    size: number;
+    male: boolean;
+    likes_child: boolean;
+    likes_other_animals: boolean;
+}
+
+export type AnimalCreate = Omit<AnimalUpdate, 'id'>;
+
+export interface Photo {
+    id: number;
+    animal: number;
+    url: string;
 }

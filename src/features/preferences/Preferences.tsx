@@ -1,17 +1,8 @@
-import React, { FormEvent } from 'react';
-import Paper from '@mui/material/Paper';
-import { SxProps, Theme, useTheme } from '@mui/material/styles';
+import React from 'react';
 import Box from '@mui/material/Box';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import Chip from '@mui/material/Chip';
-import TextField from '@mui/material/TextField';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { Color, colorSelectors } from '../colors/colorSlice';
+import { colorSelectors } from '../colors/colorSlice';
 import { useFormik } from 'formik';
 import Loader from '../loader/Loader';
 import Button from '@mui/material/Button';
@@ -20,70 +11,57 @@ import { animalKindSelectors } from '../animalKind/animaKindSlice';
 import TernaryField, {
     Ternary,
     translateTernary,
-    translateToTerenary,
+    translateToTerenary as translateToTernary,
 } from '../selectFields/TernaryField';
-import { UserPreferencesResponse } from '../apiConnection/IRequestMaker';
-import { UserPreferences } from '../auth/userSlice';
+import { updateUserPreferences, UserPreferences } from '../auth/userSlice';
 import { getRequestMaker } from '../apiConnection';
 import MultipleSelectField from '../selectFields/MultipleSelectField';
 import { characterSelectors } from '../characters/charcterSlice';
 import { sizeSelectors } from '../size/sizeSlice';
+import { addAlert } from '../alerts/alertsSlice';
 
 interface Props {}
+
+interface FormState {
+    animal_kinds: number[];
+    specific_animal_kinds: number[];
+    colors: number[];
+    characters: number[];
+    size: number[];
+    /////
+    male: Ternary;
+    likes_children: Ternary;
+    likes_other_animals: Ternary;
+}
+
+const userPrefsToFormState = (x: UserPreferences): FormState => ({
+    animal_kinds: x.animal_kind,
+    specific_animal_kinds: x.specific_animal_kind,
+    colors: x.colors,
+    characters: x.characters,
+    size: x.size,
+    ///////////
+    male: translateToTernary(x.male),
+    likes_children: translateToTernary(x.likes_children),
+    likes_other_animals: translateToTernary(x.likes_other_animals),
+});
 
 const Preferences = (props: Props) => {
     const token = useSelector((state: RootState) => state.authReducer.token);
     const user_prefs = useSelector(
-        (state: RootState) => state.authReducer.user?.preferences
+        (state: RootState) => state.authReducer.user?.user_prefs
     );
-    const formik: any = useFormik({
-        initialValues: {
-            animal_kinds:
-                useSelector(
-                    (state: RootState) =>
-                        state.authReducer.user?.preferences?.animal_kind
-                ) ?? [],
-            specific_animal_kinds:
-                useSelector(
-                    (state: RootState) =>
-                        //TODO: When animal kind changed, do not display the initial liked_specific_kind
-                        state.authReducer.user?.preferences
-                            ?.specific_animal_kind
-                ) ?? [],
-            colors:
-                useSelector(
-                    (state: RootState) =>
-                        state.authReducer.user?.preferences?.colors
-                ) ?? [],
-            characters:
-                useSelector(
-                    (state: RootState) =>
-                        state.authReducer.user?.preferences?.characters
-                ) ?? [],
-            size:
-                useSelector(
-                    (state: RootState) =>
-                        state.authReducer.user?.preferences?.size
-                ) ?? [],
+    const dispatch = useDispatch();
 
-            male: useSelector((state: RootState) =>
-                translateToTerenary(state.authReducer.user?.preferences?.male)
-            ),
-            likes_children: useSelector((state: RootState) =>
-                translateToTerenary(
-                    state.authReducer.user?.preferences?.likes_children
-                )
-            ),
-            likes_other_animals: useSelector((state: RootState) =>
-                translateToTerenary(
-                    state.authReducer.user?.preferences?.likes_other_animals
-                )
-            ),
-        },
-        onSubmit: (values) => {
-            alert(JSON.stringify(values, null, 2));
+    if (!user_prefs) {
+        throw new Error('No user prefs');
+    }
+
+    const formik: any = useFormik({
+        initialValues: userPrefsToFormState(user_prefs),
+        onSubmit: async (values, submitProps) => {
             const result: UserPreferences = {
-                id: user_prefs?.id ?? 0,
+                id: user_prefs.id,
                 animal_kind: values.animal_kinds,
                 specific_animal_kind: values.specific_animal_kinds,
                 characters: values.characters,
@@ -94,9 +72,38 @@ const Preferences = (props: Props) => {
                 likes_other_animals: translateTernary(
                     values.likes_other_animals
                 ),
+                //////
+                has_garden: user_prefs.has_garden,
+                location: user_prefs.location,
+                liked_animals: user_prefs.liked_animals,
             };
 
-            getRequestMaker().setUserAnimalPreferences(token as string, result);
+            const newUserPrefs =
+                await getRequestMaker().setUserAnimalPreferences(
+                    token as string,
+                    result
+                );
+
+            if (newUserPrefs !== null) {
+                dispatch(updateUserPreferences(newUserPrefs));
+                dispatch(
+                    addAlert({
+                        type: 'success',
+                        message: 'Updated user preferences',
+                    })
+                );
+                submitProps.resetForm({
+                    values: userPrefsToFormState(newUserPrefs),
+                });
+            } else {
+                dispatch(
+                    addAlert({
+                        type: 'error',
+                        message: 'Something went wrong',
+                    })
+                );
+                //submitProps.resetForm();
+            }
         },
     });
 
@@ -144,7 +151,8 @@ const Preferences = (props: Props) => {
                                 label="Specific Animal Kind"
                                 formik={formik}
                                 selectAll={
-                                    specificAnimalKindSelectors.selectAll
+                                    //specificAnimalKindSelectors.selectAll
+                                    specificAnimalKindSelectorObjects
                                 }
                                 selectEntities={
                                     specificAnimalKindSelectors.selectEntities
@@ -204,7 +212,7 @@ const Preferences = (props: Props) => {
 
 const check = (reducer: any) => reducer.loaded && !reducer.loading;
 
-export default () => {
+const ComponentWithLoader = () => {
     const selector = (state: RootState) =>
         check(state.animalKindReducer) &&
         check(state.specificAnimalKindReducer) &&
@@ -218,3 +226,5 @@ export default () => {
         </Loader>
     );
 };
+
+export default ComponentWithLoader;

@@ -58,6 +58,7 @@ const LoginDialog = (props: Props) => {
                                 formik.errors.username
                             }
                             disabled={formik.isSubmitting}
+                            autoFocus
                         />
                         <TextField
                             sx={{ mt: 2 }}

@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice as random_choice
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
@@ -16,9 +16,11 @@ from django_filters import rest_framework as filters
 from api.serializers import (
     AnimalKindSerializer,
     AnimalSerializer,
+    AnimalWriteSerializer,
     CharacterSerializer,
     ColorSerializer,
     PhotoSerializer,
+    ShelterPrefsSerializer,
     SpecificAnimalKindSerializer,
     UserSerializer,
     UserPrefsSerializer,
@@ -31,11 +33,13 @@ from api.models import (
     Character,
     Color,
     Photo,
+    ShelterPrefs,
     Size,
     SpecificAnimalKind,
     UserPrefs,
 )
 from api.filters import AnimalFilter
+from api.permissions import IsAdmin, IsShelter, OrPermission
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -62,6 +66,12 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
 class BaseAuthPerm:
     authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
+
+class ShelterPreferencesViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+    # authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
+    serializer_class = ShelterPrefsSerializer
+    queryset = ShelterPrefs.objects.all()
 
 
 class ColorViewSet(BaseAuthPerm, viewsets.ModelViewSet):
@@ -95,11 +105,28 @@ class MyPagination(pagination.LimitOffsetPagination):
 
 
 class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
-    serializer_class = AnimalSerializer
     queryset = Animal.objects.all()
     filterset_class = AnimalFilter
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
+
+    # list_permissions = [permissions.IsAuthenticated()]
+    # list_actions = ("list", "retrieve", "next", "like")
+    # edit_permissions = [OrPermission(IsShelter(), IsAdmin())]
+
+    """
+    def get_permissions(self):
+        if self.action in self.list_actions:
+            return self.list_permissions
+
+        return self.edit_permissions
+    """
+
+    def get_serializer_class(self):
+        if self.action == "create" or self.action == "update":
+            return AnimalWriteSerializer
+
+        return AnimalSerializer
 
     @action(methods=["post"], detail=False, serializer_class=serializers.Serializer)
     def next(self, request):
@@ -113,15 +140,56 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
+        """
         smallest_id = Animal.objects.order_by("id").first().id
         largest_id = Animal.objects.order_by("-id").first().id
         random_id = randint(smallest_id, largest_id)
 
         animal = Animal.objects.filter(id__gte=random_id).first()
+        """
+
+        animal = random_choice(Animal.objects.all())
+
         if animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
         return self.returnAndSetAnimal(user_prefs, animal)
+
+    @action(methods=["get"], detail=False, pagination_class=None)
+    def shelters(self, request):
+        return Response(
+            data=self.get_serializer(
+                Animal.objects.filter(
+                    shelter=self.request.user.profile.shelter_prefs
+                ).all(),
+                many=True,
+            ).data
+        )
+
+    @action(methods=["post"], detail=True, serializer_class=serializers.Serializer)
+    def like(self, request: Request, pk=None):
+        animal = self.get_object()
+        prefs: UserPrefs = request.user.profile.user_prefs
+        prefs.liked_animals.add(animal)
+        prefs.save()
+        return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, serializer_class=serializers.Serializer)
+    def dislike(self, request: Request, pk=None):
+        animal = self.get_object()
+        prefs: UserPrefs = request.user.profile.user_prefs
+        prefs.liked_animals.remove(animal)
+        prefs.save()
+        return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False)
+    def liked_animals(self, request: Request):
+        return Response(
+            data=self.get_serializer(
+                request.user.profile.user_prefs.liked_animals, many=True
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     def returnAndSetAnimal(self, user_prefs: UserPrefs, animal: Animal):
         user_prefs.prev_animal = animal.id
