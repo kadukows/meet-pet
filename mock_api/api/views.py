@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice as random_choice
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
@@ -139,11 +139,16 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
+        '''
         smallest_id = Animal.objects.order_by("id").first().id
         largest_id = Animal.objects.order_by("-id").first().id
         random_id = randint(smallest_id, largest_id)
 
         animal = Animal.objects.filter(id__gte=random_id).first()
+        '''
+
+        animal = random_choice(Animal.objects.all())
+
         if animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
@@ -165,6 +170,14 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         animal = self.get_object()
         prefs: UserPrefs = request.user.profile.user_prefs
         prefs.liked_animals.add(animal)
+        prefs.save()
+        return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, serializer_class=serializers.Serializer)
+    def dislike(self, request: Request, pk=None):
+        animal = self.get_object()
+        prefs: UserPrefs = request.user.profile.user_prefs
+        prefs.liked_animals.remove(animal)
         prefs.save()
         return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
 

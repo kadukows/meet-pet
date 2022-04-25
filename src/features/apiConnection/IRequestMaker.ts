@@ -38,6 +38,7 @@ interface IRequestMaker {
     fetchAnimal: (token: string, shelter_id: number) => Promise<Animal | null>;
 
     likeAnimal: (token: string, animal_id: number) => Promise<true | null>;
+    dislikeAnimal: (token: string, animal_id: number) => Promise<true | null>;
 
     // shelters things
     shelter: {

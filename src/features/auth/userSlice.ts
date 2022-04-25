@@ -83,6 +83,23 @@ const authSlice = createSlice({
 
             state.user.shelter_prefs = action.payload;
         },
+        likeAnimal(state, action: PayloadAction<number>) {
+            if (!(state.user && state.user?.user_prefs)) {
+                throw new Error('Not user in state');
+            }
+
+            state.user.user_prefs.liked_animals.push(action.payload);
+        },
+        dislikeAnimal(state, action: PayloadAction<number>) {
+            if (!(state.user && state.user?.user_prefs)) {
+                throw new Error('Not user in state');
+            }
+
+            state.user.user_prefs.liked_animals =
+                state.user.user_prefs.liked_animals.filter(
+                    (el) => el !== action.payload
+                );
+        },
     },
 });
 
@@ -91,6 +108,11 @@ interface UserTokenAuthPayload {
     user: User;
 }
 
-export const { setUserTokenAuth, resetAuth, updateShelterPreferences } =
-    authSlice.actions;
+export const {
+    setUserTokenAuth,
+    resetAuth,
+    updateShelterPreferences,
+    likeAnimal,
+    dislikeAnimal,
+} = authSlice.actions;
 export const authReducer = authSlice.reducer;

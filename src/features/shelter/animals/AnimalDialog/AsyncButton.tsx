@@ -1,7 +1,8 @@
 import React from 'react';
-//import Box from '@mui/material/Box';
 import Button, { ButtonProps } from '@mui/material/Button';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { styled } from '@mui/material/styles';
+
 import { sleep } from '../../../../helpers';
 
 type OnClickAsync = (
@@ -10,6 +11,7 @@ type OnClickAsync = (
 
 type Props = ButtonProps & {
     onClick: OnClickAsync;
+    onStart?: () => void;
 };
 
 enum ActionType {
@@ -20,6 +22,7 @@ enum ActionType {
 const AsyncButton = ({
     onClick,
     children,
+    onStart,
     ...rest
 }: React.PropsWithChildren<Props>) => {
     const [state, dispatch] = React.useReducer(reducer, {
@@ -27,6 +30,9 @@ const AsyncButton = ({
     } as State);
     const handleClick = React.useCallback(
         (e: React.MouseEvent<HTMLButtonElement>) => {
+            if (onStart) {
+                onStart();
+            }
             dispatch({
                 type: ActionType.startClick,
                 onClick,
@@ -34,11 +40,17 @@ const AsyncButton = ({
                 e,
             });
         },
-        [onClick, dispatch]
+        [onClick, dispatch, onStart]
     );
 
     return state.submitting ? (
-        <LoadingButton loading loadingPosition="center" {...rest} />
+        <LoadingButtonWithWhiteIndicator
+            loading
+            disabled
+            loadingPosition="center"
+            children={children}
+            {...rest}
+        />
     ) : (
         <Button onClick={handleClick} children={children} {...rest} />
     );
@@ -86,3 +98,9 @@ const reducer = (state: State, action: Action) => {
 
     throw new Error('Action not known');
 };
+
+const LoadingButtonWithWhiteIndicator = styled(LoadingButton)`
+    > .MuiLoadingButton-loadingIndicator {
+        color: white;
+    }
+`;

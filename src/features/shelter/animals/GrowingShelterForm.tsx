@@ -104,8 +104,7 @@ const Form = ({ expanded }: FormProps) => {
             latitude: user.shelter_prefs?.location?.latitude ?? 51.11612,
         },
         validationSchema,
-        onSubmit: async (v) => {
-            //alert(JSON.stringify(v, null, 2));
+        onSubmit: async (v, submitProps) => {
             const res =
                 await getRequestMaker().shelter.updateShelterPreferences(
                     store.getState().authReducer.token as string,
@@ -137,6 +136,8 @@ const Form = ({ expanded }: FormProps) => {
             );
 
             store.dispatch(updateShelterPreferences(res));
+
+            submitProps.resetForm({ values: v });
         },
     });
 

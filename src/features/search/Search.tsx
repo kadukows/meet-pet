@@ -16,6 +16,8 @@ import { useSelector } from 'react-redux';
 import AnimalImageListItem from './AnimalImageListItem';
 import { store } from '../../store';
 import { addAlert } from '../alerts/alertsSlice';
+import { useUser } from '../useUser';
+import SearchSvgDefinitions from './SearchSvgDefinitions';
 
 type Props = {};
 
@@ -27,6 +29,7 @@ const Search = (props: Props) => {
     const [page, setPage] = React.useState(0);
     const [pageDisabled, setPageDisabled] = React.useState(false);
     const token = useSelector((state: RootState) => state.authReducer.token);
+    const user = useUser();
 
     const fetchAnimals = React.useCallback(
         async (
@@ -98,6 +101,7 @@ const Search = (props: Props) => {
 
     return (
         <Container sx={{ mt: 4 }}>
+            <SearchSvgDefinitions />
             <Box sx={{ width: '30%', alignSelf: 'flexStart' }}>
                 <Paper
                     sx={{
@@ -124,7 +128,11 @@ const Search = (props: Props) => {
                 />
                 <ImageList cols={2} variant="masonry" gap={8}>
                     {animals.map((a) => (
-                        <AnimalImageListItem key={a.id} animal={a} />
+                        <AnimalImageListItem
+                            key={a.id}
+                            animal={a}
+                            liked={user.getLikedAnimals().has(a.id)}
+                        />
                     ))}
                     {animals.length === 0 &&
                         [...Array(10).keys()].map((k) => (

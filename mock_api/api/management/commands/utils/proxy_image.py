@@ -24,9 +24,7 @@ class ProxyImage:
                     },
                 )
                 with request.urlopen(img_request) as res:
-                    self.file = tempfile.NamedTemporaryFile(
-                        mode="wb", name=self.json["url"].split("/")[-1]
-                    )
+                    self.file = tempfile.NamedTemporaryFile(mode="wb")
                     self.file.write(res.read())
                     self.is_valid_value = True
             except HTTPError as e:

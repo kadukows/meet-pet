@@ -200,6 +200,22 @@ const DjangoRequestMaker: IRequestMaker = {
         return null;
     },
 
+    dislikeAnimal: async (token: string, animal_id: number) => {
+        try {
+            await axios.post(
+                `/api/animals/${animal_id}/dislike/`,
+                null,
+                makeAuthHeader(token)
+            );
+
+            return true;
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
     shelter: {
         getOwnAnimals: async (token) => {
             try {

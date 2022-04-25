@@ -11,6 +11,10 @@ interface UserObject extends User {
 export const useUser = (): UserObject => {
     const reduxUser = useSelector((state: RootState) => state.authReducer.user);
 
+    if (reduxUser === null) {
+        throw new Error('useUser(): user not logged in');
+    }
+
     const likedAnimals = React.useMemo(
         () => new Set<number>(reduxUser?.user_prefs?.liked_animals),
         [reduxUser]
