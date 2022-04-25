@@ -1,10 +1,30 @@
 import axios from 'axios';
 import { Animal } from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
+import { UserPreferences } from '../auth/userSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
-import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
+import {
+    AnimalQueryParams,
+    IRequestMaker,
+    UserPreferencesResponse,
+} from './IRequestMaker';
+
+function transformUserPrefs(res: UserPreferencesResponse): UserPreferences {
+    return {
+        id: res.id,
+        has_garden: res.has_garden,
+        animal_kind: res.liked_kinds,
+        specific_animal_kind: res.liked_specific_kinds,
+        colors: res.liked_colors,
+        characters: res.liked_charactes,
+        size: res.liked_sizes,
+        male: res.is_male,
+        likes_children: res.likes_children,
+        likes_other_animals: res.likes_other_animals,
+    };
+}
 
 const DjangoRequestMaker: IRequestMaker = {
     getToken: async (username, password) => {
@@ -31,10 +51,7 @@ const DjangoRequestMaker: IRequestMaker = {
             last_name: string;
             email: string;
             profile: {
-                user_prefs: null | {
-                    has_garden: boolean;
-                    location: string;
-                };
+                user_prefs: UserPreferencesResponse;
 
                 shelter_prefs: null | {
                     location: string;
@@ -47,11 +64,11 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/user/me/',
                 makeAuthHeader(token)
             );
-
             return {
                 username: res.data.username,
                 email: res.data.email,
                 full_name: res.data.first_name.concat(' ', res.data.last_name),
+                preferences: transformUserPrefs(res.data.profile.user_prefs),
             };
         } catch (e: any) {}
 
@@ -64,6 +81,7 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/colors/',
                 makeAuthHeader(token)
             );
+
             return res.data;
         } catch (e) {}
 
@@ -125,7 +143,6 @@ const DjangoRequestMaker: IRequestMaker = {
                 '/api/sizes/',
                 makeAuthHeader(token)
             );
-
             return res.data;
         } catch (e) {}
 
@@ -164,6 +181,36 @@ const DjangoRequestMaker: IRequestMaker = {
                 count: res.data.count,
                 results: res.data.results.map((ar) => transformAnimal(ar)),
             };
+        } catch (e) {}
+
+        return null;
+    },
+
+    setUserAnimalPreferences: (
+        token: string,
+        user_animal_prefs: UserPreferences
+    ) => {
+        const prefs: Omit<UserPreferencesResponse, 'id'> = {
+            has_garden: user_animal_prefs.has_garden as boolean,
+            location: 'some location',
+            liked_kinds: user_animal_prefs.colors as number[],
+            liked_specific_kinds:
+                user_animal_prefs.specific_animal_kind as number[],
+            liked_colors: user_animal_prefs.colors as number[],
+            liked_charactes: user_animal_prefs.characters as number[],
+            liked_sizes: user_animal_prefs.size as number[],
+            is_male: user_animal_prefs.male as boolean,
+            likes_children: user_animal_prefs.likes_children as boolean,
+            likes_other_animals:
+                user_animal_prefs.likes_other_animals as boolean,
+        };
+
+        try {
+            axios.put(
+                `/api/user_preferences/${user_animal_prefs.id}/`,
+                prefs,
+                makeAuthHeader(token)
+            );
         } catch (e) {}
 
         return null;

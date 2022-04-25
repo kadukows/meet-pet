@@ -49,11 +49,15 @@ class UserPrefsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPrefs
         fields = [
+            "id",
             "has_garden",
             "location",
             "liked_colors",
             "liked_charactes",
             "liked_kinds",
+            "is_male",
+            "likes_children",
+            "likes_other_animals",
         ]
 
 

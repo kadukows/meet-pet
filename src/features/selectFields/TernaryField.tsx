@@ -88,3 +88,10 @@ export const translateTernary = (t: Ternary): boolean | null => {
 
     return null;
 };
+
+export const translateToTerenary = (t: boolean | null | undefined): Ternary => {
+    if (t === null || t === undefined) {
+        return Ternary.Indeterminate;
+    }
+    return t ? Ternary.True : Ternary.False;
+};
