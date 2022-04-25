@@ -20,6 +20,7 @@ import { animalKindSelectors } from '../animalKind/animaKindSlice';
 import TernaryField, {
     Ternary,
     translateTernary,
+    translateToTerenary,
 } from '../selectFields/TernaryField';
 import { UserPreferencesResponse } from '../apiConnection/IRequestMaker';
 import { UserPreferences } from '../auth/userSlice';
@@ -62,16 +63,18 @@ const Preferences = (props: Props) => {
                         state.authReducer.user?.preferences?.size
                 ) ?? [],
 
-            male: useSelector(
-                (state: RootState) => state.authReducer.user?.preferences?.male
+            male: useSelector((state: RootState) =>
+                translateToTerenary(state.authReducer.user?.preferences?.male)
             ),
-            likes_children: useSelector(
-                (state: RootState) =>
+            likes_children: useSelector((state: RootState) =>
+                translateToTerenary(
                     state.authReducer.user?.preferences?.likes_children
+                )
             ),
-            likes_other_animals: useSelector(
-                (state: RootState) =>
+            likes_other_animals: useSelector((state: RootState) =>
+                translateToTerenary(
                     state.authReducer.user?.preferences?.likes_other_animals
+                )
             ),
         },
         onSubmit: (values) => {
@@ -82,9 +85,11 @@ const Preferences = (props: Props) => {
                 characters: values.characters,
                 colors: values.colors,
                 size: values.size,
-                male: values.male,
-                likes_children: values.likes_children,
-                likes_other_animals: values.likes_other_animals,
+                male: translateTernary(values.male),
+                likes_children: translateTernary(values.likes_children),
+                likes_other_animals: translateTernary(
+                    values.likes_other_animals
+                ),
             };
 
             getRequestMaker().setUserAnimalPreferences(token as string, result);
