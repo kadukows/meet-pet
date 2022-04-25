@@ -21,6 +21,7 @@ from api.serializers import (
     PhotoSerializer,
     SpecificAnimalKindSerializer,
     UserSerializer,
+    UserPrefsSerializer,
     SizeSerializer,
 )
 from api.authentication import TokenBearerAuth
@@ -133,3 +134,8 @@ class PhotoViewset(viewsets.ModelViewSet):
     queryset = Photo.objects.all()
     authentication_classes = []
     permission_classes = []
+
+
+class UserPrefsViewset(BaseAuthPerm, viewsets.ModelViewSet):
+    serializer_class = UserPrefsSerializer
+    queryset = UserPrefs.objects.all()

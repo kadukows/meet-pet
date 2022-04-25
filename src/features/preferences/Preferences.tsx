@@ -33,6 +33,9 @@ interface Props {}
 
 const Preferences = (props: Props) => {
     const token = useSelector((state: RootState) => state.authReducer.token);
+    const user_prefs = useSelector(
+        (state: RootState) => state.authReducer.user?.preferences
+    );
     const formik: any = useFormik({
         initialValues: {
             animal_kinds:
@@ -80,6 +83,7 @@ const Preferences = (props: Props) => {
         onSubmit: (values) => {
             alert(JSON.stringify(values, null, 2));
             const result: UserPreferences = {
+                id: user_prefs?.id ?? 0,
                 animal_kind: values.animal_kinds,
                 specific_animal_kind: values.specific_animal_kinds,
                 characters: values.characters,
@@ -184,7 +188,11 @@ const Preferences = (props: Props) => {
                             label="Likes other animals?"
                             formik={formik}
                         />
-                        <Button variant="contained" type="submit">
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            disabled={formik.isSubmitting || !formik.dirty}
+                        >
                             Request!
                         </Button>
                     </Box>

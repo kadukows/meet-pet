@@ -41,6 +41,7 @@ export type { IRequestMaker };
 ////////////////////////
 
 export interface UserPreferencesResponse {
+    id: number;
     has_garden: boolean;
     location: string;
     liked_kinds: number[];

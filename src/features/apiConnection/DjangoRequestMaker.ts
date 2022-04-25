@@ -13,6 +13,7 @@ import {
 
 function transformUserPrefs(res: UserPreferencesResponse): UserPreferences {
     return {
+        id: res.id,
         has_garden: res.has_garden,
         animal_kind: res.liked_kinds,
         specific_animal_kind: res.liked_specific_kinds,
@@ -189,9 +190,9 @@ const DjangoRequestMaker: IRequestMaker = {
         token: string,
         user_animal_prefs: UserPreferences
     ) => {
-        const prefs: UserPreferencesResponse = {
+        const prefs: Omit<UserPreferencesResponse, 'id'> = {
             has_garden: user_animal_prefs.has_garden as boolean,
-            location: '',
+            location: 'some location',
             liked_kinds: user_animal_prefs.colors as number[],
             liked_specific_kinds:
                 user_animal_prefs.specific_animal_kind as number[],
@@ -205,9 +206,9 @@ const DjangoRequestMaker: IRequestMaker = {
         };
 
         try {
-            axios.post(
-                '/api/preferences/',
-                JSON.stringify(prefs),
+            axios.put(
+                `/api/user_preferences/${user_animal_prefs.id}/`,
+                prefs,
                 makeAuthHeader(token)
             );
         } catch (e) {}

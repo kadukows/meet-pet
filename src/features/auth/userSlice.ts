@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface UserPreferences {
+    id: number;
     has_garden?: boolean | null;
     animal_kind?: number[];
     specific_animal_kind?: number[];
