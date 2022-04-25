@@ -1,9 +1,7 @@
 import React from 'react';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
 import DarkThemeToggler from '../darkThemeProvider/DarkThemeToggler';
 import { Location, useLocation } from 'react-router';
 import MyDrawer from './MyDrawer';
@@ -38,7 +36,6 @@ const MyAppBar = (props: Props) => {
                     {authed ? <MenuBar /> : <Login />}
                 </Toolbar>
             </AppBar>
-            {/*<Offset />*/}
         </React.Fragment>
     );
 };
@@ -52,6 +49,7 @@ const REGEX_MAPPING = {
     Search: /^\/search$/,
     'Manage animals': /^\/shelters_animal$/,
     Details: /^\/animal\/[0-9]+$/,
+    'Liked animals': /^\/liked_animals$/,
 };
 
 const translateLocationPathname = (location: Location) => {
@@ -63,5 +61,3 @@ const translateLocationPathname = (location: Location) => {
 
     return 'translateNotFound ;<';
 };
-
-const Offset = styled('div')(({ theme }) => (theme.mixins as any).toolbar);

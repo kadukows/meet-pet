@@ -73,14 +73,14 @@ const GrowingShelterForm = ({ dataGridRef }: GrowingShelterFormProps) => {
         >
             <Paper
                 className="shelter-prefs-form-container"
-                sx={{ p: 2 }}
+                sx={{ p: 2, pb: 3 }}
                 ref={myDiv}
             >
                 <Form expanded={fullyExpanded} />
             </Paper>
         </CSSTransition>
     ) : (
-        <Paper sx={{ p: 2, width: '100%' }} ref={myDiv}>
+        <Paper sx={{ p: 2, pb: 3, width: '100%' }} ref={myDiv}>
             <Form expanded={true} />
         </Paper>
     );

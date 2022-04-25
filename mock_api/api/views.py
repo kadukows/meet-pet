@@ -139,13 +139,13 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
 
-        '''
+        """
         smallest_id = Animal.objects.order_by("id").first().id
         largest_id = Animal.objects.order_by("-id").first().id
         random_id = randint(smallest_id, largest_id)
 
         animal = Animal.objects.filter(id__gte=random_id).first()
-        '''
+        """
 
         animal = random_choice(Animal.objects.all())
 
@@ -180,6 +180,15 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         prefs.liked_animals.remove(animal)
         prefs.save()
         return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False)
+    def liked_animals(self, request: Request):
+        return Response(
+            data=self.get_serializer(
+                request.user.profile.user_prefs.liked_animals, many=True
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     def returnAndSetAnimal(self, user_prefs: UserPrefs, animal: Animal):
         user_prefs.prev_animal = animal.id

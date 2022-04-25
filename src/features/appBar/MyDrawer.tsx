@@ -72,6 +72,13 @@ const NormalUserLinks = ({ closeDrawer }: LinksProps) => (
         <ListItemButton component={NavLink} onClick={closeDrawer} to="/search">
             Search
         </ListItemButton>
+        <ListItemButton
+            component={NavLink}
+            onClick={closeDrawer}
+            to="/liked_animals"
+        >
+            Liked animals
+        </ListItemButton>
     </React.Fragment>
 );
 

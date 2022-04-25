@@ -216,6 +216,21 @@ const DjangoRequestMaker: IRequestMaker = {
         return null;
     },
 
+    likedAnimals: async (token) => {
+        try {
+            const res = await axios.get<AnimalResponse[]>(
+                '/api/animals/liked_animals/',
+                makeAuthHeader(token)
+            );
+
+            return res.data.map(transformAnimal);
+        } catch (e) {
+            console.error(e);
+        }
+
+        return null;
+    },
+
     shelter: {
         getOwnAnimals: async (token) => {
             try {
