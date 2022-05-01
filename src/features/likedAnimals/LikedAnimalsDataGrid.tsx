@@ -72,6 +72,11 @@ const LikedAnimalsDataGrid = () => {
                               (params.row as Animal).specific_animal_kind
                                   .animal_kind.value,
                       },
+                      {
+                          field: 'liked_status',
+                          headerName: 'Status',
+                          flex: 1,
+                      },
                   ]),
             {
                 field: 'actions',

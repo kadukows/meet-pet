@@ -3,6 +3,12 @@ interface EnumValue {
     value: string;
 }
 
+export enum LikedAnimalStatus {
+    Pending = 'Pending',
+    Accepted = 'Accepted',
+    Rejected = 'Rejected',
+}
+
 export interface Animal {
     id: number;
     name: string;
@@ -26,4 +32,5 @@ export interface Animal {
         url: string;
     }>;
     shelter: number | null;
+    liked_status: LikedAnimalStatus | null;
 }

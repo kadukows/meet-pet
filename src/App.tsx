@@ -17,6 +17,8 @@ import Search from './features/search/Search';
 import SheltersAnimal from './features/shelter/animals/SheltersAnimal';
 import AnimalRetrieve from './features/animalRetrieve/AnimalRetrieve';
 import LikedAnimals from './features/likedAnimals/LikedAnimals';
+import Pretendents from './features/shelter/animals/pretendents';
+import { UserType } from './features/auth/userSlice';
 
 function App() {
     return (
@@ -32,10 +34,13 @@ function App() {
                         <Container maxWidth="lg">
                             <Routes>
                                 <Route path="/" element={<HomePage />} />
+                                {/* User routes */}
                                 <Route
                                     path="/meet"
                                     element={
-                                        <RedirectIfNotLoggedIn>
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Normal}
+                                        >
                                             <TinderChoose />
                                         </RedirectIfNotLoggedIn>
                                     }
@@ -43,7 +48,9 @@ function App() {
                                 <Route
                                     path="/preferences"
                                     element={
-                                        <RedirectIfNotLoggedIn>
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Normal}
+                                        >
                                             <Preferences />
                                         </RedirectIfNotLoggedIn>
                                     }
@@ -51,7 +58,9 @@ function App() {
                                 <Route
                                     path="/search"
                                     element={
-                                        <RedirectIfNotLoggedIn>
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Normal}
+                                        >
                                             <Search />
                                         </RedirectIfNotLoggedIn>
                                     }
@@ -59,24 +68,41 @@ function App() {
                                 <Route
                                     path="/animal/:animalId"
                                     element={
-                                        <RedirectIfNotLoggedIn>
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Normal}
+                                        >
                                             <AnimalRetrieve />
-                                        </RedirectIfNotLoggedIn>
-                                    }
-                                />
-                                <Route
-                                    path="/shelters_animal"
-                                    element={
-                                        <RedirectIfNotLoggedIn>
-                                            <SheltersAnimal />
                                         </RedirectIfNotLoggedIn>
                                     }
                                 />
                                 <Route
                                     path="/liked_animals"
                                     element={
-                                        <RedirectIfNotLoggedIn>
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Normal}
+                                        >
                                             <LikedAnimals />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                {/* Shelter routes */}
+                                <Route
+                                    path="/shelter/manage_animals"
+                                    element={
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Shelter}
+                                        >
+                                            <SheltersAnimal />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/shelter/pretendents/:animal_id"
+                                    element={
+                                        <RedirectIfNotLoggedIn
+                                            type={UserType.Shelter}
+                                        >
+                                            <Pretendents />
                                         </RedirectIfNotLoggedIn>
                                     }
                                 />

@@ -1,5 +1,10 @@
 import { AnimalKind } from '../animalKind/animaKindSlice';
-import { ShelterPreferences, User, UserPreferences } from '../auth/userSlice';
+import {
+    NormalUser,
+    ShelterPreferences,
+    User,
+    UserPreferences,
+} from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
 import { Animal } from '../animal/animalSlice';
@@ -35,7 +40,7 @@ interface IRequestMaker {
         shelter_id: number
     ) => Promise<ShelterPreferences | null>;
 
-    fetchAnimal: (token: string, shelter_id: number) => Promise<Animal | null>;
+    fetchAnimal: (token: string, animal_id: number) => Promise<Animal | null>;
 
     likeAnimal: (token: string, animal_id: number) => Promise<true | null>;
     dislikeAnimal: (token: string, animal_id: number) => Promise<true | null>;
@@ -44,6 +49,7 @@ interface IRequestMaker {
 
     // shelters things
     shelter: {
+        /** animal management */
         getOwnAnimals: (token: string) => Promise<Animal[] | null>;
         createAnimal: (
             token: string,
@@ -57,15 +63,22 @@ interface IRequestMaker {
             token: string,
             animal_id: number
         ) => Promise<true | null>;
+        /** photos */
         uploadPhoto: (
             token: string,
             formData: FormData
         ) => Promise<Photo | null>;
         deletePhoto: (token: string, photo_id: number) => Promise<true | null>;
+        /** shelter preferences */
         updateShelterPreferences: (
             token: string,
             update: ShelterPreferences
         ) => Promise<ShelterPreferences | null>;
+        /** pretendents */
+        fetchPretendents: (
+            token: string,
+            animal_id: number
+        ) => Promise<NormalUser[] | null>;
     };
     setUserAnimalPreferences: (
         token: string,

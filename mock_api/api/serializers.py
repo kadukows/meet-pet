@@ -3,6 +3,7 @@ from rest_framework import serializers
 from api.models import (
     Animal,
     AnimalKind,
+    AnimalUserRelation,
     Character,
     Location,
     Photo,
@@ -61,9 +62,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
     liked_kinds = serializers.PrimaryKeyRelatedField(
         queryset=AnimalKind.objects.all(), many=True, required=False
     )
-
-    # liked_charactes = serializers.ModelField(Character, required=False)
-    # liked_kinds = serializers.ModelField(AnimalKind, required=False)
+    # liked_animals = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = UserPrefs
@@ -82,6 +81,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             "location",
             "liked_animals",
         ]
+        read_only_fields = ["liked_animals"]
 
     def update(self, instance: ShelterPrefs, validated_data: dict):
         location = (
@@ -98,6 +98,10 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def get_liked_animals(self, obj):
+        aur = AnimalUserRelation.objects.filter(user_prefs=obj)
+        return AnimalUserRelationSerializers.WithAnimal(aur, many=True).data
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):
@@ -231,3 +235,23 @@ class AnimalSerializer(serializers.ModelSerializer):
         model = Animal
         fields = [*AnimalWriteSerializer.Meta.fields, "photos", "shelter"]
         read_only = ["id"]
+
+
+class AnimalUserRelationSerializers:
+    class Vanilla(serializers.ModelSerializer):
+        class Meta:
+            model = AnimalUserRelation
+            fields = ["id", "animal", "user_prefs", "created_at", "status"]
+
+    class WithAnimal(Vanilla):
+        animal = AnimalSerializer()
+
+    class WithUser(serializers.ModelSerializer):
+        user = serializers.SerializerMethodField()
+
+        class Meta:
+            model = AnimalUserRelation
+            fields = ["id", "animal", "user_prefs", "created_at", "status", "user"]
+
+        def get_user(self, obj: AnimalUserRelation):
+            return UserSerializer(obj.user_prefs.profile.user).data

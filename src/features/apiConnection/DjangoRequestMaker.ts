@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Animal } from '../animal/animalSlice';
+import { Animal, LikedAnimalStatus } from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
@@ -11,6 +11,7 @@ import {
     UserType,
     UserPreferences,
     Location,
+    NormalUser,
 } from '../auth/userSlice';
 import { sleep } from '../../helpers';
 
@@ -219,12 +220,12 @@ const DjangoRequestMaker: IRequestMaker = {
 
     likedAnimals: async (token) => {
         try {
-            const res = await axios.get<AnimalResponse[]>(
+            const res = await axios.get<LikedAnimalResponse[]>(
                 '/api/animals/liked_animals/',
                 makeAuthHeader(token)
             );
 
-            return res.data.map(transformAnimal);
+            return res.data.map(transformLikedAnimal);
         } catch (e) {
             console.error(e);
         }
@@ -370,6 +371,22 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return null;
         },
+
+        fetchPretendents: async (token: string, animal_id: number) => {
+            try {
+                const res = await axios.get<UserResponse[]>(
+                    `/api/animals/${animal_id}/pretendents/`,
+                    makeAuthHeader(token)
+                );
+
+                //return res.data.map(transformUserPreferences);
+                return res.data.map(transformUser) as NormalUser[];
+            } catch (e) {
+                console.error(e);
+            }
+
+            return null;
+        },
     },
     setUserAnimalPreferences: async (
         token: string,
@@ -481,6 +498,7 @@ function transformAnimal(res: AnimalResponse): Animal {
             url: p.image_url,
         })),
         shelter,
+        liked_status: null,
     };
 }
 
@@ -677,3 +695,34 @@ const parseLocation = (loc: LocationResponse) => ({
     longitude: parseFloat(loc.longitude),
     latitude: parseFloat(loc.latitude),
 });
+
+type LikedAnimalStatusResponse = 'PE' | 'AC' | 'RE';
+
+interface LikedAnimalResponse {
+    animal: AnimalResponse;
+    created_at: string;
+    status: LikedAnimalStatusResponse;
+}
+
+const transformLikedStatus = (
+    st_res: LikedAnimalStatusResponse
+): LikedAnimalStatus | null => {
+    switch (st_res) {
+        case 'AC':
+            return LikedAnimalStatus.Accepted;
+        case 'PE':
+            return LikedAnimalStatus.Pending;
+        case 'RE':
+            return LikedAnimalStatus.Rejected;
+    }
+
+    return null;
+};
+
+const transformLikedAnimal = (
+    likedAnimalResponse: LikedAnimalResponse
+): Animal => {
+    const animal = transformAnimal(likedAnimalResponse.animal);
+    animal.liked_status = transformLikedStatus(likedAnimalResponse.status);
+    return animal;
+};

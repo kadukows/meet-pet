@@ -47,7 +47,7 @@ const REGEX_MAPPING = {
     Search: /^\/search$/,
     Home: /^\/$/,
     'Meet the pet!': /^\/meet$/,
-    'Manage animals': /^\/shelters_animal$/,
+    'Manage animals': /^\/shelter\/manage_animals$/,
     Details: /^\/animal\/[0-9]+$/,
     'Liked animals': /^\/liked_animals$/,
 };

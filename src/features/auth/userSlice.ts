@@ -43,6 +43,11 @@ export interface User {
     user_prefs: UserPreferences | null;
 }
 
+export interface NormalUser extends User {
+    shelter_prefs: null;
+    user_prefs: UserPreferences;
+}
+
 interface AuthState {
     loading: boolean;
     token: string | null;

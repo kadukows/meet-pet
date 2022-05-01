@@ -94,7 +94,7 @@ const ShelterUserLinks = ({ closeDrawer }: LinksProps) => (
         <ListItemButton
             component={NavLink}
             onClick={closeDrawer}
-            to="/shelters_animal"
+            to="/shelter/manage_animals"
         >
             Manage animals
         </ListItemButton>

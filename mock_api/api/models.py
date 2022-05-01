@@ -67,7 +67,32 @@ class UserPrefs(models.Model):
 
     prev_animal = models.IntegerField(null=True)
 
-    liked_animals = models.ManyToManyField("Animal")
+    liked_animals = models.ManyToManyField(
+        "Animal", through="AnimalUserRelation", related_name="liked_by"
+    )
+
+
+class AnimalUserRelation(models.Model):
+    animal = models.ForeignKey("Animal", on_delete=models.CASCADE)
+    user_prefs = models.ForeignKey(UserPrefs, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    PENDING = "PE"
+    ACCEPTED = "AC"
+    REJECTED = "RE"
+    STATUS_CHOICES = [
+        (PENDING, "Pending"),
+        (ACCEPTED, "Accepted by shelter"),
+        (REJECTED, "Rejected by shelter"),
+    ]
+    status = models.CharField(
+        max_length=2,
+        choices=STATUS_CHOICES,
+        default=PENDING,
+    )
+
+    class Meta:
+        unique_together = ("animal", "user_prefs")
 
 
 class ShelterPrefs(models.Model):
