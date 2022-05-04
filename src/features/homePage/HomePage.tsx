@@ -4,6 +4,7 @@ import styled from '@mui/system/styled';
 import Fade from '@mui/material/Fade';
 import Slide from '@mui/material/Slide';
 import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 type Props = {};
@@ -17,6 +18,12 @@ const HomePage = (props: Props) => {
         [idx, setIdx]
     );
     const containerRef = React.useRef(null);
+
+    return (
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography variant="h2">Home page</Typography>
+        </Box>
+    );
 
     return (
         <React.Fragment>
