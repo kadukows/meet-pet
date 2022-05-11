@@ -23,6 +23,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("api_key", nargs="?", type=str)
+        parser.add_argument("breeds_no", nargs="?", default=10, type=int)
 
     def handle(self, *args, **options):
         apikey = options["api_key"]
@@ -49,7 +50,7 @@ class Command(BaseCommand):
 
         shuffle(breeds)
 
-        for breed in breeds[:10]:
+        for breed in breeds[: options["breeds_no"]]:
             images_request = request.Request(
                 f"https://api.thecatapi.com/v1/images/search?breed_id={breed['id']}&limit=30&order=RANDOM",
                 headers=headers,
@@ -79,6 +80,8 @@ class Command(BaseCommand):
                     description=get_lorem(),
                     randomly_generated=True,
                 )
+
+                self.stdout.write(f"Adding {animal.name}")
 
                 chars = set(random_choice(characters) for _ in range(randint(1, 2)))
                 clrs = set(random_choice(colors) for _ in range(randint(1, 2)))

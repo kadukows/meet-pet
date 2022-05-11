@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from pkg_resources import require
 from rest_framework import serializers
 from api.models import (
     Animal,
@@ -101,32 +102,50 @@ class UserPrefsSerializer(serializers.ModelSerializer):
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer()
+    location = LocationSerializer(required=False)
 
     class Meta:
         model = ShelterPrefs
         fields = ["id", "description", "location"]
         read_only = ["id"]
 
+    def get_validations_exclusions(self):
+        exclusions = super(ShelterPrefsSerializer, self).get_validations_exclusions()
+        return exclusions + ["location"]
+
     def create(self, validated_data):
-        location_data = validated_data.pop("location")
+        try:
+            location_data = validated_data.pop("location")
+        except KeyError:
+            location_data = None
 
         shelter_prefs = ShelterPrefs.objects.create(**validated_data)
-        location = Location.objects.create(shelter_prefs=shelter_prefs, **location_data)
+        if location_data:
+            location = Location.objects.create(
+                shelter_prefs=shelter_prefs, **location_data
+            )
 
-        location.save()
+            location.save()
+        shelter_prefs.location = location
         shelter_prefs.save()
 
         return shelter_prefs
 
     def update(self, instance: ShelterPrefs, validated_data):
-        location = validated_data.pop("location")
+        try:
+            location = validated_data.pop("location")
+        except KeyError:
+            location = None
 
         instance.description = validated_data["description"]
-        instance.location.latitude = location["latitude"]
-        instance.location.longitude = location["longitude"]
+        if location:
+            if instance.location is None:
+                instance.location = Location.objects.create(latitude=0, longitude=0)
 
-        instance.location.save()
+            instance.location.latitude = location["latitude"]
+            instance.location.longitude = location["longitude"]
+
+            instance.location.save()
         instance.save()
 
         return instance

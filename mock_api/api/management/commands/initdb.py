@@ -2,7 +2,7 @@ import os
 from urllib import request
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group, Permission, User
 from PIL import Image
 from api.models import (
     Animal,
@@ -12,6 +12,8 @@ from api.models import (
     Size,
     Character,
     SpecificAnimalKind,
+    ShelterPrefs,
+    Profile,
 )
 
 
@@ -74,11 +76,30 @@ class Command(BaseCommand):
     help = "Populates inital database with basic values"
 
     def handle(self, *args, **options):
+        self.createUsers()
         self.createColors()
         self.createSizes()
         self.createCharacters()
         self.createKinds()
         self.createAnimals()
+
+    def createUsers(self):
+        foo = User.objects.create(username="foo")
+        foo.set_password("foo")
+        foo.save()
+
+        shelter = User.objects.create(username="shelter")
+        shelter.set_password("shelter")
+
+        shelter_prefs = ShelterPrefs.objects.create(description="Basic description")
+        profile: Profile = shelter.profile
+        profile.shelter_prefs = shelter_prefs
+        profile.user_prefs = None
+
+        profile.save()
+        shelter.save()
+
+        self.shelter_user = shelter
 
     def createColors(self):
         self.createObjects(Color, COLORS)
@@ -135,6 +156,7 @@ class Command(BaseCommand):
                 male=aDef.male,
                 likes_child=aDef.likes_child,
                 likes_other_animals=aDef.likes_other_animals,
+                shelter=self.shelter_user.profile.shelter_prefs,
             )
             animal.characters.set(
                 [
