@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { colorSelectors } from '../colors/colorSlice';
-import { useFormik } from 'formik';
+import { useFormik, validateYupSchema } from 'formik';
 import Loader from '../loader/Loader';
 import Button from '@mui/material/Button';
 import { specificAnimalKindSelectors } from '../specificAnimalKind/specificAnimalKindSlice';
@@ -13,12 +13,18 @@ import TernaryField, {
     translateTernary,
     translateToTerenary as translateToTernary,
 } from '../selectFields/TernaryField';
-import { updateUserPreferences, UserPreferences } from '../auth/userSlice';
+import {
+    updateUserPreferences,
+    UserPreferences,
+    Location,
+} from '../auth/userSlice';
 import { getRequestMaker } from '../apiConnection';
 import MultipleSelectField from '../selectFields/MultipleSelectField';
 import { characterSelectors } from '../characters/charcterSlice';
 import { sizeSelectors } from '../size/sizeSlice';
 import { addAlert } from '../alerts/alertsSlice';
+import MapPicker from 'react-google-map-picker';
+import { Input, TextField } from '@mui/material';
 
 interface Props {}
 
@@ -32,6 +38,9 @@ interface FormState {
     male: Ternary;
     likes_children: Ternary;
     likes_other_animals: Ternary;
+    latitude: number;
+    longitude: number;
+    max_range: number;
 }
 
 const userPrefsToFormState = (x: UserPreferences): FormState => ({
@@ -44,6 +53,9 @@ const userPrefsToFormState = (x: UserPreferences): FormState => ({
     male: translateToTernary(x.male),
     likes_children: translateToTernary(x.likes_children),
     likes_other_animals: translateToTernary(x.likes_other_animals),
+    latitude: x.location?.latitude ?? 51.11612,
+    longitude: x.location?.longitude ?? 17.03699,
+    max_range: x.max_range,
 });
 
 const Preferences = (props: Props) => {
@@ -74,8 +86,13 @@ const Preferences = (props: Props) => {
                 ),
                 //////
                 has_garden: user_prefs.has_garden,
-                location: user_prefs.location,
+
+                location: {
+                    latitude: values.latitude,
+                    longitude: values.longitude,
+                },
                 liked_animals: user_prefs.liked_animals,
+                max_range: values.max_range,
             };
 
             const newUserPrefs =
@@ -116,6 +133,20 @@ const Preferences = (props: Props) => {
                 ),
         [formik.values.animal_kinds]
     );
+
+    const [mapDefaultPickerValue] = React.useState(() => ({
+        lng: user_prefs.location?.longitude ?? 17.03699,
+        lat: user_prefs.location?.latitude ?? 51.11612,
+    }));
+
+    const mapHandleChangeLocation = React.useCallback(
+        (lat: number, lng: number) => {
+            formik.setFieldValue('latitude', lat);
+            formik.setFieldValue('longitude', lng);
+        },
+        [formik]
+    );
+    const [mapZoom, mapSetZoom] = React.useState(13);
 
     return (
         <React.Fragment>
@@ -195,6 +226,26 @@ const Preferences = (props: Props) => {
                             name="likes_other_animals"
                             label="Likes other animals?"
                             formik={formik}
+                        />
+                        <h2>Set your location:</h2>
+                        <TextField
+                            name={'max_range'}
+                            label={'Max distance to shelter (km)'}
+                            type={'number'}
+                            value={formik.values['max_range']}
+                            onChange={formik.handleChange}
+                            fullWidth
+                        >
+                            siema
+                        </TextField>
+
+                        <MapPicker
+                            zoom={mapZoom}
+                            defaultLocation={mapDefaultPickerValue}
+                            onChangeLocation={mapHandleChangeLocation}
+                            onChangeZoom={mapSetZoom}
+                            mapTypeId={'roadmap' as any}
+                            apiKey="AIzaSyD07E1VvpsN_0FvsmKAj4nK9GnLq-9jtj8"
                         />
                         <Button
                             variant="contained"
