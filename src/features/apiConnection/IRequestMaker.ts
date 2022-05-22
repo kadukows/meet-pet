@@ -2,7 +2,7 @@ import { AnimalKind } from '../animalKind/animaKindSlice';
 import { ShelterPreferences, User, UserPreferences } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
-import { Animal } from '../animal/animalSlice';
+import { Animal, UserAnimalLikeRelation } from '../animal/animalSlice';
 import { Character } from '../characters/charcterSlice';
 import { Size } from '../size/sizeSlice';
 
@@ -71,6 +71,9 @@ interface IRequestMaker {
         token: string,
         user_animal_prefs: UserPreferences
     ) => Promise<UserPreferences | null>;
+    getUserAnimalRelations: (
+        token: string
+    ) => Promise<UserAnimalLikeRelation[] | null>;
 }
 
 export type { IRequestMaker };

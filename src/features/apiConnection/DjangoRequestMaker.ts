@@ -1,5 +1,9 @@
 import axios from 'axios';
-import { Animal } from '../animal/animalSlice';
+import {
+    Animal,
+    UserAnimalLikeRelation,
+    UserAnimalLikeRelationState,
+} from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
@@ -188,11 +192,13 @@ const DjangoRequestMaker: IRequestMaker = {
 
     likeAnimal: async (token, animal_id) => {
         try {
-            await axios.post(
+            const resPromise = axios.post(
                 `/api/animals/${animal_id}/like/`,
                 null,
                 makeAuthHeader(token)
             );
+            const sleepPromise = sleep(500);
+            await Promise.all([resPromise, sleepPromise]);
             return true;
         } catch (e) {
             console.error(e);
@@ -407,6 +413,19 @@ const DjangoRequestMaker: IRequestMaker = {
         } catch (e) {
             console.error(e);
         }
+
+        return null;
+    },
+
+    getUserAnimalRelations: async (token: string) => {
+        try {
+            const res = await axios.get<UserAnimalLikeRelationResponse[]>(
+                '/api/user_animal_like_rel/',
+                makeAuthHeader(token)
+            );
+
+            return res.data.map(transformUserAnimalLikeRelation);
+        } catch (e) {}
 
         return null;
     },
@@ -676,4 +695,23 @@ const formatObjectLocation = (loc: Location | null): LocationResponse | null =>
 const parseLocation = (loc: LocationResponse) => ({
     longitude: parseFloat(loc.longitude),
     latitude: parseFloat(loc.latitude),
+});
+
+interface UserAnimalLikeRelationResponse {
+    id: number;
+    user: number;
+    animal: number;
+    state: 'LI' | 'NO' | 'AC';
+}
+
+const transformUserAnimalLikeRelation = ({
+    id,
+    user,
+    animal,
+    state,
+}: UserAnimalLikeRelationResponse): UserAnimalLikeRelation => ({
+    id,
+    user_prefs: user,
+    animal,
+    state: state as UserAnimalLikeRelationState,
 });

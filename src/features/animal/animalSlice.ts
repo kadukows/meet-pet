@@ -27,3 +27,16 @@ export interface Animal {
     }>;
     shelter: number | null;
 }
+
+export enum UserAnimalLikeRelationState {
+    LIKED = 'LI',
+    NOT_ACCEPTED = 'NO',
+    ACCEPTED = 'AC',
+}
+
+export interface UserAnimalLikeRelation {
+    id: number;
+    user_prefs: number;
+    animal: number;
+    state: UserAnimalLikeRelationState;
+}

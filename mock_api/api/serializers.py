@@ -10,6 +10,7 @@ from api.models import (
     Profile,
     Size,
     SpecificAnimalKind,
+    UserAnimalLikeRelation,
     UserPrefs,
     ShelterPrefs,
     Color,
@@ -250,3 +251,9 @@ class AnimalSerializer(serializers.ModelSerializer):
         model = Animal
         fields = [*AnimalWriteSerializer.Meta.fields, "photos", "shelter"]
         read_only = ["id"]
+
+
+class UserAnimalLikeRelationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAnimalLikeRelation
+        fields = ["id", "user", "animal", "state"]

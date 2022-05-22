@@ -13,6 +13,7 @@ from api.views import (
     ShelterPreferencesViewSet,
     SizeViewSet,
     SpecificAnimalKindViewSet,
+    UserAnimalLikeRelationViewset,
     UserViewSet,
     UserPrefsViewset,
 )
@@ -29,6 +30,7 @@ router.register(r"specific_animal_kinds", SpecificAnimalKindViewSet)
 router.register(r"my_photos", PhotoViewset)
 router.register(r"shelter_preferences", ShelterPreferencesViewSet)
 router.register(r"user_preferences", UserPrefsViewset)
+router.register(r"user_animal_like_rel", UserAnimalLikeRelationViewset)
 
 
 urlpatterns = [

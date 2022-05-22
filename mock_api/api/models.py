@@ -67,7 +67,7 @@ class UserPrefs(models.Model):
 
     prev_animal = models.IntegerField(null=True)
 
-    liked_animals = models.ManyToManyField("Animal")
+    liked_animals = models.ManyToManyField("Animal", through="UserAnimalLikeRelation")
 
 
 class ShelterPrefs(models.Model):
@@ -146,6 +146,23 @@ class Animal(models.Model):
 class Photo(models.Model):
     file = models.ImageField(upload_to="api/animal_images")
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name="photos")
+
+
+class UserAnimalLikeRelation(models.Model):
+    user: UserPrefs = models.ForeignKey(UserPrefs, on_delete=models.CASCADE)
+    animal: Animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
+
+    LIKED = "LI"
+    NOT_ACCEPTED = "NO"
+    ACCEPTED = "AC"
+    STATE_CHOICES = [
+        (LIKED, "Liked"),
+        (NOT_ACCEPTED, "Not accepted"),
+        (ACCEPTED, "Accepted"),
+    ]
+    state = models.CharField(
+        max_length=2, choices=STATE_CHOICES, null=False, default=LIKED
+    )
 
 
 @receiver(models.signals.post_delete, sender=Photo)

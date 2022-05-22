@@ -82,9 +82,6 @@ const reducer = (state: State, action: Action) => {
             }
 
             const decoratedOnClick = async () => {
-                const sleepPromise = sleep(2000);
-                await sleepPromise;
-                //await Promise.all([action.onClick(action.e), sleepPromise]);
                 await action.onClick(action.e);
                 action.dispatch({ type: ActionType.endClick });
             };

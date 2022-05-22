@@ -22,6 +22,7 @@ from api.serializers import (
     PhotoSerializer,
     ShelterPrefsSerializer,
     SpecificAnimalKindSerializer,
+    UserAnimalLikeRelationSerializer,
     UserSerializer,
     UserPrefsSerializer,
     SizeSerializer,
@@ -36,6 +37,7 @@ from api.models import (
     ShelterPrefs,
     Size,
     SpecificAnimalKind,
+    UserAnimalLikeRelation,
     UserPrefs,
 )
 from api.filters import AnimalFilter
@@ -207,3 +209,37 @@ class PhotoViewset(viewsets.ModelViewSet):
 class UserPrefsViewset(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = UserPrefsSerializer
     queryset = UserPrefs.objects.all()
+
+
+class UserAnimalLikeRelationViewset(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserAnimalLikeRelationSerializer
+    queryset = UserAnimalLikeRelation.objects.all()
+
+    def get_queryset(self):
+        user_prefs = self.request.user.profile.user_prefs
+        shelter_prefs = self.request.user.profile.shelter_prefs
+
+        if user_prefs is not None:
+            return UserAnimalLikeRelation.objects.filter(
+                user=self.request.user.profile.user_prefs
+            ).all()
+        else:
+            shelters_animals = Animal.objects.filter(shelter=shelter_prefs)
+
+            return UserAnimalLikeRelation.objects.filter(
+                animal__in=shelters_animals
+            ).all()
+
+    @action(methods=["post"], detail=True, permission_classes=[IsShelter])
+    def accept(self, request: Request, pk=None):
+        instance: UserAnimalLikeRelation = self.get_object()
+        instance.state = UserAnimalLikeRelation.ACCEPTED
+        instance.save()
+        return Response(self.get_serializer(instance).data)
+
+    @action(methods=["post"], detail=True, permission_classes=[IsShelter])
+    def not_accept(self, request: Request, pk=None):
+        instance: UserAnimalLikeRelation = self.get_object()
+        instance.state = UserAnimalLikeRelation.NOT_ACCEPTED
+        instance.save()
+        return Response(self.get_serializer(instance).data)
