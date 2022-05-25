@@ -31,6 +31,7 @@ export interface UserPreferences {
     ///// data
     description: string;
     has_garden: boolean;
+    avatar: string;
     location: null | Location;
     liked_animals: number[];
 }

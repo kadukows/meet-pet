@@ -5,8 +5,19 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
+
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Checkbox from '@mui/material/Checkbox';
+import MuiAvatar from '@mui/material/Avatar';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
 import { useSlot } from '../../../../events/EventProvider';
 import { User } from '../../../../auth/userSlice';
@@ -16,6 +27,7 @@ import { getRequestMaker } from '../../../../apiConnection';
 import AsyncButton from '../../AnimalDialog/AsyncButton';
 import { UserAnimalLikeRelationState } from '../../../../animal/animalSlice';
 import { setRelationStateAction } from '../../userAnimalRelSlice';
+import Avatar from './Avatar';
 
 export enum SlotTypes {
     DetailPeople = 'DetailPeople',
@@ -44,8 +56,6 @@ const PeopleDialog = (props: Props) => {
         SlotTypesToCallbacks[SlotTypes.DetailPeople]
     >(
         async (user_prefs_id, user_rel_id) => {
-            console.log('hello');
-
             const user = await getRequestMaker().shelter.getUserByUserPrefsId(
                 token as string,
                 user_prefs_id
@@ -98,14 +108,23 @@ const PeopleDialog = (props: Props) => {
         <Dialog maxWidth="md" fullWidth open={open} onClose={handleClose}>
             <DialogTitle>{user?.full_name}</DialogTitle>
             <DialogContent>
-                <Typography variant="h4">Description</Typography>
-                <Typography>
-                    {user?.user_prefs?.description ? (
-                        user?.user_prefs?.description
-                    ) : (
-                        <i>No description</i>
-                    )}
-                </Typography>
+                <Grid container spacing={2}>
+                    <Grid item sm={4} xs={12}>
+                        <Avatar
+                            url={user?.user_prefs?.avatar ?? ''}
+                            sx={{ aspectRatio: '1' }}
+                        />
+                        <UserTable user={user} />
+                    </Grid>
+                    <Grid item sm={8} xs={12}>
+                        <Typography variant="h4">Description</Typography>
+                        {user?.user_prefs?.description ? (
+                            user?.user_prefs?.description
+                        ) : (
+                            <i>No description</i>
+                        )}
+                    </Grid>
+                </Grid>
             </DialogContent>
             <DialogActions>
                 <AsyncButton
@@ -130,3 +149,27 @@ const PeopleDialog = (props: Props) => {
 };
 
 export default PeopleDialog;
+
+type UserTableProps = {
+    user: User | null;
+};
+
+const UserTable = ({ user }: UserTableProps) => {
+    return (
+        <TableContainer>
+            <Table sx={{ width: '100%' }}>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>Has garden</TableCell>
+                        <TableCell>
+                            <Checkbox
+                                disabled
+                                checked={!!user?.user_prefs?.has_garden}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+        </TableContainer>
+    );
+};

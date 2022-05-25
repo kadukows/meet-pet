@@ -408,10 +408,7 @@ const DjangoRequestMaker: IRequestMaker = {
             return null;
         },
     },
-    setUserAnimalPreferences: async (
-        token: string,
-        user_animal_prefs: UserPreferences
-    ) => {
+    setUserAnimalPreferences: async (token, user_animal_prefs) => {
         const prefs: Partial<Omit<UserPreferencesResponse, 'id'>> = {
             // booleans
             has_garden: user_animal_prefs.has_garden,
@@ -618,6 +615,7 @@ interface UserPreferencesResponse {
     // additional stuff
     description: string;
     has_garden: boolean;
+    avatar: string;
     location: LocationResponse | null;
     liked_animals: number[];
 }
@@ -675,6 +673,7 @@ const transformUserPreferences = ({
     id,
     has_garden,
     is_male,
+    avatar,
     likes_children,
     likes_other_animals,
     liked_colors,
@@ -697,6 +696,7 @@ const transformUserPreferences = ({
         likes_other_animals,
         //
         has_garden,
+        avatar,
         location: location ? parseLocation(location) : null,
         liked_animals,
         description,

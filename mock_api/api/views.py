@@ -44,7 +44,11 @@ from api.models import (
     UserPrefs,
 )
 from api.filters import AnimalFilter
-from api.permissions import IsAdmin, IsShelter, OrPermission
+from api.permissions import IsAdmin, IsNormalUser, IsShelter, OrPermission
+
+
+class AvatarSerializer(serializers.Serializer):
+    avatar = serializers.ImageField()
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -66,6 +70,21 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
     @action(methods=["get"], detail=False)
     def me(self, request: Request):
         return Response(self.get_serializer(request.user).data)
+
+    @action(
+        methods=["post"],
+        detail=False,
+        serializer_class=AvatarSerializer,
+        permission_classes=[IsNormalUser],
+    )
+    def upload_photo(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.request.user.profile.user_prefs.avatar = request.data["avatar"]
+            return Response(
+                UserSerializer(self.request.user).data, status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BaseAuthPerm:

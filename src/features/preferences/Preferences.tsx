@@ -19,6 +19,7 @@ import MultipleSelectField from '../selectFields/MultipleSelectField';
 import { characterSelectors } from '../characters/charcterSlice';
 import { sizeSelectors } from '../size/sizeSlice';
 import { addAlert } from '../alerts/alertsSlice';
+import { WritableUserPreferences } from '../apiConnection/IRequestMaker';
 
 interface Props {}
 
@@ -46,8 +47,6 @@ const userPrefsToFormState = (x: UserPreferences): FormState => ({
     likes_other_animals: translateToTernary(x.likes_other_animals),
 });
 
-type UserPreferencesToSearchFor = Omit<UserPreferences, 'description'>;
-
 const Preferences = (props: Props) => {
     const token = useSelector((state: RootState) => state.authReducer.token);
     const user_prefs = useSelector(
@@ -62,7 +61,7 @@ const Preferences = (props: Props) => {
     const formik: any = useFormik({
         initialValues: userPrefsToFormState(user_prefs),
         onSubmit: async (values, submitProps) => {
-            const result: UserPreferences = {
+            const result: WritableUserPreferences = {
                 id: user_prefs.id,
                 animal_kind: values.animal_kinds,
                 specific_animal_kind: values.specific_animal_kinds,

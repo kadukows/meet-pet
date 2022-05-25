@@ -13,6 +13,9 @@ import { Size } from '../size/sizeSlice';
 // Interface handling connection between backend and frontend.
 // All requests should be routed through this, so we can simply exchange this object in factory
 // when the actual backend comes.
+
+export type WritableUserPreferences = Omit<UserPreferences, 'avatar'>;
+
 interface IRequestMaker {
     getToken: (username: string, password: string) => Promise<string | null>;
     getUser: (token: string) => Promise<User | null>;
@@ -85,7 +88,7 @@ interface IRequestMaker {
     };
     setUserAnimalPreferences: (
         token: string,
-        user_animal_prefs: UserPreferences
+        user_animal_prefs: WritableUserPreferences
     ) => Promise<UserPreferences | null>;
     getUserAnimalRelations: (
         token: string
@@ -96,6 +99,7 @@ export type { IRequestMaker };
 
 ////////////////////////
 
+/*
 export interface UserPreferencesResponse {
     id: number;
     has_garden: boolean;
@@ -110,6 +114,7 @@ export interface UserPreferencesResponse {
     likes_children: boolean;
     likes_other_animals: boolean;
 }
+*/
 
 export interface AnimalQueryParams {
     characters?: number[];

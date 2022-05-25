@@ -63,6 +63,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
     liked_kinds = serializers.PrimaryKeyRelatedField(
         queryset=AnimalKind.objects.all(), many=True, required=False
     )
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     # liked_charactes = serializers.ModelField(Character, required=False)
     # liked_kinds = serializers.ModelField(AnimalKind, required=False)
@@ -73,6 +74,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             "id",
             "has_garden",
             "description",
+            "avatar",
             # boolean preferences
             "is_male",
             "likes_children",
@@ -85,6 +87,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             "location",
             "liked_animals",
         ]
+        read_only_fields = ["id"]
 
     def update(self, instance: ShelterPrefs, validated_data: dict):
         location = (
@@ -101,6 +104,9 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def get_avatar(self, instance):
+        return instance.avatar.url
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):

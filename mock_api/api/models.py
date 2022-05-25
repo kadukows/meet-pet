@@ -61,6 +61,7 @@ class UserPrefs(models.Model):
         on_delete=models.CASCADE,
         related_name="user_prefs",
     )
+    avatar = models.ImageField(upload_to="api/avatars", null=True)
 
     # I guess
     liked_colors = models.ManyToManyField("Color")
