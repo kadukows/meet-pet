@@ -30,18 +30,26 @@ interface AnimalWithLikeStatus {
     like_status: UserAnimalLikeRelation | null;
 }
 
-const renderLikeStatus = (userRelState: UserAnimalLikeRelationState) => {
-    switch (userRelState) {
-        case UserAnimalLikeRelationState.LIKED:
-            return <Chip color="primary" label="Liked" />;
-        case UserAnimalLikeRelationState.ACCEPTED:
-            return <Chip color="success" label="Accepted" />;
-        case UserAnimalLikeRelationState.NOT_ACCEPTED:
-            return <Chip color="error" label="Rejected" />;
-    }
-
-    return <React.Fragment />;
+export type LikeStatusChipProps = {
+    userRelState: UserAnimalLikeRelationState;
 };
+
+export const LikeStatusChip = React.forwardRef(
+    ({ userRelState }: LikeStatusChipProps, ref) => {
+        switch (userRelState) {
+            case UserAnimalLikeRelationState.LIKED:
+                return <Chip color="primary" label="Liked" ref={ref as any} />;
+            case UserAnimalLikeRelationState.ACCEPTED:
+                return (
+                    <Chip color="success" label="Accepted" ref={ref as any} />
+                );
+            case UserAnimalLikeRelationState.NOT_ACCEPTED:
+                return <Chip color="error" label="Rejected" ref={ref as any} />;
+        }
+
+        return <div ref={ref as any} />;
+    }
+);
 
 const getAnimalIdToLikeStatus = (userAnimalRels: UserAnimalLikeRelation[]) => {
     const animalIdToLikeStatus = new Map<number, UserAnimalLikeRelation>();
@@ -134,7 +142,11 @@ const LikedAnimalsDataGrid = () => {
                 flex: 1,
                 renderCell: (
                     params: GridRenderCellParams<AnimalWithLikeStatus>
-                ) => renderLikeStatus(params.row.like_status.state),
+                ) => (
+                    <LikeStatusChip
+                        userRelState={params.row.like_status.state}
+                    />
+                ),
             },
             {
                 field: 'actions',

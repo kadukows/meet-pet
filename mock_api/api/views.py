@@ -1,3 +1,4 @@
+from lib2to3.pytree import Base
 from random import randint, choice as random_choice
 from django.contrib.auth.models import User
 from rest_framework import (
@@ -8,10 +9,12 @@ from rest_framework import (
     status,
     serializers,
     pagination,
+    mixins,
 )
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django_filters import rest_framework as filters
 from api.serializers import (
     AnimalKindSerializer,
@@ -243,3 +246,24 @@ class UserAnimalLikeRelationViewset(BaseAuthPerm, viewsets.ReadOnlyModelViewSet)
         instance.state = UserAnimalLikeRelation.NOT_ACCEPTED
         instance.save()
         return Response(self.get_serializer(instance).data)
+
+
+class UserDetailByUserPrefsIdViewset(
+    BaseAuthPerm,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [IsShelter]
+    serializer_class = UserSerializer
+    queryset = UserPrefs.objects.all()
+
+    def get_object(self):
+        userPrefsInstance = generics.RetrieveAPIView.get_object(self)
+        return userPrefsInstance.profile.user
+
+    def get_permissions(self):
+        if self.action == "list":
+            return [IsAdmin()]
+
+        return super().get_permissions()

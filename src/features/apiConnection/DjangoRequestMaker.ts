@@ -376,6 +376,37 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return null;
         },
+
+        userAnimalRel: {
+            accept: async (token, user_animal_rel_id) => {
+                return await userAnimalRelCommon(
+                    token,
+                    user_animal_rel_id,
+                    'accept'
+                );
+            },
+
+            no_accept: async (token, user_animal_rel_id) => {
+                return await userAnimalRelCommon(
+                    token,
+                    user_animal_rel_id,
+                    'not_accept'
+                );
+            },
+        },
+
+        getUserByUserPrefsId: async (token, user_prefs_id) => {
+            try {
+                const res = await axios.get<UserResponse>(
+                    `/api/user_detail_shelter/${user_prefs_id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return transformUser(res.data);
+            } catch (e) {}
+
+            return null;
+        },
     },
     setUserAnimalPreferences: async (
         token: string,
@@ -577,7 +608,6 @@ interface ShelterPreferenceResponse {
 interface UserPreferencesResponse {
     id: number;
     // boolean preferences
-    has_garden: boolean | null;
     is_male: boolean | null;
     likes_children: boolean | null;
     likes_other_animals: boolean | null;
@@ -586,6 +616,8 @@ interface UserPreferencesResponse {
     liked_charactes: number[];
     liked_kinds: number[];
     // additional stuff
+    description: string;
+    has_garden: boolean;
     location: LocationResponse | null;
     liked_animals: number[];
 }
@@ -650,6 +682,7 @@ const transformUserPreferences = ({
     liked_kinds,
     location,
     liked_animals,
+    description,
 }: UserPreferencesResponse): UserPreferences => {
     return {
         id,
@@ -666,6 +699,7 @@ const transformUserPreferences = ({
         has_garden,
         location: location ? parseLocation(location) : null,
         liked_animals,
+        description,
     };
 };
 
@@ -702,6 +736,7 @@ interface UserAnimalLikeRelationResponse {
     user: number;
     animal: number;
     state: 'LI' | 'NO' | 'AC';
+    name: string;
 }
 
 const transformUserAnimalLikeRelation = ({
@@ -709,9 +744,32 @@ const transformUserAnimalLikeRelation = ({
     user,
     animal,
     state,
+    name,
 }: UserAnimalLikeRelationResponse): UserAnimalLikeRelation => ({
     id,
     user_prefs: user,
     animal,
     state: state as UserAnimalLikeRelationState,
+    name,
+    is_updating: false,
 });
+
+const userAnimalRelCommon = async (
+    token: string,
+    user_animal_rel_id: number,
+    postfix: string
+) => {
+    await sleep(500);
+
+    try {
+        await axios.post(
+            `/api/user_animal_like_rel/${user_animal_rel_id}/${postfix}/`,
+            {},
+            makeAuthHeader(token)
+        );
+
+        return true;
+    } catch (e) {}
+
+    return null;
+};

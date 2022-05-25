@@ -66,6 +66,22 @@ interface IRequestMaker {
             token: string,
             update: ShelterPreferences
         ) => Promise<ShelterPreferences | null>;
+        ////
+        userAnimalRel: {
+            accept: (
+                token: string,
+                user_animal_rel_id: number
+            ) => Promise<true | null>;
+            no_accept: (
+                token: string,
+                user_animal_rel_id: number
+            ) => Promise<true | null>;
+        };
+        /////
+        getUserByUserPrefsId: (
+            token: string,
+            user_prefs_id: number
+        ) => Promise<User | null>;
     };
     setUserAnimalPreferences: (
         token: string,

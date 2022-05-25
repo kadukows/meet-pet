@@ -29,7 +29,8 @@ export interface UserPreferences {
     likes_children: boolean | null;
     likes_other_animals: boolean | null;
     ///// data
-    has_garden: boolean | null;
+    description: string;
+    has_garden: boolean;
     location: null | Location;
     liked_animals: number[];
 }

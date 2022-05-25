@@ -1,4 +1,6 @@
 import os
+from pydoc import describe
+from this import d
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
@@ -49,7 +51,9 @@ class Location(models.Model):
 
 
 class UserPrefs(models.Model):
+    # things about a person
     has_garden = models.BooleanField(null=False, default=False)
+    description = models.TextField(null=False, default="")
     location: Location = models.OneToOneField(
         Location,
         null=True,
@@ -57,6 +61,8 @@ class UserPrefs(models.Model):
         on_delete=models.CASCADE,
         related_name="user_prefs",
     )
+
+    # I guess
     liked_colors = models.ManyToManyField("Color")
     liked_charactes = models.ManyToManyField("Character")
     liked_kinds = models.ManyToManyField("AnimalKind")

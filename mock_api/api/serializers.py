@@ -71,8 +71,9 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         model = UserPrefs
         fields = [
             "id",
-            # boolean preferences
             "has_garden",
+            "description",
+            # boolean preferences
             "is_male",
             "likes_children",
             "likes_other_animals",
@@ -254,6 +255,12 @@ class AnimalSerializer(serializers.ModelSerializer):
 
 
 class UserAnimalLikeRelationSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model = UserAnimalLikeRelation
-        fields = ["id", "user", "animal", "state"]
+        fields = ["id", "user", "animal", "state", "name"]
+
+    def get_name(self, serialized: UserAnimalLikeRelation):
+        user: User = serialized.user.profile.user
+        return f"{user.first_name} {user.last_name}"

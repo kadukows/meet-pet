@@ -11,11 +11,13 @@ import { useSelector } from 'react-redux';
 import { shelterAnimalSelectors } from './animalSlice';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PeopleIcon from '@mui/icons-material/People';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSignal } from '../../events/EventProvider';
 import { SlotTypes, SlotTypesToCallbacks } from './AnimalDialog/AnimalDialog';
 import { Animal } from '../../animal/animalSlice';
+import { useNavigate } from 'react-router';
 
 type Props = {};
 
@@ -27,6 +29,7 @@ const AnimalDataGrid = (props: Props) => {
         useSignal(SlotTypes.DeleteAnimal);
     const theme = useTheme();
     const isXSmall = useMediaQuery(theme.breakpoints.down('sm'));
+    const navigate = useNavigate();
 
     const columns = React.useMemo<GridColDef[]>(
         () => [
@@ -65,8 +68,17 @@ const AnimalDataGrid = (props: Props) => {
             {
                 field: 'actions',
                 type: 'actions',
-                width: 70,
+                width: 110,
                 getActions: (params: GridRowParams<Animal>) => [
+                    <GridActionsCellItem
+                        label="People"
+                        icon={<PeopleIcon />}
+                        onClick={() =>
+                            navigate(
+                                `/shelters_animal/liked_by/${params.row.id}`
+                            )
+                        }
+                    />,
                     <GridActionsCellItem
                         label="Edit"
                         icon={<EditIcon />}
@@ -80,7 +92,7 @@ const AnimalDataGrid = (props: Props) => {
                 ],
             } as GridActionsColDef,
         ],
-        [editAnimalCallback, isXSmall, deleteAnimalCallback]
+        [editAnimalCallback, isXSmall, deleteAnimalCallback, navigate]
     );
 
     return <DataGrid rows={animals} columns={columns} autoPageSize />;

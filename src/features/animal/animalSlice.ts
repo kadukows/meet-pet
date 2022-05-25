@@ -39,4 +39,7 @@ export interface UserAnimalLikeRelation {
     user_prefs: number;
     animal: number;
     state: UserAnimalLikeRelationState;
+    name: string;
+
+    is_updating: boolean;
 }

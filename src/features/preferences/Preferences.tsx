@@ -46,6 +46,8 @@ const userPrefsToFormState = (x: UserPreferences): FormState => ({
     likes_other_animals: translateToTernary(x.likes_other_animals),
 });
 
+type UserPreferencesToSearchFor = Omit<UserPreferences, 'description'>;
+
 const Preferences = (props: Props) => {
     const token = useSelector((state: RootState) => state.authReducer.token);
     const user_prefs = useSelector(
@@ -73,6 +75,7 @@ const Preferences = (props: Props) => {
                     values.likes_other_animals
                 ),
                 //////
+                description: user_prefs.description,
                 has_garden: user_prefs.has_garden,
                 location: user_prefs.location,
                 liked_animals: user_prefs.liked_animals,
