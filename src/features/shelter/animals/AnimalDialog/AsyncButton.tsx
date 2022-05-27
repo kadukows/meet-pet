@@ -1,51 +1,59 @@
 import React from 'react';
 import Button, { ButtonProps } from '@mui/material/Button';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { styled } from '@mui/material/styles';
-
-import { sleep } from '../../../../helpers';
-
-type OnClickAsync = (
-    e: React.MouseEvent<HTMLButtonElement>
-) => Promise<unknown>;
-
-type Props = ButtonProps & {
-    onClick: OnClickAsync;
-    onStart?: () => void;
-};
+import { styled, css } from '@mui/material/styles';
 
 enum ActionType {
     startClick = 'startClick',
     endClick = 'endClick',
 }
 
-const AsyncButton = ({
-    onClick,
-    children,
-    onStart,
-    ...rest
-}: React.PropsWithChildren<Props>) => {
+///////////////
+
+type OnClickAsync = (
+    e: React.MouseEvent<HTMLButtonElement>
+) => Promise<unknown>;
+
+type AsyncButtonDerivedFromOnClickProps = {
+    onClick: OnClickAsync;
+};
+
+type AsyncButtonControlledProps = {
+    loading: boolean;
+};
+
+type Props =
+    | ButtonProps
+    | AsyncButtonDerivedFromOnClickProps
+    | AsyncButtonControlledProps;
+
+type ImplProps = ButtonProps &
+    Partial<AsyncButtonDerivedFromOnClickProps> &
+    Partial<AsyncButtonControlledProps>;
+
+const AsyncButton = (p: React.PropsWithChildren<Props>) => {
+    const { onClick, loading, children, ...rest } = p as ImplProps;
+
     const [state, dispatch] = React.useReducer(reducer, {
         submitting: false,
     } as State);
     const handleClick = React.useCallback(
         (e: React.MouseEvent<HTMLButtonElement>) => {
-            if (onStart) {
-                onStart();
+            if (onClick) {
+                dispatch({
+                    type: ActionType.startClick,
+                    onClick,
+                    dispatch,
+                    e,
+                });
             }
-            dispatch({
-                type: ActionType.startClick,
-                onClick,
-                dispatch,
-                e,
-            });
         },
-        [onClick, dispatch, onStart]
+        [onClick, dispatch]
     );
 
-    return state.submitting ? (
+    return state.submitting || !!loading ? (
         <LoadingButtonWithWhiteIndicator
-            loading
+            loading={true}
             disabled
             loadingPosition="center"
             children={children}
@@ -96,8 +104,14 @@ const reducer = (state: State, action: Action) => {
     throw new Error('Action not known');
 };
 
-const LoadingButtonWithWhiteIndicator = styled(LoadingButton)`
-    > .MuiLoadingButton-loadingIndicator {
-        color: white;
+const LoadingButtonWithWhiteIndicator = styled(LoadingButton)(({ theme }) => {
+    if (theme.palette.mode === 'dark') {
+        return css`
+            > .MuiLoadingButton-loadingIndicator {
+                color: white;
+            }
+        `;
     }
-`;
+
+    return '';
+});

@@ -35,6 +35,8 @@ const TinderChooseIndexPage = (props: Props) => {
     const likeAnimalCallback = React.useCallback(async () => {
         const animal_id = animal?.id;
 
+        setSubmitting(true);
+
         if (animal_id === undefined) {
             return;
         }
@@ -63,16 +65,11 @@ const TinderChooseIndexPage = (props: Props) => {
         );
 
         nextAnimalCallback();
-    }, [animal, token, nextAnimalCallback]);
+    }, [animal, token, nextAnimalCallback, setSubmitting]);
 
     React.useEffect(() => {
         fetchAnimal();
     }, [fetchAnimal]);
-
-    const subToTrue = React.useCallback(
-        () => setSubmitting(true),
-        [setSubmitting]
-    );
 
     return (
         <TinderChooseMain animal={animal}>
@@ -89,7 +86,6 @@ const TinderChooseIndexPage = (props: Props) => {
                     variant="contained"
                     onClick={likeAnimalCallback}
                     disabled={animal === null}
-                    onStart={subToTrue}
                 >
                     Like
                 </AsyncButton>

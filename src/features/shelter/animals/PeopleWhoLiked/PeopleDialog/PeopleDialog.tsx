@@ -27,7 +27,8 @@ import { getRequestMaker } from '../../../../apiConnection';
 import AsyncButton from '../../AnimalDialog/AsyncButton';
 import { UserAnimalLikeRelationState } from '../../../../animal/animalSlice';
 import { setRelationStateAction } from '../../userAnimalRelSlice';
-import Avatar from './Avatar';
+import Avatar, { getUserAvatarUrl } from '../../../../avatar/Avatar';
+import { getFullName } from '../../../../appBar/MenuBar';
 
 export enum SlotTypes {
     DetailPeople = 'DetailPeople',
@@ -106,12 +107,12 @@ const PeopleDialog = (props: Props) => {
 
     return (
         <Dialog maxWidth="md" fullWidth open={open} onClose={handleClose}>
-            <DialogTitle>{user?.full_name}</DialogTitle>
+            <DialogTitle>{getFullName(user)}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={2}>
                     <Grid item sm={4} xs={12}>
                         <Avatar
-                            url={user?.user_prefs?.avatar ?? ''}
+                            url={getUserAvatarUrl(user)}
                             sx={{ aspectRatio: '1' }}
                         />
                         <UserTable user={user} />

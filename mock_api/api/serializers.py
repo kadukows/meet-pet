@@ -106,7 +106,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         return instance
 
     def get_avatar(self, instance):
-        return instance.avatar.url
+        return instance.avatar.url if instance.avatar else None
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):

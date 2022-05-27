@@ -457,6 +457,38 @@ const DjangoRequestMaker: IRequestMaker = {
 
         return null;
     },
+
+    uploadAvatar: async (token, formData, onUploadProgress) => {
+        try {
+            const res = await axios.post<UserResponse>(
+                '/api/user/upload_photo/',
+                formData,
+                {
+                    onUploadProgress,
+                    ...makeAuthHeader(token),
+                }
+            );
+
+            return res.data.profile.user_prefs?.avatar
+                ? { url: res.data.profile.user_prefs?.avatar }
+                : null;
+        } catch (e) {}
+
+        return null;
+    },
+
+    deleteAvatar: async (token) => {
+        try {
+            await axios.delete(
+                '/api/user/delete_avatar/',
+                makeAuthHeader(token)
+            );
+
+            return true;
+        } catch (e) {}
+
+        return null;
+    },
 };
 
 const makeAuthHeader = (token: string) => ({
@@ -615,7 +647,7 @@ interface UserPreferencesResponse {
     // additional stuff
     description: string;
     has_garden: boolean;
-    avatar: string;
+    avatar: string | null;
     location: LocationResponse | null;
     liked_animals: number[];
 }
@@ -649,10 +681,8 @@ const transformUser = (user_response: UserResponse): User => {
     return {
         username: user_response.username,
         email: user_response.email,
-        full_name: user_response.first_name.concat(
-            ' ',
-            user_response.last_name
-        ),
+        first_name: user_response.first_name,
+        last_name: user_response.last_name,
         user_type,
         shelter_prefs,
         user_prefs,

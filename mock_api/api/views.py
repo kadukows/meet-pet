@@ -1,5 +1,5 @@
-from lib2to3.pytree import Base
-from random import randint, choice as random_choice
+import os
+from random import choice as random_choice
 from django.contrib.auth.models import User
 from rest_framework import (
     viewsets,
@@ -62,6 +62,8 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
     def get_permissions(self):
         if self.action == "create":
             permission_classes = []
+        elif self.action == "upload_photo" or self.action == "delete_avatar":
+            permission_classes = [IsNormalUser]
         else:
             permission_classes = [permissions.IsAuthenticated]
 
@@ -80,11 +82,29 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
     def upload_photo(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            if self.request.user.profile.user_prefs.avatar:
+                os.remove(self.request.user.profile.user_prefs.avatar.path)
             self.request.user.profile.user_prefs.avatar = request.data["avatar"]
+            self.request.user.profile.user_prefs.save()
             return Response(
                 UserSerializer(self.request.user).data, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        methods=["delete"],
+        detail=False,
+        serializer_class=serializers.Serializer,
+    )
+    def delete_avatar(self, request):
+        user_prefs: UserPrefs = self.request.user.profile.user_prefs
+
+        if user_prefs.avatar:
+            os.remove(user_prefs.avatar.path)
+        user_prefs.avatar = None
+        user_prefs.save()
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class BaseAuthPerm:
@@ -134,18 +154,6 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
 
-    # list_permissions = [permissions.IsAuthenticated()]
-    # list_actions = ("list", "retrieve", "next", "like")
-    # edit_permissions = [OrPermission(IsShelter(), IsAdmin())]
-
-    """
-    def get_permissions(self):
-        if self.action in self.list_actions:
-            return self.list_permissions
-
-        return self.edit_permissions
-    """
-
     def get_serializer_class(self):
         if self.action == "create" or self.action == "update":
             return AnimalWriteSerializer
@@ -163,14 +171,6 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
 
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
-
-        """
-        smallest_id = Animal.objects.order_by("id").first().id
-        largest_id = Animal.objects.order_by("-id").first().id
-        random_id = randint(smallest_id, largest_id)
-
-        animal = Animal.objects.filter(id__gte=random_id).first()
-        """
 
         animal = random_choice(Animal.objects.all())
 

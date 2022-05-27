@@ -93,28 +93,17 @@ interface IRequestMaker {
     getUserAnimalRelations: (
         token: string
     ) => Promise<UserAnimalLikeRelation[] | null>;
+    uploadAvatar: (
+        token: string,
+        formData: FormData,
+        onUploadProgress?: (a: ProgressEvent) => void
+    ) => Promise<Avatar | null>;
+    deleteAvatar: (token: string) => Promise<true | null>;
 }
 
 export type { IRequestMaker };
 
 ////////////////////////
-
-/*
-export interface UserPreferencesResponse {
-    id: number;
-    has_garden: boolean;
-    location: string;
-    liked_kinds: number[];
-    // TODO
-    //liked_specific_kinds: number[];
-    liked_colors: number[];
-    liked_charactes: number[];
-    liked_sizes: number[];
-    is_male: boolean;
-    likes_children: boolean;
-    likes_other_animals: boolean;
-}
-*/
 
 export interface AnimalQueryParams {
     characters?: number[];
@@ -154,5 +143,9 @@ export type AnimalCreate = Omit<AnimalUpdate, 'id'>;
 export interface Photo {
     id: number;
     animal: number;
+    url: string;
+}
+
+export interface Avatar {
     url: string;
 }

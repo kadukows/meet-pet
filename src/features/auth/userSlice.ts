@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 
 export enum UserType {
     Normal = 'Normal',
@@ -31,7 +31,7 @@ export interface UserPreferences {
     ///// data
     description: string;
     has_garden: boolean;
-    avatar: string;
+    avatar: string | null;
     location: null | Location;
     liked_animals: number[];
 }
@@ -39,7 +39,8 @@ export interface UserPreferences {
 export interface User {
     username: string;
     email: string;
-    full_name: string;
+    first_name: string;
+    last_name: string;
     user_type: UserType;
     shelter_prefs: ShelterPreferences | null;
     user_prefs: UserPreferences | null;
@@ -92,13 +93,32 @@ const authSlice = createSlice({
 
             state.user.shelter_prefs = action.payload;
         },
-        updateUserPreferences(state, action: PayloadAction<UserPreferences>) {
+        updateUserPreferences(
+            state,
+            action: PayloadAction<Partial<UserPreferences>>
+        ) {
             if (state.user === null || state.user.user_prefs === null) {
                 console.error('Not shelter preferences to update');
                 return;
             }
 
-            state.user.user_prefs = action.payload;
+            const updateKeys = Object.keys(action.payload) as Array<
+                keyof UserPreferences
+            >;
+            const currentKeys = Object.keys(state.user.user_prefs);
+
+            const mixedSet = new Set([...updateKeys, ...currentKeys]);
+            const isUpdateSubsetOfCurrent =
+                mixedSet.size === currentKeys.length;
+
+            if (!isUpdateSubsetOfCurrent) {
+                throw new Error('Updating with new keys');
+            }
+
+            for (const key of updateKeys) {
+                // @ts-ignore
+                state.user.user_prefs[key] = action.payload[key];
+            }
         },
         likeAnimal(state, action: PayloadAction<number>) {
             if (!(state.user && state.user?.user_prefs)) {

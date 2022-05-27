@@ -2,13 +2,16 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import { RootState } from '../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetAuth } from '../auth/userSlice';
+import { resetAuth, User } from '../auth/userSlice';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { addAlert } from '../alerts/alertsSlice';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
 import { UserType } from '../auth/userSlice';
+import { useNavigate } from 'react-router';
+import { Avatar } from '@mui/material';
+import { getUserAvatarUrl } from '../avatar/Avatar';
 
 type Props = {
     text?: string;
@@ -38,6 +41,12 @@ const MenuBar = (props: Props) => {
         );
     }, [dispatch]);
 
+    const navigate = useNavigate();
+    const profileCallback = React.useCallback(() => {
+        navigate('/profile');
+        handleClose();
+    }, [navigate, handleClose]);
+
     return (
         <React.Fragment>
             <Button
@@ -57,7 +66,8 @@ const MenuBar = (props: Props) => {
                         height: '3rem',
                     }}
                 >
-                    <p>{user?.full_name}</p>
+                    <Avatar src={getUserAvatarUrl(user)} />
+                    <p>{getFullName(user)}</p>
                     <Divider orientation="vertical" flexItem />
                     <p>{translateUserType(user?.user_type)}</p>
                 </Box>
@@ -71,7 +81,7 @@ const MenuBar = (props: Props) => {
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={profileCallback}>Profile</MenuItem>
                 <MenuItem onClick={logoutCallback}>Logout</MenuItem>
             </Menu>
         </React.Fragment>
@@ -92,3 +102,6 @@ const translateUserType = (user_type: UserType | undefined) => {
 
     return '';
 };
+
+export const getFullName = (user: User | null) =>
+    user ? user.first_name.concat(' ', user.last_name) : '';
