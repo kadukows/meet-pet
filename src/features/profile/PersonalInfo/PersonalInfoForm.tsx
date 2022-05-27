@@ -11,16 +11,18 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import FormGroup from '@mui/material/FormGroup';
 
-import { RootState } from '../../../store';
-import { User } from '../../auth/userSlice';
+import { RootState, useAppDispatch } from '../../../store';
+import { updateUser, updateUserPreferences, User } from '../../auth/userSlice';
 import AsyncButton from '../../shelter/animals/AnimalDialog/AsyncButton';
 import { sleep } from '../../../helpers';
+import { getRequestMaker } from '../../apiConnection';
+import { addAlert } from '../../alerts/alertsSlice';
 
 type InitialValues = {
     first_name: string;
     last_name: string;
-    description?: string;
-    has_garden?: boolean;
+    description: string;
+    has_garden: boolean;
 };
 
 type Props = {};
@@ -32,13 +34,60 @@ const PersonalInfoForm = (props: Props) => {
     const token = useSelector(
         (state: RootState) => state.authReducer.token
     ) as string;
+    const dispatch = useAppDispatch();
+
+    const onSubmit = React.useCallback<FormikConfig<InitialValues>['onSubmit']>(
+        async (values, formikHelpers) => {
+            const res = await getRequestMaker().updatePersonalInfo(
+                token,
+                values
+            );
+
+            if (res === null) {
+                dispatch(
+                    addAlert({
+                        type: 'error',
+                        message: 'Something went wrong',
+                    })
+                );
+
+                return;
+            }
+
+            dispatch(
+                addAlert({
+                    type: 'success',
+                    message: 'Personal info sucessfully updated',
+                })
+            );
+
+            dispatch(
+                updateUserPreferences({
+                    description: res.description,
+                    has_garden: res.has_garden,
+                })
+            );
+
+            dispatch(
+                updateUser({
+                    first_name: res.first_name,
+                    last_name: res.last_name,
+                })
+            );
+
+            formikHelpers.resetForm({ values: res });
+        },
+        [dispatch, token]
+    );
 
     const formik = useFormik({
-        initialValues: getInitialValues(user),
-        onSubmit: async (values) => {
-            console.log(values);
-            await sleep(2000);
+        initialValues: {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            description: user.user_prefs?.description ?? '',
+            has_garden: user.user_prefs?.has_garden ?? false,
         },
+        onSubmit,
     });
 
     return (
@@ -136,20 +185,6 @@ const PersonalInfoForm = (props: Props) => {
 };
 
 export default PersonalInfoForm;
-
-const getInitialValues = (user: User) => {
-    const result: InitialValues = {
-        first_name: user.first_name,
-        last_name: user.last_name,
-    };
-
-    if (user.user_prefs) {
-        result.description = user.user_prefs.description;
-        result.has_garden = user.user_prefs.has_garden;
-    }
-
-    return result;
-};
 
 type MyTextFieldProps = TextFieldProps & {
     name: string;

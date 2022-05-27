@@ -8,7 +8,11 @@ import { AnimalKind } from '../animalKind/animaKindSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
-import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
+import {
+    AnimalQueryParams,
+    IRequestMaker,
+    PersonalInfo,
+} from './IRequestMaker';
 import {
     ShelterPreferences,
     User,
@@ -485,6 +489,20 @@ const DjangoRequestMaker: IRequestMaker = {
             );
 
             return true;
+        } catch (e) {}
+
+        return null;
+    },
+
+    updatePersonalInfo: async (token: string, personal_info: PersonalInfo) => {
+        try {
+            const res = await axios.post<PersonalInfo>(
+                '/api/user/update_personal_info/',
+                personal_info,
+                makeAuthHeader(token)
+            );
+
+            return res.data;
         } catch (e) {}
 
         return null;

@@ -175,3 +175,22 @@ export const useIntersectionWasInViewportOnce = (
 
     return seen;
 };
+
+export const safeShallowUpdate = <T extends object>(
+    root: T,
+    update: Partial<T>
+) => {
+    const updateKeys = Object.keys(update);
+    const rootKeys = Object.keys(root);
+
+    const mixedSet = new Set<string>([...updateKeys, ...rootKeys]);
+    const isUpdateSubsetOfRoot = mixedSet.size === rootKeys.length;
+
+    if (!isUpdateSubsetOfRoot) {
+        throw new Error('Updating with new keys');
+    }
+
+    for (const key of updateKeys as Array<keyof T>) {
+        root[key] = update[key] as T[keyof T];
+    }
+};

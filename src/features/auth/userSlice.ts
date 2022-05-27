@@ -1,4 +1,5 @@
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { safeShallowUpdate } from '../../helpers';
 
 export enum UserType {
     Normal = 'Normal',
@@ -102,23 +103,20 @@ const authSlice = createSlice({
                 return;
             }
 
-            const updateKeys = Object.keys(action.payload) as Array<
-                keyof UserPreferences
-            >;
-            const currentKeys = Object.keys(state.user.user_prefs);
-
-            const mixedSet = new Set([...updateKeys, ...currentKeys]);
-            const isUpdateSubsetOfCurrent =
-                mixedSet.size === currentKeys.length;
-
-            if (!isUpdateSubsetOfCurrent) {
-                throw new Error('Updating with new keys');
+            safeShallowUpdate(state.user.user_prefs, action.payload);
+        },
+        updateUser(
+            state,
+            action: PayloadAction<
+                Partial<Omit<User, 'user_prefs' | 'shelter_prefs'>>
+            >
+        ) {
+            if (state.user === null) {
+                console.error('Not user to update');
+                return;
             }
 
-            for (const key of updateKeys) {
-                // @ts-ignore
-                state.user.user_prefs[key] = action.payload[key];
-            }
+            safeShallowUpdate(state.user, action.payload);
         },
         likeAnimal(state, action: PayloadAction<number>) {
             if (!(state.user && state.user?.user_prefs)) {
@@ -150,6 +148,7 @@ export const {
     resetAuth,
     updateShelterPreferences,
     updateUserPreferences,
+    updateUser,
     likeAnimal,
     dislikeAnimal,
 } = authSlice.actions;

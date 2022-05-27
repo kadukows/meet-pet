@@ -270,3 +270,20 @@ class UserAnimalLikeRelationSerializer(serializers.ModelSerializer):
     def get_name(self, serialized: UserAnimalLikeRelation):
         user: User = serialized.user.profile.user
         return f"{user.first_name} {user.last_name}"
+
+
+class PersonalInfoSerializer(serializers.Serializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    description = serializers.CharField()
+    has_garden = serializers.BooleanField()
+
+    def update_user_model(self, user: User):
+        assert user.profile.user_prefs != None
+
+        user.first_name = self["first_name"].value
+        user.last_name = self["last_name"].value
+
+        user_prefs: UserPrefs = user.profile.user_prefs
+        user_prefs.description = self["description"].value
+        user_prefs.has_garden = self["has_garden"].value

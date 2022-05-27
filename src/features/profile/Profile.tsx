@@ -11,6 +11,9 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import PersonalInfo from './PersonalInfo';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { UserType } from '../auth/userSlice';
 
 enum Page {
     Account = 'Account',
@@ -21,12 +24,15 @@ type Props = {};
 
 const Profile = (props: Props) => {
     const [page, setPage] = React.useState<Page>(Page.Account);
+    const user_type = useSelector(
+        (state: RootState) => state.authReducer.user?.user_type
+    );
 
     return (
         <Box sx={{ display: 'flex', width: '100%', height: '85vh', mt: 2 }}>
             <Box>
                 <List>
-                    {Object.values(Page).map((p) => (
+                    {getPagesForUserType(user_type as UserType).map((p) => (
                         <ListItem disablePadding key={p} sx={{ mb: 0.5 }}>
                             <PageButton
                                 active={page === p}
@@ -99,4 +105,15 @@ const ProfileSwitch = ({ page }: ProfileSwitchProps) => {
     }
 
     return <div />;
+};
+
+const getPagesForUserType = (user_type: UserType): Page[] => {
+    switch (user_type) {
+        case UserType.Normal:
+            return [Page.Account, Page.Personal];
+        case UserType.Shelter:
+            return [Page.Account];
+    }
+
+    return [];
 };

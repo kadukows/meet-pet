@@ -99,6 +99,10 @@ interface IRequestMaker {
         onUploadProgress?: (a: ProgressEvent) => void
     ) => Promise<Avatar | null>;
     deleteAvatar: (token: string) => Promise<true | null>;
+    updatePersonalInfo: (
+        token: string,
+        profile_info: PersonalInfo
+    ) => Promise<PersonalInfo | null>;
 }
 
 export type { IRequestMaker };
@@ -148,4 +152,11 @@ export interface Photo {
 
 export interface Avatar {
     url: string;
+}
+
+export interface PersonalInfo {
+    first_name: string;
+    last_name: string;
+    description: string;
+    has_garden: boolean;
 }

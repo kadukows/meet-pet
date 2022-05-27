@@ -22,6 +22,7 @@ from api.serializers import (
     AnimalWriteSerializer,
     CharacterSerializer,
     ColorSerializer,
+    PersonalInfoSerializer,
     PhotoSerializer,
     ShelterPrefsSerializer,
     SpecificAnimalKindSerializer,
@@ -58,16 +59,13 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
         TokenBearerAuth,
         authentication.SessionAuthentication,
     ]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
         if self.action == "create":
-            permission_classes = []
-        elif self.action == "upload_photo" or self.action == "delete_avatar":
-            permission_classes = [IsNormalUser]
-        else:
-            permission_classes = [permissions.IsAuthenticated]
+            return []
 
-        return [p() for p in permission_classes]
+        return super().get_permissions()
 
     @action(methods=["get"], detail=False)
     def me(self, request: Request):
@@ -95,6 +93,7 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
         methods=["delete"],
         detail=False,
         serializer_class=serializers.Serializer,
+        permission_classes=[IsNormalUser],
     )
     def delete_avatar(self, request):
         user_prefs: UserPrefs = self.request.user.profile.user_prefs
@@ -105,6 +104,22 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
         user_prefs.save()
 
         return Response(status=status.HTTP_200_OK)
+
+    @action(
+        methods=["post"],
+        detail=False,
+        serializer_class=PersonalInfoSerializer,
+        permission_classes=[IsNormalUser],
+    )
+    def update_personal_info(self, request: Request):
+        serializer: PersonalInfoSerializer = PersonalInfoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.update_user_model(request.user)
+            request.user.profile.user_prefs.save()
+            request.user.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BaseAuthPerm:
