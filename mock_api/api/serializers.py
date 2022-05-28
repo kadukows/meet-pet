@@ -82,6 +82,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             # additional stuff
             "location",
             "liked_animals",
+            "max_range",
         ]
 
     def update(self, instance: ShelterPrefs, validated_data: dict):

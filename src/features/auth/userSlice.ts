@@ -32,6 +32,7 @@ export interface UserPreferences {
     has_garden: boolean | null;
     location: null | Location;
     liked_animals: number[];
+    max_range: number;
 }
 
 export interface User {
