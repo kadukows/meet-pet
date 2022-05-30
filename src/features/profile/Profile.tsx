@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import Box, { BoxProps } from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -10,10 +11,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import PersonalInfo from './PersonalInfo';
-import { useSelector } from 'react-redux';
+
 import { RootState } from '../../store';
 import { UserType } from '../auth/userSlice';
+
+import PersonalInfo from './PersonalInfo';
+import AccountInfo from './AccountInfo';
 
 enum Page {
     Account = 'Account',
@@ -99,7 +102,7 @@ type ProfileSwitchProps = {
 const ProfileSwitch = ({ page }: ProfileSwitchProps) => {
     switch (page) {
         case Page.Account:
-            return <div>Page</div>;
+            return <AccountInfo />;
         case Page.Personal:
             return <PersonalInfo />;
     }

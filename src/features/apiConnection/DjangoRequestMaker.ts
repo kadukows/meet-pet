@@ -464,7 +464,7 @@ const DjangoRequestMaker: IRequestMaker = {
 
     uploadAvatar: async (token, formData, onUploadProgress) => {
         try {
-            const res = await axios.post<UserResponse>(
+            const resP = await axios.post<UserResponse>(
                 '/api/user/upload_photo/',
                 formData,
                 {
@@ -472,6 +472,9 @@ const DjangoRequestMaker: IRequestMaker = {
                     ...makeAuthHeader(token),
                 }
             );
+            const sP = sleep(500);
+
+            const [res] = await Promise.all([resP, sP]);
 
             return res.data.profile.user_prefs?.avatar
                 ? { url: res.data.profile.user_prefs?.avatar }
@@ -496,11 +499,14 @@ const DjangoRequestMaker: IRequestMaker = {
 
     updatePersonalInfo: async (token: string, personal_info: PersonalInfo) => {
         try {
-            const res = await axios.post<PersonalInfo>(
+            const sP = sleep(500);
+            const resP = await axios.post<PersonalInfo>(
                 '/api/user/update_personal_info/',
                 personal_info,
                 makeAuthHeader(token)
             );
+
+            const [res] = await Promise.all([resP, sP]);
 
             return res.data;
         } catch (e) {}

@@ -105,7 +105,6 @@ const ChangeAvatarForm = () => {
 
             const formData = new FormData(e.target as any);
             const photo = await getRequestMaker().uploadAvatar(token, formData);
-            await sleep(3000);
 
             if (photo === null) {
                 dispatch(
@@ -140,6 +139,8 @@ const ChangeAvatarForm = () => {
         },
         [token, dispatch, setSubmitting]
     );
+
+    // initial set
 
     return (
         <MyForm onSubmit={handleSubmit}>

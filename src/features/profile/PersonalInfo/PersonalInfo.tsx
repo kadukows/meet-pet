@@ -1,8 +1,8 @@
 import React from 'react';
 
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
+
+import { ProfilePageLayout } from '../helpers';
 
 import PersonalInfoForm from './PersonalInfoForm';
 import AvatarEdit from './AvatarEdit';
@@ -11,9 +11,7 @@ type Props = {};
 
 const PersonalInfo = (props: Props) => {
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h2">Personal Info</Typography>
-            <Divider sx={{ mt: 1, mb: 3 }} />
+        <ProfilePageLayout title="Personal Info">
             <Box sx={{ display: 'flex' }}>
                 <Box sx={{ width: '50%' }}>
                     <PersonalInfoForm />
@@ -22,7 +20,7 @@ const PersonalInfo = (props: Props) => {
                     <AvatarEdit />
                 </Box>
             </Box>
-        </Box>
+        </ProfilePageLayout>
     );
 };
 
