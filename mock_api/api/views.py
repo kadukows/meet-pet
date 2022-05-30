@@ -1,6 +1,7 @@
 import os
 from random import choice as random_choice
 from django.contrib.auth.models import User
+from pkg_resources import require
 from rest_framework import (
     viewsets,
     permissions,
@@ -17,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters import rest_framework as filters
 from api.serializers import (
+    AccountInfoSerializer,
     AnimalKindSerializer,
     AnimalSerializer,
     AnimalWriteSerializer,
@@ -116,6 +118,21 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
         if serializer.is_valid():
             serializer.update_user_model(request.user)
             request.user.profile.user_prefs.save()
+            request.user.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        methods=["post"],
+        detail=False,
+        serializer_class=AccountInfoSerializer,
+        permission_classes=[IsNormalUser],
+    )
+    def update_account_info(self, request: Request):
+        serializer: AccountInfoSerializer = AccountInfoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.update_user_model(request.user)
             request.user.save()
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 

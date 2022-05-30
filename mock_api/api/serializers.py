@@ -287,3 +287,20 @@ class PersonalInfoSerializer(serializers.Serializer):
         user_prefs: UserPrefs = user.profile.user_prefs
         user_prefs.description = self["description"].value
         user_prefs.has_garden = self["has_garden"].value
+
+
+class AccountInfoSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False, allow_null=True)
+    password = serializers.CharField(required=False, allow_null=True)
+
+    def update_user_model(self, user: User):
+        assert user.profile.user_prefs != None
+
+        new_email = self["email"].value
+        new_password = self["password"].value
+
+        if new_email != None:
+            user.email = new_email
+
+        if new_password:
+            user.set_password(new_password)

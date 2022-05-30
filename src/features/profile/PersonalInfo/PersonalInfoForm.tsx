@@ -92,7 +92,7 @@ const PersonalInfoForm = (props: Props) => {
     });
 
     return (
-        <FlexForm>
+        <FlexForm onSubmit={formik.handleSubmit}>
             <Typography variant="h5" sx={{ mb: 1 }}>
                 Name
             </Typography>

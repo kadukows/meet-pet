@@ -9,6 +9,7 @@ import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
 import {
+    AccountInfo,
     AnimalQueryParams,
     IRequestMaker,
     PersonalInfo,
@@ -505,6 +506,23 @@ const DjangoRequestMaker: IRequestMaker = {
                 personal_info,
                 makeAuthHeader(token)
             );
+
+            const [res] = await Promise.all([resP, sP]);
+
+            return res.data;
+        } catch (e) {}
+
+        return null;
+    },
+
+    updateAccountInfo: async (token, account_info) => {
+        try {
+            const resP = axios.post<AccountInfo>(
+                '/api/user/update_account_info/',
+                account_info,
+                makeAuthHeader(token)
+            );
+            const sP = sleep(500);
 
             const [res] = await Promise.all([resP, sP]);
 

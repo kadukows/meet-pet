@@ -1,5 +1,7 @@
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { userInfo } from 'os';
 import { safeShallowUpdate } from '../../helpers';
+import { AccountInfo } from '../apiConnection/IRequestMaker';
 
 export enum UserType {
     Normal = 'Normal',
@@ -105,6 +107,16 @@ const authSlice = createSlice({
 
             safeShallowUpdate(state.user.user_prefs, action.payload);
         },
+        updateAccountInfo(state, action: PayloadAction<AccountInfo>) {
+            if (state.user === null) {
+                console.error('No user to update');
+                return;
+            }
+
+            if (action.payload.email !== null) {
+                state.user.email = action.payload.email;
+            }
+        },
         updateUser(
             state,
             action: PayloadAction<
@@ -148,6 +160,7 @@ export const {
     resetAuth,
     updateShelterPreferences,
     updateUserPreferences,
+    updateAccountInfo,
     updateUser,
     likeAnimal,
     dislikeAnimal,
