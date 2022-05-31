@@ -19,7 +19,7 @@ import PersonalInfo from './PersonalInfo';
 import AccountInfo from './AccountInfo';
 
 enum Page {
-    Account = 'Account',
+    Account = 'Account info',
     Personal = 'Personal info',
 }
 

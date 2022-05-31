@@ -307,5 +307,4 @@ class AccountInfoSerializer(serializers.Serializer):
             user.email = new_email
 
         if new_password:
-            print(f"Setting user password to: {new_password}")
             user.set_password(new_password)
