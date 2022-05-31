@@ -100,6 +100,9 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         super().update(instance, validated_data)
 
         if location is not None:
+            if instance.location is None:
+                instance.location = Location.objects.create(latitude=0, longitude=0)
+
             instance.location.latitude = location["latitude"]
             instance.location.longitude = location["longitude"]
             instance.location.save()

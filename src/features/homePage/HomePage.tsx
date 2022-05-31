@@ -4,6 +4,7 @@ import styled from '@mui/system/styled';
 import Fade from '@mui/material/Fade';
 import Slide from '@mui/material/Slide';
 import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import logo from './homePageMainImage.png';
 import ImageList from '@mui/material/ImageList';

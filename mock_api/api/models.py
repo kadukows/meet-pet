@@ -1,6 +1,5 @@
 import os
-from pydoc import describe
-from this import d
+from django.core import validators
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
@@ -75,7 +74,9 @@ class UserPrefs(models.Model):
     prev_animal = models.IntegerField(null=True)
 
     liked_animals = models.ManyToManyField("Animal", through="UserAnimalLikeRelation")
-    max_range = models.IntegerField(null=True)
+    max_range = models.IntegerField(
+        null=False, default=50, validators=[validators.MinValueValidator(0)]
+    )
 
 
 class ShelterPrefs(models.Model):
@@ -141,7 +142,11 @@ class Animal(models.Model):
     likes_child = models.BooleanField(null=False)
     likes_other_animals = models.BooleanField(null=False)
     shelter = models.ForeignKey(
-        ShelterPrefs, on_delete=models.DO_NOTHING, null=True, default=None
+        ShelterPrefs,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        default=None,
+        related_name="animals",
     )
 
     # impl detail

@@ -62,7 +62,9 @@ const getAnimalIdToLikeStatus = (userAnimalRels: UserAnimalLikeRelation[]) => {
 };
 
 const LikedAnimalsDataGrid = () => {
-    const [animals, setAnimals] = React.useState<AnimalWithLikeStatus[]>([]);
+    const [animals, setAnimals] = React.useState<AnimalWithLikeStatus[] | null>(
+        null
+    );
     const token = useSelector((state: RootState) => state.authReducer.token);
     const fetchAnimals = React.useCallback(async () => {
         if (token !== null) {
@@ -118,7 +120,9 @@ const LikedAnimalsDataGrid = () => {
                 field: 'photo',
                 headerName: 'Photo',
                 flex: 1,
-                renderCell: (params: GridValueGetterParams<Animal>) => {
+                renderCell: (
+                    params: GridValueGetterParams<AnimalWithLikeStatus>
+                ) => {
                     return (
                         <>
                             <img
@@ -128,8 +132,14 @@ const LikedAnimalsDataGrid = () => {
                                 }}
                                 height={'60px'}
                                 width={'90px'}
-                                src={(params.row as Animal).photos[0].url}
-                                alt={(params.row as Animal).name}
+                                src={
+                                    (params.row as AnimalWithLikeStatus).animal
+                                        .photos[0].url
+                                }
+                                alt={
+                                    (params.row as AnimalWithLikeStatus).animal
+                                        .name
+                                }
                             />
                         </>
                     );
@@ -190,7 +200,8 @@ const LikedAnimalsDataGrid = () => {
 
     return (
         <DataGrid
-            rows={animals}
+            loading={animals === null}
+            rows={animals as Array<any>}
             columns={columns}
             autoPageSize
             rowHeight={65}
