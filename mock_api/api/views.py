@@ -148,28 +148,34 @@ class ShelterPreferencesViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = ShelterPrefsSerializer
     queryset = ShelterPrefs.objects.all()
 
+    def get_queryset(self):
+        if self.action == "list" or self.action == "retrieve":
+            return super().get_queryset()
 
-class ColorViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+        return ShelterPrefs.objects.filter(profile__user=self.request.user).all()
+
+
+class ColorViewSet(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
     serializer_class = ColorSerializer
     queryset = Color.objects.all()
 
 
-class SizeViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+class SizeViewSet(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
     serializer_class = SizeSerializer
     queryset = Size.objects.all()
 
 
-class CharacterViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+class CharacterViewSet(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
     serializer_class = CharacterSerializer
     queryset = Character.objects.all()
 
 
-class AnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+class AnimalKindViewSet(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
     serializer_class = AnimalKindSerializer
     queryset = AnimalKind.objects.all()
 
 
-class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ModelViewSet):
+class SpecificAnimalKindViewSet(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
     serializer_class = SpecificAnimalKindSerializer
     queryset = SpecificAnimalKind.objects.all()
 
@@ -184,6 +190,12 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     filterset_class = AnimalFilter
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
+
+    def get_permissions(self):
+        if self.action == "create":
+            return [IsShelter()]
+
+        return super().get_permissions()
 
     def get_serializer_class(self):
         if self.action == "create" or self.action == "update":
@@ -221,21 +233,40 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
             ).data
         )
 
-    @action(methods=["post"], detail=True, serializer_class=serializers.Serializer)
+    @action(
+        methods=["post"],
+        detail=True,
+        serializer_class=serializers.Serializer,
+        permission_classes=[IsNormalUser],
+    )
     def like(self, request: Request, pk=None):
         animal = self.get_object()
         prefs: UserPrefs = request.user.profile.user_prefs
         prefs.liked_animals.add(animal)
         prefs.save()
-        return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
-    @action(methods=["post"], detail=True, serializer_class=serializers.Serializer)
+    @action(
+        methods=["post"],
+        detail=True,
+        serializer_class=serializers.Serializer,
+        permission_classes=[IsNormalUser],
+    )
     def dislike(self, request: Request, pk=None):
         animal = self.get_object()
         prefs: UserPrefs = request.user.profile.user_prefs
+        rel: UserAnimalLikeRelation = UserAnimalLikeRelation.objects.filter(
+            user__profile__user=request.user, animal=animal
+        ).first()
+
+        if rel is not None:
+            if rel.state != UserAnimalLikeRelation.LIKED:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
         prefs.liked_animals.remove(animal)
         prefs.save()
-        return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=False)
     def liked_animals(self, request: Request):
@@ -252,16 +283,45 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
         return Response(data=AnimalSerializer(animal).data, status=status.HTTP_200_OK)
 
 
-class PhotoViewset(viewsets.ModelViewSet):
+class PhotoViewset(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = PhotoSerializer
     queryset = Photo.objects.all()
-    authentication_classes = []
-    permission_classes = []
+    permission_classes = [IsShelter]
+
+    def get_queryset(self):
+        if (
+            self.action != "list"
+            and self.request.user.profile.shelter_prefs is not None
+        ):
+            our_animals = self.request.user.profile.shelter_prefs.animals
+            return Photo.objects.filter(animal__in=our_animals.all()).all()
+
+        return super().get_queryset()
+
+    def get_permissions(self):
+        if self.action == "list":
+            return []
+
+        return super().get_permissions()
 
 
 class UserPrefsViewset(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = UserPrefsSerializer
     queryset = UserPrefs.objects.all()
+
+    def get_queryset(self):
+        if self.request.user.profile.is_normal_user():
+            # self.request.user.profile.user_prefs
+            return UserPrefs.objects.filter(profile__user=self.request.user).all()
+
+        # shelters should see all
+        return super().get_queryset()
+
+    def get_permissions(self):
+        if self.action != "list":
+            return [IsNormalUser()]
+
+        return super().get_permissions()
 
 
 class UserAnimalLikeRelationViewset(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):

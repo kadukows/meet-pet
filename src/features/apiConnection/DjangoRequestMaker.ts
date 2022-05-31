@@ -138,7 +138,7 @@ const DjangoRequestMaker: IRequestMaker = {
             );
 
             // to showcase animation
-            const sleepPromise = sleep(2000);
+            const sleepPromise = sleep(250);
 
             const [res] = await Promise.all([resPromise, sleepPromise]);
 
