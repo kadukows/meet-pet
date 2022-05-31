@@ -16,18 +16,6 @@ interface Props {
     animal: Animal | null;
 }
 
-/*
-
-<Typography variant="h4" sx={{ mb: 3 }}>
-                            {animal === null ? (
-                                <Skeleton variant="text" />
-                            ) : (
-                                animal.name
-                            )}
-                        </Typography>
-
-*/
-
 const AnimalTable = ({ animal }: Props) => {
     if (animal === null) {
         return <SkeletonTable />;

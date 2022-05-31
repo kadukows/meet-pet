@@ -1,4 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { userInfo } from 'os';
+import { safeShallowUpdate } from '../../helpers';
+//import { AccountInfo } from '../apiConnection/IRequestMaker';
 
 export enum UserType {
     Normal = 'Normal',
@@ -29,7 +32,9 @@ export interface UserPreferences {
     likes_children: boolean | null;
     likes_other_animals: boolean | null;
     ///// data
-    has_garden: boolean | null;
+    description: string;
+    has_garden: boolean;
+    avatar: string | null;
     location: null | Location;
     liked_animals: number[];
     max_range: number;
@@ -38,10 +43,15 @@ export interface UserPreferences {
 export interface User {
     username: string;
     email: string;
-    full_name: string;
+    first_name: string;
+    last_name: string;
     user_type: UserType;
     shelter_prefs: ShelterPreferences | null;
     user_prefs: UserPreferences | null;
+}
+
+export interface UpdatedAccountInfo {
+    email: string;
 }
 
 interface AuthState {
@@ -91,13 +101,39 @@ const authSlice = createSlice({
 
             state.user.shelter_prefs = action.payload;
         },
-        updateUserPreferences(state, action: PayloadAction<UserPreferences>) {
+        updateUserPreferences(
+            state,
+            action: PayloadAction<Partial<UserPreferences>>
+        ) {
             if (state.user === null || state.user.user_prefs === null) {
                 console.error('Not shelter preferences to update');
                 return;
             }
 
-            state.user.user_prefs = action.payload;
+            safeShallowUpdate(state.user.user_prefs, action.payload);
+        },
+        updateAccountInfo(state, action: PayloadAction<UpdatedAccountInfo>) {
+            if (state.user === null) {
+                console.error('No user to update');
+                return;
+            }
+
+            if (action.payload.email !== null) {
+                state.user.email = action.payload.email;
+            }
+        },
+        updateUser(
+            state,
+            action: PayloadAction<
+                Partial<Omit<User, 'user_prefs' | 'shelter_prefs'>>
+            >
+        ) {
+            if (state.user === null) {
+                console.error('Not user to update');
+                return;
+            }
+
+            safeShallowUpdate(state.user, action.payload);
         },
         likeAnimal(state, action: PayloadAction<number>) {
             if (!(state.user && state.user?.user_prefs)) {
@@ -129,6 +165,8 @@ export const {
     resetAuth,
     updateShelterPreferences,
     updateUserPreferences,
+    updateAccountInfo,
+    updateUser,
     likeAnimal,
     dislikeAnimal,
 } = authSlice.actions;

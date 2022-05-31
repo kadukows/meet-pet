@@ -2,7 +2,7 @@ import { AnimalKind } from '../animalKind/animaKindSlice';
 import { ShelterPreferences, User, UserPreferences } from '../auth/userSlice';
 import { Color } from '../colors/colorSlice';
 import { SpecificAnimalKind } from '../specificAnimalKind/specificAnimalKindSlice';
-import { Animal } from '../animal/animalSlice';
+import { Animal, UserAnimalLikeRelation } from '../animal/animalSlice';
 import { Character } from '../characters/charcterSlice';
 import { Size } from '../size/sizeSlice';
 
@@ -13,6 +13,9 @@ import { Size } from '../size/sizeSlice';
 // Interface handling connection between backend and frontend.
 // All requests should be routed through this, so we can simply exchange this object in factory
 // when the actual backend comes.
+
+export type WritableUserPreferences = Omit<UserPreferences, 'avatar'>;
+
 interface IRequestMaker {
     getToken: (username: string, password: string) => Promise<string | null>;
     getUser: (token: string) => Promise<User | null>;
@@ -66,31 +69,55 @@ interface IRequestMaker {
             token: string,
             update: ShelterPreferences
         ) => Promise<ShelterPreferences | null>;
+        ////
+        userAnimalRel: {
+            accept: (
+                token: string,
+                user_animal_rel_id: number
+            ) => Promise<true | null>;
+            no_accept: (
+                token: string,
+                user_animal_rel_id: number
+            ) => Promise<true | null>;
+        };
+        /////
+        getUserByUserPrefsId: (
+            token: string,
+            user_prefs_id: number
+        ) => Promise<User | null>;
     };
     setUserAnimalPreferences: (
         token: string,
-        user_animal_prefs: UserPreferences
+        user_animal_prefs: WritableUserPreferences
     ) => Promise<UserPreferences | null>;
+    getUserAnimalRelations: (
+        token: string
+    ) => Promise<UserAnimalLikeRelation[] | null>;
+    uploadAvatar: (
+        token: string,
+        formData: FormData,
+        onUploadProgress?: (a: ProgressEvent) => void
+    ) => Promise<Avatar | null>;
+    deleteAvatar: (token: string) => Promise<true | null>;
+
+    updatePersonalInfo: (
+        token: string,
+        profile_info: PersonalInfo
+    ) => Promise<PersonalInfo | null>;
+
+    updateAccountInfo: (
+        token: string,
+        account_info: AccountInfo
+    ) => Promise<AccountInfo | Errors<AccountInfo>>;
+
+    registerAccount: (
+        register_values: RegisterValues
+    ) => Promise<true | Errors<RegisterValues>>;
 }
 
 export type { IRequestMaker };
 
 ////////////////////////
-
-export interface UserPreferencesResponse {
-    id: number;
-    has_garden: boolean;
-    location: string;
-    liked_kinds: number[];
-    // TODO
-    //liked_specific_kinds: number[];
-    liked_colors: number[];
-    liked_charactes: number[];
-    liked_sizes: number[];
-    is_male: boolean;
-    likes_children: boolean;
-    likes_other_animals: boolean;
-}
 
 export interface AnimalQueryParams {
     characters?: number[];
@@ -132,3 +159,37 @@ export interface Photo {
     animal: number;
     url: string;
 }
+
+export interface Avatar {
+    url: string;
+}
+
+export interface PersonalInfo {
+    first_name: string;
+    last_name: string;
+    description: string;
+    has_garden: boolean;
+}
+
+export interface AccountInfo {
+    email: string | null;
+    password: string | null;
+}
+
+export type Errors<T> = {
+    [Property in keyof T]?: string;
+} & {
+    is_error: true;
+};
+
+export const isRequestMakerErrors = (err: Errors<unknown> | any) => {
+    return typeof err === 'object' && err !== null && err.is_error === true;
+};
+
+export type RegisterValues = {
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+};

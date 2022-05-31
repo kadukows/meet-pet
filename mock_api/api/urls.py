@@ -1,3 +1,4 @@
+from email.mime import base
 import os
 from django.urls import path, include
 from django.conf import settings
@@ -13,6 +14,8 @@ from api.views import (
     ShelterPreferencesViewSet,
     SizeViewSet,
     SpecificAnimalKindViewSet,
+    UserAnimalLikeRelationViewset,
+    UserDetailByUserPrefsIdViewset,
     UserViewSet,
     UserPrefsViewset,
 )
@@ -29,7 +32,12 @@ router.register(r"specific_animal_kinds", SpecificAnimalKindViewSet)
 router.register(r"my_photos", PhotoViewset)
 router.register(r"shelter_preferences", ShelterPreferencesViewSet)
 router.register(r"user_preferences", UserPrefsViewset)
-
+router.register(r"user_animal_like_rel", UserAnimalLikeRelationViewset)
+router.register(
+    r"user_detail_shelter",
+    UserDetailByUserPrefsIdViewset,
+    basename="user_detail_shelter",
+)
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -1,5 +1,7 @@
-from random import randint, choice as random_choice
+import os
+from random import choice as random_choice
 from django.contrib.auth.models import User
+from pkg_resources import require
 from rest_framework import (
     viewsets,
     permissions,
@@ -8,20 +10,25 @@ from rest_framework import (
     status,
     serializers,
     pagination,
+    mixins,
 )
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django_filters import rest_framework as filters
 from api.serializers import (
+    AccountInfoSerializer,
     AnimalKindSerializer,
     AnimalSerializer,
     AnimalWriteSerializer,
     CharacterSerializer,
     ColorSerializer,
+    PersonalInfoSerializer,
     PhotoSerializer,
     ShelterPrefsSerializer,
     SpecificAnimalKindSerializer,
+    UserAnimalLikeRelationSerializer,
     UserSerializer,
     UserPrefsSerializer,
     SizeSerializer,
@@ -36,10 +43,15 @@ from api.models import (
     ShelterPrefs,
     Size,
     SpecificAnimalKind,
+    UserAnimalLikeRelation,
     UserPrefs,
 )
 from api.filters import AnimalFilter
-from api.permissions import IsAdmin, IsShelter, OrPermission
+from api.permissions import IsAdmin, IsNormalUser, IsShelter, OrPermission
+
+
+class AvatarSerializer(serializers.Serializer):
+    avatar = serializers.ImageField()
 
 
 class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
@@ -49,18 +61,82 @@ class UserViewSet(viewsets.GenericViewSet, generics.CreateAPIView):
         TokenBearerAuth,
         authentication.SessionAuthentication,
     ]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
         if self.action == "create":
-            permission_classes = []
-        else:
-            permission_classes = [permissions.IsAuthenticated]
+            return []
 
-        return [p() for p in permission_classes]
+        return super().get_permissions()
 
     @action(methods=["get"], detail=False)
     def me(self, request: Request):
         return Response(self.get_serializer(request.user).data)
+
+    @action(
+        methods=["post"],
+        detail=False,
+        serializer_class=AvatarSerializer,
+        permission_classes=[IsNormalUser],
+    )
+    def upload_photo(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            if self.request.user.profile.user_prefs.avatar:
+                os.remove(self.request.user.profile.user_prefs.avatar.path)
+            self.request.user.profile.user_prefs.avatar = request.data["avatar"]
+            self.request.user.profile.user_prefs.save()
+            return Response(
+                UserSerializer(self.request.user).data, status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        methods=["delete"],
+        detail=False,
+        serializer_class=serializers.Serializer,
+        permission_classes=[IsNormalUser],
+    )
+    def delete_avatar(self, request):
+        user_prefs: UserPrefs = self.request.user.profile.user_prefs
+
+        if user_prefs.avatar:
+            os.remove(user_prefs.avatar.path)
+        user_prefs.avatar = None
+        user_prefs.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(
+        methods=["post"],
+        detail=False,
+        serializer_class=PersonalInfoSerializer,
+        permission_classes=[IsNormalUser],
+    )
+    def update_personal_info(self, request: Request):
+        serializer: PersonalInfoSerializer = PersonalInfoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.update_user_model(request.user)
+            request.user.profile.user_prefs.save()
+            request.user.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        methods=["post"],
+        detail=False,
+        serializer_class=AccountInfoSerializer,
+        permission_classes=[IsNormalUser],
+    )
+    def update_account_info(self, request: Request):
+        serializer: AccountInfoSerializer = AccountInfoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.update_user_model(request.user)
+            request.user.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BaseAuthPerm:
@@ -69,7 +145,6 @@ class BaseAuthPerm:
 
 
 class ShelterPreferencesViewSet(BaseAuthPerm, viewsets.ModelViewSet):
-    # authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
     serializer_class = ShelterPrefsSerializer
     queryset = ShelterPrefs.objects.all()
 
@@ -110,18 +185,6 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = MyPagination
 
-    # list_permissions = [permissions.IsAuthenticated()]
-    # list_actions = ("list", "retrieve", "next", "like")
-    # edit_permissions = [OrPermission(IsShelter(), IsAdmin())]
-
-    """
-    def get_permissions(self):
-        if self.action in self.list_actions:
-            return self.list_permissions
-
-        return self.edit_permissions
-    """
-
     def get_serializer_class(self):
         if self.action == "create" or self.action == "update":
             return AnimalWriteSerializer
@@ -139,14 +202,6 @@ class AnimalViewSet(BaseAuthPerm, viewsets.ModelViewSet):
 
         if user_prefs.prev_animal is None:
             return self.returnAndSetAnimal(user_prefs, Animal.objects.first())
-
-        """
-        smallest_id = Animal.objects.order_by("id").first().id
-        largest_id = Animal.objects.order_by("-id").first().id
-        random_id = randint(smallest_id, largest_id)
-
-        animal = Animal.objects.filter(id__gte=random_id).first()
-        """
 
         animal = random_choice(Animal.objects.all())
 
@@ -207,3 +262,58 @@ class PhotoViewset(viewsets.ModelViewSet):
 class UserPrefsViewset(BaseAuthPerm, viewsets.ModelViewSet):
     serializer_class = UserPrefsSerializer
     queryset = UserPrefs.objects.all()
+
+
+class UserAnimalLikeRelationViewset(BaseAuthPerm, viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserAnimalLikeRelationSerializer
+    queryset = UserAnimalLikeRelation.objects.all()
+
+    def get_queryset(self):
+        user_prefs = self.request.user.profile.user_prefs
+        shelter_prefs = self.request.user.profile.shelter_prefs
+
+        if user_prefs is not None:
+            return UserAnimalLikeRelation.objects.filter(
+                user=self.request.user.profile.user_prefs
+            ).all()
+        else:
+            shelters_animals = Animal.objects.filter(shelter=shelter_prefs)
+
+            return UserAnimalLikeRelation.objects.filter(
+                animal__in=shelters_animals
+            ).all()
+
+    @action(methods=["post"], detail=True, permission_classes=[IsShelter])
+    def accept(self, request: Request, pk=None):
+        instance: UserAnimalLikeRelation = self.get_object()
+        instance.state = UserAnimalLikeRelation.ACCEPTED
+        instance.save()
+        return Response(self.get_serializer(instance).data)
+
+    @action(methods=["post"], detail=True, permission_classes=[IsShelter])
+    def not_accept(self, request: Request, pk=None):
+        instance: UserAnimalLikeRelation = self.get_object()
+        instance.state = UserAnimalLikeRelation.NOT_ACCEPTED
+        instance.save()
+        return Response(self.get_serializer(instance).data)
+
+
+class UserDetailByUserPrefsIdViewset(
+    BaseAuthPerm,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [IsShelter]
+    serializer_class = UserSerializer
+    queryset = UserPrefs.objects.all()
+
+    def get_object(self):
+        userPrefsInstance = generics.RetrieveAPIView.get_object(self)
+        return userPrefsInstance.profile.user
+
+    def get_permissions(self):
+        if self.action == "list":
+            return [IsAdmin()]
+
+        return super().get_permissions()

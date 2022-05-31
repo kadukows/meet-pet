@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
@@ -20,13 +20,8 @@ type Props = {
 };
 
 const AnimalImageListItem = ({ animal, liked }: Props) => {
-    const navigate = useNavigate();
-    const handleClick = React.useCallback(() => {
-        navigate(`/animal/${animal.id}`);
-    }, [navigate, animal.id]);
-
     const ref = React.useRef<Element | null>(null);
-    const seen = useIntersectionWasInViewportOnce(ref);
+    const seen = true; // useIntersectionWasInViewportOnce(ref);
 
     return (
         <ImageListItem
@@ -52,10 +47,12 @@ const AnimalImageListItem = ({ animal, liked }: Props) => {
                         }
                         actionIcon={
                             <IconButton
-                                sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
-                                onClick={handleClick}
+                                component={NavLink}
+                                to={`/animal/${animal.id}`}
                             >
-                                <InfoIcon />
+                                <InfoIcon
+                                    sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
+                                />
                             </IconButton>
                         }
                     />,

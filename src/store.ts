@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
 import { observe } from 'redux-observers';
 import { alertsReducer } from './features/alerts/alertsSlice';
 import { darkThemeProviderReducer } from './features/darkThemeProvider/darkThemeSlice';
@@ -21,6 +22,10 @@ import {
     shelterAnimalReducer,
     shelterAnimalObserver,
 } from './features/shelter/animals/animalSlice';
+import {
+    shelterUserAnimalRelReducer,
+    shelterUserAnimalRelObserver,
+} from './features/shelter/animals/userAnimalRelSlice';
 
 const store = configureStore({
     reducer: {
@@ -33,6 +38,7 @@ const store = configureStore({
         characterReducer,
         sizeReducer,
         shelterAnimalReducer,
+        shelterUserAnimalRelReducer,
     },
 });
 
@@ -47,4 +53,8 @@ observe(store, [
     characterObserver,
     sizeObserver,
     shelterAnimalObserver,
+    shelterUserAnimalRelObserver,
 ]);
+
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>(); // Export a hook that can be reused to resolve types

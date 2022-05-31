@@ -6,6 +6,7 @@ import { colorSelectors } from '../colors/colorSlice';
 import { useFormik, validateYupSchema } from 'formik';
 import Loader from '../loader/Loader';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import { specificAnimalKindSelectors } from '../specificAnimalKind/specificAnimalKindSlice';
 import { animalKindSelectors } from '../animalKind/animaKindSlice';
 import TernaryField, {
@@ -23,8 +24,8 @@ import MultipleSelectField from '../selectFields/MultipleSelectField';
 import { characterSelectors } from '../characters/charcterSlice';
 import { sizeSelectors } from '../size/sizeSlice';
 import { addAlert } from '../alerts/alertsSlice';
+import { WritableUserPreferences } from '../apiConnection/IRequestMaker';
 import MapPicker from 'react-google-map-picker';
-import { Input, TextField } from '@mui/material';
 
 interface Props {}
 
@@ -72,7 +73,7 @@ const Preferences = (props: Props) => {
     const formik: any = useFormik({
         initialValues: userPrefsToFormState(user_prefs),
         onSubmit: async (values, submitProps) => {
-            const result: UserPreferences = {
+            const result: WritableUserPreferences = {
                 id: user_prefs.id,
                 animal_kind: values.animal_kinds,
                 specific_animal_kind: values.specific_animal_kinds,
@@ -85,6 +86,7 @@ const Preferences = (props: Props) => {
                     values.likes_other_animals
                 ),
                 //////
+                description: user_prefs.description,
                 has_garden: user_prefs.has_garden,
 
                 location: {

@@ -6,9 +6,11 @@ import {
     DialogContent,
     DialogTitle,
     TextField,
+    Typography,
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import { NavLink } from 'react-router-dom';
 
 type Props = {
     isOpen: boolean;
@@ -80,6 +82,13 @@ const LoginDialog = (props: Props) => {
                             disabled={formik.isSubmitting}
                         />
                     </form>
+                    <Typography sx={{ mt: 2 }}>
+                        Not{' '}
+                        <NavLink to="/register" onClick={handleClose}>
+                            registered
+                        </NavLink>
+                        ?
+                    </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>

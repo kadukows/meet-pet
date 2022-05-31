@@ -5,6 +5,7 @@ import { Animal } from '../../animal/animalSlice';
 import { observer } from 'redux-observers';
 import { RootState } from '../../../store';
 import { UserType } from '../../auth/userSlice';
+import { makeObserverForShelterAccount } from './helpers';
 
 const reducerAndStuff = createCommonObjectReducerAndStuff<Animal>(
     (token) => getRequestMaker().shelter.getOwnAnimals(token),
@@ -14,7 +15,12 @@ const reducerAndStuff = createCommonObjectReducerAndStuff<Animal>(
 export const shelterAnimalSelectors = reducerAndStuff.selectors;
 export const shelterAnimalReducer = reducerAndStuff.reducer;
 export const shelterAnimalActions = reducerAndStuff.actions;
-export const shelterAnimalObserver = observer(
+export const shelterAnimalObserver = makeObserverForShelterAccount(
+    reducerAndStuff.fetchAction() as any,
+    shelterAnimalActions.removeAll()
+);
+/*
+observer(
     (state: RootState) => ({
         authed: state.authReducer.authorized,
         user_type: state.authReducer.user?.user_type,
@@ -29,5 +35,6 @@ export const shelterAnimalObserver = observer(
         }
     }
 );
+*/
 
 export type { Animal };

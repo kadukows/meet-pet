@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+import django.contrib.auth.password_validation as validators
+from django.core import exceptions
 from pkg_resources import require
 from rest_framework import serializers
 from api.models import (
@@ -10,6 +12,7 @@ from api.models import (
     Profile,
     Size,
     SpecificAnimalKind,
+    UserAnimalLikeRelation,
     UserPrefs,
     ShelterPrefs,
     Color,
@@ -62,6 +65,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
     liked_kinds = serializers.PrimaryKeyRelatedField(
         queryset=AnimalKind.objects.all(), many=True, required=False
     )
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     # liked_charactes = serializers.ModelField(Character, required=False)
     # liked_kinds = serializers.ModelField(AnimalKind, required=False)
@@ -70,8 +74,10 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         model = UserPrefs
         fields = [
             "id",
-            # boolean preferences
             "has_garden",
+            "description",
+            "avatar",
+            # boolean preferences
             "is_male",
             "likes_children",
             "likes_other_animals",
@@ -84,6 +90,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             "liked_animals",
             "max_range",
         ]
+        read_only_fields = ["id"]
 
     def update(self, instance: ShelterPrefs, validated_data: dict):
         location = (
@@ -100,6 +107,9 @@ class UserPrefsSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def get_avatar(self, instance):
+        return instance.avatar.url if instance.avatar else None
 
 
 class ShelterPrefsSerializer(serializers.ModelSerializer):
@@ -170,18 +180,10 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        user: User = User.objects.create(username=validated_data["username"])
-        user.set_password(validated_data["password"])
+        password = validated_data.pop("password")
+        user: User = User.objects.create(**validated_data)
+        user.set_password(password)
         user.save()
-        """
-        profile = Profile.objects.create(
-            user=user,
-            user_prefs=UserPrefs.objects.create(
-                has_garden=False, location="51.1161764981763, 17.037053837245473"
-            ),
-        )
-        profile.save()
-        """
         return user
 
 
@@ -251,3 +253,58 @@ class AnimalSerializer(serializers.ModelSerializer):
         model = Animal
         fields = [*AnimalWriteSerializer.Meta.fields, "photos", "shelter"]
         read_only = ["id"]
+
+
+class UserAnimalLikeRelationSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserAnimalLikeRelation
+        fields = ["id", "user", "animal", "state", "name"]
+
+    def get_name(self, serialized: UserAnimalLikeRelation):
+        user: User = serialized.user.profile.user
+        return f"{user.first_name} {user.last_name}"
+
+
+class PersonalInfoSerializer(serializers.Serializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    description = serializers.CharField()
+    has_garden = serializers.BooleanField()
+
+    def update_user_model(self, user: User):
+        assert user.profile.user_prefs != None
+
+        user.first_name = self["first_name"].value
+        user.last_name = self["last_name"].value
+
+        user_prefs: UserPrefs = user.profile.user_prefs
+        user_prefs.description = self["description"].value
+        user_prefs.has_garden = self["has_garden"].value
+
+
+class AccountInfoSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(required=False, allow_null=True)
+
+    def validate_password(self, data):
+        if data is not None:
+            try:
+                validators.validate_password(password=data)
+            except exceptions.ValidationError as e:
+                raise serializers.ValidationError(list(e.messages))
+
+        return data
+
+    def update_user_model(self, user: User):
+        assert user.profile.user_prefs != None
+
+        new_email = self["email"].value
+        new_password = self["password"].value
+
+        if new_email != None:
+            user.email = new_email
+
+        if new_password:
+            user.set_password(new_password)

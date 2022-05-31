@@ -1,10 +1,20 @@
-import axios from 'axios';
-import { Animal } from '../animal/animalSlice';
+import axios, { AxiosError } from 'axios';
+import {
+    Animal,
+    UserAnimalLikeRelation,
+    UserAnimalLikeRelationState,
+} from '../animal/animalSlice';
 import { AnimalKind } from '../animalKind/animaKindSlice';
 import { Character } from '../characters/charcterSlice';
 import { Color } from '../colors/colorSlice';
 import { Size } from '../size/sizeSlice';
-import { AnimalQueryParams, IRequestMaker } from './IRequestMaker';
+import {
+    AccountInfo,
+    AnimalQueryParams,
+    Errors,
+    IRequestMaker,
+    PersonalInfo,
+} from './IRequestMaker';
 import {
     ShelterPreferences,
     User,
@@ -188,11 +198,13 @@ const DjangoRequestMaker: IRequestMaker = {
 
     likeAnimal: async (token, animal_id) => {
         try {
-            await axios.post(
+            const resPromise = axios.post(
                 `/api/animals/${animal_id}/like/`,
                 null,
                 makeAuthHeader(token)
             );
+            const sleepPromise = sleep(500);
+            await Promise.all([resPromise, sleepPromise]);
             return true;
         } catch (e) {
             console.error(e);
@@ -370,11 +382,39 @@ const DjangoRequestMaker: IRequestMaker = {
 
             return null;
         },
+
+        userAnimalRel: {
+            accept: async (token, user_animal_rel_id) => {
+                return await userAnimalRelCommon(
+                    token,
+                    user_animal_rel_id,
+                    'accept'
+                );
+            },
+
+            no_accept: async (token, user_animal_rel_id) => {
+                return await userAnimalRelCommon(
+                    token,
+                    user_animal_rel_id,
+                    'not_accept'
+                );
+            },
+        },
+
+        getUserByUserPrefsId: async (token, user_prefs_id) => {
+            try {
+                const res = await axios.get<UserResponse>(
+                    `/api/user_detail_shelter/${user_prefs_id}/`,
+                    makeAuthHeader(token)
+                );
+
+                return transformUser(res.data);
+            } catch (e) {}
+
+            return null;
+        },
     },
-    setUserAnimalPreferences: async (
-        token: string,
-        user_animal_prefs: UserPreferences
-    ) => {
+    setUserAnimalPreferences: async (token, user_animal_prefs) => {
         const prefs: Partial<Omit<UserPreferencesResponse, 'id'>> = {
             // booleans
             has_garden: user_animal_prefs.has_garden,
@@ -410,6 +450,121 @@ const DjangoRequestMaker: IRequestMaker = {
         }
 
         return null;
+    },
+
+    getUserAnimalRelations: async (token: string) => {
+        try {
+            const res = await axios.get<UserAnimalLikeRelationResponse[]>(
+                '/api/user_animal_like_rel/',
+                makeAuthHeader(token)
+            );
+
+            return res.data.map(transformUserAnimalLikeRelation);
+        } catch (e) {}
+
+        return null;
+    },
+
+    uploadAvatar: async (token, formData, onUploadProgress) => {
+        try {
+            const resP = await axios.post<UserResponse>(
+                '/api/user/upload_photo/',
+                formData,
+                {
+                    onUploadProgress,
+                    ...makeAuthHeader(token),
+                }
+            );
+            const sP = sleep(500);
+
+            const [res] = await Promise.all([resP, sP]);
+
+            return res.data.profile.user_prefs?.avatar
+                ? { url: res.data.profile.user_prefs?.avatar }
+                : null;
+        } catch (e) {}
+
+        return null;
+    },
+
+    deleteAvatar: async (token) => {
+        try {
+            await axios.delete(
+                '/api/user/delete_avatar/',
+                makeAuthHeader(token)
+            );
+
+            return true;
+        } catch (e) {}
+
+        return null;
+    },
+
+    updatePersonalInfo: async (token: string, personal_info: PersonalInfo) => {
+        try {
+            const sP = sleep(500);
+            const resP = await axios.post<PersonalInfo>(
+                '/api/user/update_personal_info/',
+                personal_info,
+                makeAuthHeader(token)
+            );
+
+            const [res] = await Promise.all([resP, sP]);
+
+            return res.data;
+        } catch (e) {}
+
+        return null;
+    },
+
+    updateAccountInfo: async (token, account_info) => {
+        try {
+            const resP = axios.post<AccountInfo>(
+                '/api/user/update_account_info/',
+                account_info,
+                makeAuthHeader(token)
+            );
+            const sP = sleep(500);
+
+            const [res] = await Promise.all([resP, sP]);
+
+            return res.data;
+        } catch (e: any) {
+            if (axios.isAxiosError(e)) {
+                type MyErrors = Omit<Errors<typeof account_info>, 'is_error'>;
+                const err = e as AxiosError<MyErrors>;
+
+                return {
+                    is_error: true,
+                    ...err.response?.data,
+                };
+            }
+
+            throw e;
+        }
+    },
+
+    registerAccount: async (register_values) => {
+        try {
+            await axios.post<UserResponse>('/api/user/', register_values);
+
+            return true;
+        } catch (e: any) {
+            if (axios.isAxiosError(e)) {
+                type MyErrors = Omit<
+                    Errors<typeof register_values>,
+                    'is_error'
+                >;
+                const err = e as AxiosError<MyErrors>;
+
+                return {
+                    is_error: true,
+                    ...err.response?.data,
+                };
+            }
+
+            throw e;
+        }
     },
 };
 
@@ -559,7 +714,6 @@ interface ShelterPreferenceResponse {
 interface UserPreferencesResponse {
     id: number;
     // boolean preferences
-    has_garden: boolean | null;
     is_male: boolean | null;
     likes_children: boolean | null;
     likes_other_animals: boolean | null;
@@ -568,6 +722,9 @@ interface UserPreferencesResponse {
     liked_charactes: number[];
     liked_kinds: number[];
     // additional stuff
+    description: string;
+    has_garden: boolean;
+    avatar: string | null;
     location: LocationResponse | null;
     liked_animals: number[];
     max_range: number;
@@ -602,10 +759,8 @@ const transformUser = (user_response: UserResponse): User => {
     return {
         username: user_response.username,
         email: user_response.email,
-        full_name: user_response.first_name.concat(
-            ' ',
-            user_response.last_name
-        ),
+        first_name: user_response.first_name,
+        last_name: user_response.last_name,
         user_type,
         shelter_prefs,
         user_prefs,
@@ -626,6 +781,7 @@ const transformUserPreferences = ({
     id,
     has_garden,
     is_male,
+    avatar,
     likes_children,
     likes_other_animals,
     liked_colors,
@@ -633,6 +789,7 @@ const transformUserPreferences = ({
     liked_kinds,
     location,
     liked_animals,
+    description,
     max_range,
 }: UserPreferencesResponse): UserPreferences => {
     return {
@@ -648,8 +805,10 @@ const transformUserPreferences = ({
         likes_other_animals,
         //
         has_garden,
+        avatar,
         location: location ? parseLocation(location) : null,
         liked_animals,
+        description,
         max_range,
     };
 };
@@ -681,3 +840,46 @@ const parseLocation = (loc: LocationResponse) => ({
     longitude: parseFloat(loc.longitude),
     latitude: parseFloat(loc.latitude),
 });
+
+interface UserAnimalLikeRelationResponse {
+    id: number;
+    user: number;
+    animal: number;
+    state: 'LI' | 'NO' | 'AC';
+    name: string;
+}
+
+const transformUserAnimalLikeRelation = ({
+    id,
+    user,
+    animal,
+    state,
+    name,
+}: UserAnimalLikeRelationResponse): UserAnimalLikeRelation => ({
+    id,
+    user_prefs: user,
+    animal,
+    state: state as UserAnimalLikeRelationState,
+    name,
+    is_updating: false,
+});
+
+const userAnimalRelCommon = async (
+    token: string,
+    user_animal_rel_id: number,
+    postfix: string
+) => {
+    await sleep(500);
+
+    try {
+        await axios.post(
+            `/api/user_animal_like_rel/${user_animal_rel_id}/${postfix}/`,
+            {},
+            makeAuthHeader(token)
+        );
+
+        return true;
+    } catch (e) {}
+
+    return null;
+};

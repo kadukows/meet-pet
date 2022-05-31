@@ -17,6 +17,9 @@ import Search from './features/search/Search';
 import SheltersAnimal from './features/shelter/animals/SheltersAnimal';
 import AnimalRetrieve from './features/animalRetrieve/AnimalRetrieve';
 import LikedAnimals from './features/likedAnimals/LikedAnimals';
+import PeopleWhoLiked from './features/shelter/animals/PeopleWhoLiked';
+import Profile from './features/profile';
+import Register from './features/register';
 
 function App() {
     return (
@@ -79,6 +82,26 @@ function App() {
                                             <LikedAnimals />
                                         </RedirectIfNotLoggedIn>
                                     }
+                                />
+                                <Route
+                                    path="/shelters_animal/liked_by/:animalId"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <PeopleWhoLiked />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/profile"
+                                    element={
+                                        <RedirectIfNotLoggedIn>
+                                            <Profile />
+                                        </RedirectIfNotLoggedIn>
+                                    }
+                                />
+                                <Route
+                                    path="/register"
+                                    element={<Register />}
                                 />
                             </Routes>
                         </Container>
