@@ -37,6 +37,7 @@ export interface UserPreferences {
     avatar: string | null;
     location: null | Location;
     liked_animals: number[];
+    max_range: number;
 }
 
 export interface User {

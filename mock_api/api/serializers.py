@@ -88,6 +88,7 @@ class UserPrefsSerializer(serializers.ModelSerializer):
             # additional stuff
             "location",
             "liked_animals",
+            "max_range",
         ]
         read_only_fields = ["id"]
 

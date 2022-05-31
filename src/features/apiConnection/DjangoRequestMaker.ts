@@ -429,6 +429,7 @@ const DjangoRequestMaker: IRequestMaker = {
             location:
                 formatObjectLocation(user_animal_prefs.location) ?? undefined,
             liked_animals: user_animal_prefs.liked_animals,
+            max_range: user_animal_prefs.max_range,
             // TODO
             //liked_specific_kinds: ,
 
@@ -726,6 +727,7 @@ interface UserPreferencesResponse {
     avatar: string | null;
     location: LocationResponse | null;
     liked_animals: number[];
+    max_range: number;
 }
 
 interface UserResponse {
@@ -788,6 +790,7 @@ const transformUserPreferences = ({
     location,
     liked_animals,
     description,
+    max_range,
 }: UserPreferencesResponse): UserPreferences => {
     return {
         id,
@@ -806,6 +809,7 @@ const transformUserPreferences = ({
         location: location ? parseLocation(location) : null,
         liked_animals,
         description,
+        max_range,
     };
 };
 

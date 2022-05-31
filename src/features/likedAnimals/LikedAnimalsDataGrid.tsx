@@ -114,6 +114,27 @@ const LikedAnimalsDataGrid = () => {
                     params: GridValueGetterParams<AnimalWithLikeStatus>
                 ) => params.row.animal.name,
             },
+            {
+                field: 'photo',
+                headerName: 'Photo',
+                flex: 1,
+                renderCell: (params: GridValueGetterParams<Animal>) => {
+                    return (
+                        <>
+                            <img
+                                style={{
+                                    objectFit: 'cover',
+                                    borderRadius: 10,
+                                }}
+                                height={'60px'}
+                                width={'90px'}
+                                src={(params.row as Animal).photos[0].url}
+                                alt={(params.row as Animal).name}
+                            />
+                        </>
+                    );
+                },
+            },
             ...(isXSmall
                 ? []
                 : [
@@ -172,6 +193,7 @@ const LikedAnimalsDataGrid = () => {
             rows={animals}
             columns={columns}
             autoPageSize
+            rowHeight={65}
             sx={{ flex: 1 }}
         />
     );

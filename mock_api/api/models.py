@@ -75,6 +75,7 @@ class UserPrefs(models.Model):
     prev_animal = models.IntegerField(null=True)
 
     liked_animals = models.ManyToManyField("Animal", through="UserAnimalLikeRelation")
+    max_range = models.IntegerField(null=True)
 
 
 class ShelterPrefs(models.Model):
