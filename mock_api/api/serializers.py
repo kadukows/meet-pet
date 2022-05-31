@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+import django.contrib.auth.password_validation as validators
+from django.core import exceptions
 from pkg_resources import require
 from rest_framework import serializers
 from api.models import (
@@ -290,8 +292,16 @@ class PersonalInfoSerializer(serializers.Serializer):
 
 
 class AccountInfoSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=False, allow_null=True)
+    email = serializers.EmailField()
     password = serializers.CharField(required=False, allow_null=True)
+
+    def validate_password(slef, data):
+        try:
+            validators.validate_password(password=data)
+        except exceptions.ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+
+        return data
 
     def update_user_model(self, user: User):
         assert user.profile.user_prefs != None
@@ -303,4 +313,5 @@ class AccountInfoSerializer(serializers.Serializer):
             user.email = new_email
 
         if new_password:
+            print(f"Setting user password to: {new_password}")
             user.set_password(new_password)

@@ -111,6 +111,16 @@ const UserLinks = ({ userType, ...rest }: UserLinksProps) => {
             return <NormalUserLinks {...rest} />;
         case UserType.Shelter:
             return <ShelterUserLinks {...rest} />;
+        case undefined:
+            return (
+                <ListItemButton
+                    component={NavLink}
+                    onClick={rest.closeDrawer}
+                    to="/register"
+                >
+                    Register
+                </ListItemButton>
+            );
     }
 
     return <React.Fragment />;

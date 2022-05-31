@@ -50,6 +50,8 @@ const REGEX_MAPPING = {
     'Manage animals': /^\/shelters_animal$/,
     Details: /^\/animal\/[0-9]+$/,
     'Liked animals': /^\/liked_animals$/,
+    Profile: /^\/profile$/,
+    Register: /^\/register$/,
 };
 
 const translateLocationPathname = (location: Location) => {

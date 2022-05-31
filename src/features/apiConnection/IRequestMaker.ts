@@ -108,7 +108,7 @@ interface IRequestMaker {
     updateAccountInfo: (
         token: string,
         account_info: AccountInfo
-    ) => Promise<AccountInfo | null>;
+    ) => Promise<AccountInfo | Errors<AccountInfo>>;
 
     registerAccount: (
         register_values: RegisterValues
@@ -176,12 +176,17 @@ export interface AccountInfo {
     password: string | null;
 }
 
-export type Errors<T extends object> = {
+export type Errors<T> = {
+    [Property in keyof T]?: string;
+} & {
     is_error: true;
-    [Property in keyof T]: string | undefined;
 };
 
-type RegisterValues = {
+export const isRequestMakerErrors = (err: Errors<unknown> | any) => {
+    return typeof err === 'object' && err !== null && err.is_error === true;
+};
+
+export type RegisterValues = {
     username: string;
     first_name: string;
     last_name: string;

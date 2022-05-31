@@ -145,7 +145,6 @@ class BaseAuthPerm:
 
 
 class ShelterPreferencesViewSet(BaseAuthPerm, viewsets.ModelViewSet):
-    # authentication_classes = [TokenBearerAuth, authentication.SessionAuthentication]
     serializer_class = ShelterPrefsSerializer
     queryset = ShelterPrefs.objects.all()
 

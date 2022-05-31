@@ -1,20 +1,24 @@
 import React from 'react';
 
 import * as yup from 'yup';
-import { FormikConfig, useFormik } from 'formik';
+import { useFormik, FormikConfig, FormikErrors } from 'formik';
 import { useSelector } from 'react-redux';
 
 import FormLabel from '@mui/material/FormLabel';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
 
 import { RootState, useAppDispatch } from '../../../store';
 import { updateAccountInfo, User } from '../../auth/userSlice';
 import { MyTextField, FlexForm } from '../helpers';
-import AsyncButton from '../../shelter/animals/AnimalDialog/AsyncButton';
 import { getRequestMaker } from '../../apiConnection';
+import {
+    AccountInfo,
+    Errors,
+    isRequestMakerErrors,
+} from '../../apiConnection/IRequestMaker';
 import { addAlert } from '../../alerts/alertsSlice';
+import AsyncButton from '../../shelter/animals/AnimalDialog/AsyncButton';
 
 type FormValues = {
     new_password: string;
@@ -25,85 +29,87 @@ type FormValues = {
 type Props = {};
 
 const AccountInfoForm = (props: Props) => {
-    const user = useSelector(
-        (state: RootState) => state.authReducer.user
-    ) as User;
-    const token = useSelector(
-        (state: RootState) => state.authReducer.token
-    ) as string;
+    const { user, token } = useSelector(
+        (state: RootState) => state.authReducer
+    );
     const dispatch = useAppDispatch();
 
     const onSubmit = React.useCallback<FormikConfig<FormValues>['onSubmit']>(
-        async ({ email, new_password }, formikHelpers) => {
-            const res = await getRequestMaker().updateAccountInfo(token, {
-                email: email.length > 0 ? email : null,
-                password: new_password.length > 0 ? new_password : null,
-            });
+        async ({ new_password, email }, formikHelpers) => {
+            const res = await getRequestMaker().updateAccountInfo(
+                token as string,
+                {
+                    password: new_password.length > 0 ? new_password : null,
+                    email: email.length > 0 ? email : null,
+                }
+            );
 
-            if (res === null) {
-                dispatch(
-                    addAlert({
-                        type: 'error',
-                        message: 'Something went wrong',
-                    })
-                );
+            if (isRequestMakerErrors(res)) {
+                const e = res as Errors<AccountInfo>;
+
+                const formikErrors: FormikErrors<FormValues> = {};
+                if (e.password !== undefined)
+                    formikErrors.new_password = e.password;
+                if (e.email !== undefined) formikErrors.email = e.email;
+                formikHelpers.setErrors(formikErrors);
 
                 return;
             }
 
+            if (res.email !== undefined && res.email !== null) {
+                dispatch(
+                    updateAccountInfo({
+                        email: res.email,
+                    })
+                );
+
+                formikHelpers.setFieldValue('email', res.email);
+            }
+
+            formikHelpers.setFieldValue('new_password', '');
+            formikHelpers.setFieldValue('new_password2', '');
+
             dispatch(
                 addAlert({
                     type: 'success',
-                    message: 'Account info sucessfully updated',
+                    message: 'Sucessfully updated account info!',
                 })
             );
-
-            dispatch(updateAccountInfo(res));
-
-            formikHelpers.resetForm({
-                values: {
-                    email: res.email ?? '',
-                    new_password: '',
-                    new_password2: '',
-                },
-            });
         },
-        [token, dispatch]
+        [token]
     );
 
     const formik = useFormik<FormValues>({
         initialValues: {
             new_password: '',
             new_password2: '',
-            email: user.email,
+            email: user?.email ?? '',
         },
         onSubmit,
         validationSchema,
     });
 
     return (
-        <HalfFlexForm onSubmit={formik.handleSubmit}>
+        <Box
+            component="form"
+            sx={{ maxWidth: 'sm', display: 'flex', flexDirection: 'column' }}
+            onSubmit={formik.handleSubmit}
+        >
             <Typography variant="h5">Password</Typography>
-            <Box
-                sx={{
-                    display: 'flex',
-                    gap: 2,
-                    justifyContent: 'space-between',
-                }}
-            >
+            <Box sx={{ display: 'flex', gap: 2 }}>
                 <MyTextField
-                    sx={{ flex: 1 }}
                     name="new_password"
                     label="Password"
-                    formik={formik}
                     type="password"
+                    formik={formik}
+                    sx={{ flex: '1' }}
                 />
                 <MyTextField
-                    sx={{ flex: 1 }}
                     name="new_password2"
                     label="Repeat password"
-                    formik={formik}
                     type="password"
+                    formik={formik}
+                    sx={{ flex: '1' }}
                 />
             </Box>
             <FormLabel>You can change your password here</FormLabel>
@@ -111,18 +117,18 @@ const AccountInfoForm = (props: Props) => {
                 Email
             </Typography>
             <MyTextField name="email" label="Email" formik={formik} />
-            <FormLabel>We use your email to contact you</FormLabel>
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+            <FormLabel>Used to contact you</FormLabel>
+            <Box sx={{ display: 'flex', flexDirection: 'row-reverse', mt: 3 }}>
                 <AsyncButton
                     loading={formik.isSubmitting}
-                    variant="contained"
-                    type="submit"
                     disabled={!formik.dirty}
+                    type="submit"
+                    variant="contained"
                 >
                     Submit
                 </AsyncButton>
             </Box>
-        </HalfFlexForm>
+        </Box>
     );
 };
 
@@ -134,11 +140,7 @@ const validationSchema = yup.object({
     new_password: yup.string().label('New password'),
     new_password2: yup
         .string()
-        .oneOf([yup.ref('new_password')], 'Passwords must match!')
+        .oneOf([yup.ref('new_password')], 'Password must match!')
         .label('Repeat password'),
-    email: yup.string().email().label('Email'),
+    email: yup.string().required().email().label('Email'),
 });
-
-const HalfFlexForm = styled(FlexForm)`
-    width: 50%;
-`;

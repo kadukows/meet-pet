@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 import {
     Animal,
     UserAnimalLikeRelation,
@@ -11,6 +11,7 @@ import { Size } from '../size/sizeSlice';
 import {
     AccountInfo,
     AnimalQueryParams,
+    Errors,
     IRequestMaker,
     PersonalInfo,
 } from './IRequestMaker';
@@ -527,33 +528,42 @@ const DjangoRequestMaker: IRequestMaker = {
             const [res] = await Promise.all([resP, sP]);
 
             return res.data;
-        } catch (e) {}
+        } catch (e: any) {
+            if (axios.isAxiosError(e)) {
+                type MyErrors = Omit<Errors<typeof account_info>, 'is_error'>;
+                const err = e as AxiosError<MyErrors>;
 
-        return null;
+                return {
+                    is_error: true,
+                    ...err.response?.data,
+                };
+            }
+
+            throw e;
+        }
     },
 
     registerAccount: async (register_values) => {
         try {
-            const res = await axios.post<UserResponse>(
-                '/api/user/',
-                register_values
-            );
+            await axios.post<UserResponse>('/api/user/', register_values);
 
             return true;
         } catch (e: any) {
             if (axios.isAxiosError(e)) {
-                const err = e as AxiosError<Errors<typeof register_values>>;
+                type MyErrors = Omit<
+                    Errors<typeof register_values>,
+                    'is_error'
+                >;
+                const err = e as AxiosError<MyErrors>;
 
                 return {
-                    is_error: true;
-                    ...err.response.data
-                }
+                    is_error: true,
+                    ...err.response?.data,
+                };
             }
-        }
 
-        return {
-            is_error: true,
-        };
+            throw e;
+        }
     },
 };
 
