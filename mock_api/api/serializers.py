@@ -180,18 +180,10 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        user: User = User.objects.create(username=validated_data["username"])
-        user.set_password(validated_data["password"])
+        password = validated_data.pop("password")
+        user: User = User.objects.create(**validated_data)
+        user.set_password(password)
         user.save()
-        """
-        profile = Profile.objects.create(
-            user=user,
-            user_prefs=UserPrefs.objects.create(
-                has_garden=False, location="51.1161764981763, 17.037053837245473"
-            ),
-        )
-        profile.save()
-        """
         return user
 
 
@@ -296,11 +288,12 @@ class AccountInfoSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(required=False, allow_null=True)
 
-    def validate_password(slef, data):
-        try:
-            validators.validate_password(password=data)
-        except exceptions.ValidationError as e:
-            raise serializers.ValidationError(list(e.messages))
+    def validate_password(self, data):
+        if data is not None:
+            try:
+                validators.validate_password(password=data)
+            except exceptions.ValidationError as e:
+                raise serializers.ValidationError(list(e.messages))
 
         return data
 

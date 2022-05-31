@@ -300,9 +300,11 @@ const DeleteAvatarButton = ({ buttonProps }: DeleteAvatarButtonProps) => {
                 </DialogActions>
             </Dialog>
             <Tooltip title="Delete">
-                <DeleteIconButton onClick={handleOpen} {...buttonProps}>
-                    <DeleteIcon />
-                </DeleteIconButton>
+                <span>
+                    <DeleteIconButton onClick={handleOpen} {...buttonProps}>
+                        <DeleteIcon />
+                    </DeleteIconButton>
+                </span>
             </Tooltip>
         </React.Fragment>
     );
