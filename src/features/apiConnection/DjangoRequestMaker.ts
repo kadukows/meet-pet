@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { Axios, AxiosError } from 'axios';
 import {
     Animal,
     UserAnimalLikeRelation,
@@ -530,6 +530,30 @@ const DjangoRequestMaker: IRequestMaker = {
         } catch (e) {}
 
         return null;
+    },
+
+    registerAccount: async (register_values) => {
+        try {
+            const res = await axios.post<UserResponse>(
+                '/api/user/',
+                register_values
+            );
+
+            return true;
+        } catch (e: any) {
+            if (axios.isAxiosError(e)) {
+                const err = e as AxiosError<Errors<typeof register_values>>;
+
+                return {
+                    is_error: true;
+                    ...err.response.data
+                }
+            }
+        }
+
+        return {
+            is_error: true,
+        };
     },
 };
 

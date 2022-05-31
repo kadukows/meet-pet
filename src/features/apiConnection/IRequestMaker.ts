@@ -109,6 +109,10 @@ interface IRequestMaker {
         token: string,
         account_info: AccountInfo
     ) => Promise<AccountInfo | null>;
+
+    registerAccount: (
+        register_values: RegisterValues
+    ) => Promise<true | Errors<RegisterValues>>;
 }
 
 export type { IRequestMaker };
@@ -171,3 +175,16 @@ export interface AccountInfo {
     email: string | null;
     password: string | null;
 }
+
+export type Errors<T extends object> = {
+    is_error: true;
+    [Property in keyof T]: string | undefined;
+};
+
+type RegisterValues = {
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+};

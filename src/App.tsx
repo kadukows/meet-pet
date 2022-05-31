@@ -19,6 +19,7 @@ import AnimalRetrieve from './features/animalRetrieve/AnimalRetrieve';
 import LikedAnimals from './features/likedAnimals/LikedAnimals';
 import PeopleWhoLiked from './features/shelter/animals/PeopleWhoLiked';
 import Profile from './features/profile';
+import Register from './features/register';
 
 function App() {
     return (
@@ -97,6 +98,10 @@ function App() {
                                             <Profile />
                                         </RedirectIfNotLoggedIn>
                                     }
+                                />
+                                <Route
+                                    path="/register"
+                                    element={<Register />}
                                 />
                             </Routes>
                         </Container>
